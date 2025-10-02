@@ -1,0 +1,191 @@
+/* resources/sass/faculty.scss */
+.page {
+    background: #eef0ff;
+    min-height: 100vh;
+}
+
+.page-header {
+    position: relative;
+    padding: 16px 0;
+}
+
+.page-title {
+    margin: 0;
+}
+
+.page-subtitle {
+    margin: 4px 0 12px;
+    color: #6b7280;
+}
+
+.new-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.actions-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0 12px;
+}
+
+.checkbox-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f3f4f6;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.search {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 6px 10px;
+    min-width: 420px;
+}
+
+.search-input {
+    border: none;
+    outline: none;
+    width: 100%;
+}
+
+.filter {
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    border-radius: 20px;
+    padding: 6px 12px;
+}
+
+.btn {
+    border: 1px solid #e5e7eb;
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 6px 10px;
+}
+
+.btn-primary {
+    background: #6366f1;
+    color: #fff;
+    border-color: #6366f1;
+}
+
+.btn-success {
+    background: #a7f3d0;
+    border-color: #a7f3d0;
+}
+
+.btn-light {
+    background: #eef2ff;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.badge-success {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+/* ---------- Table Styles (aligned with students) ---------- */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.faculty-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 14px;
+}
+
+.faculty-table thead {
+    background: #f9fafb;
+    font-weight: 600;
+    text-align: left;
+}
+
+.faculty-table th,
+.faculty-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.faculty-table th {
+    color: #374151;
+    font-size: 14px;
+}
+
+.faculty-table td {
+    color: #111827;
+    vertical-align: middle;
+}
+
+.faculty-table tbody tr:nth-child(even) {
+    background: #fafbfc;
+}
+
+.faculty-table tbody tr:hover {
+    background: #f3f4f6;
+}
+
+.faculty-table th:last-child,
+.faculty-table td:last-child {
+    width: 180px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.faculty-table td:last-child {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    align-items: center;
+}
+
+.faculty-table th:first-child {
+    border-top-left-radius: 10px;
+}
+
+.faculty-table th:last-child {
+    border-top-right-radius: 10px;
+}
+
+.faculty-table tr:last-child td:first-child {
+    border-bottom-left-radius: 10px;
+}
+
+.faculty-table tr:last-child td:last-child {
+    border-bottom-right-radius: 10px;
+}
+
+.table-blank {
+    height: 260px;
+    border: 1px solid #e5e7eb;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    background: #fff;
+}

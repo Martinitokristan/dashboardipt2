@@ -1,0 +1,482 @@
+/*
+====================================
+           BASE STYLES
+====================================
+*/
+
+.page {
+    padding: 20px;
+    background-color: #f6f7ff;
+    min-height: 100vh;
+}
+
+.page-header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0;
+    position: absolute; 
+    margin-top: 35px;
+}
+
+.new-btn {
+    padding: 10px 20px;
+}
+
+/*
+====================================
+          ACTION & FILTER STYLES
+====================================
+*/
+
+.actions-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 10px;
+}
+
+.checkbox-pill {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.checkbox-pill input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.filters {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.search {
+    position: relative;
+}
+
+.search .icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 16px;
+}
+
+.search-input {
+    padding: 8px 10px 8px 35px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    width: 250px;
+}
+
+.filter {
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #fff;
+    font-size: 14px;
+    color: #1f2937;
+}
+
+/*
+====================================
+           TABLE STYLES
+====================================
+*/
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.students-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 14px;
+}
+
+/* Table Header */
+.students-table thead {
+    background: #f9fafb;
+    font-weight: 600;
+    text-align: left;
+}
+
+.students-table th,
+.students-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.students-table th {
+    color: #374151;
+    font-size: 14px;
+}
+
+.students-table td {
+    color: #111827;
+    vertical-align: middle;
+}
+
+/* Zebra striping */
+.students-table tbody tr:nth-child(even) {
+    background: #fafbfc;
+}
+
+/* Hover effect */
+.students-table tbody tr:hover {
+    background: #f3f4f6;
+}
+
+/* Action column */
+.students-table th:last-child,
+.students-table td:last-child {
+    width: 180px; 		
+    text-align: center; 	
+    white-space: nowrap; 	
+}
+
+.students-table td:last-child {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Round table edges */
+.students-table th:first-child {
+    border-top-left-radius: 10px;
+}
+.students-table th:last-child {
+    border-top-right-radius: 10px;
+}
+.students-table tr:last-child td:first-child {
+    border-bottom-left-radius: 10px;
+    border-bottom: none;
+}
+.students-table tr:last-child td:last-child {
+    border-bottom-right-radius: 10px;
+    border-bottom: none;
+}
+
+/* Badge for Status */
+.badge {
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+.badge-success {
+    background-color: #d1fae5;
+    color: #059669;
+}
+
+
+/*
+====================================
+          BUTTON STYLES
+====================================
+*/
+
+.btn {
+    padding: 8px 14px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.btn-primary {
+    background-color: #4f46e5;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #4338ca;
+}
+
+.btn-light {
+    background-color: #f3f4f6;
+    color: #374151;
+    border-color: #d1d5db;
+}
+
+.btn-light:hover {
+    background-color: #e5e7eb;
+}
+
+.btn-success {
+    background-color: #10b981;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #059669;
+}
+
+/*
+====================================
+          MODAL STYLES (Unified & Customized)
+====================================
+*/
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+
+.modal-card {
+    position: relative; 
+    /* Increased width for two columns */
+    width: 650px; 
+    background: #fff; /* Changed to white background for form based on image */
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    padding: 30px; /* Increased padding */
+    border: 1px solid #d1d5db;
+    min-height: 400px; 
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header-container {
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.modal-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* Grid layout for the form fields, applied to the wrapper div */
+.form-grid-container {
+    display: grid;
+    /* Two columns: 1fr for label (optional if using React components), 2fr for input */
+    grid-template-columns: 150px 1fr;
+    gap: 15px 15px; /* Vertical and horizontal gap */
+    align-items: center;
+    padding-bottom: 20px;
+    flex-grow: 1;
+}
+
+/* Style for the labels (if they are separate elements) */
+.form-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    text-align: right;
+    padding-right: 15px;
+}
+
+.form-input-wrapper {
+    display: flex;
+    gap: 10px; /* For fields like Date of Birth/Sex or Department/Course */
+}
+
+/* For full-width inputs that span both columns (like Address) */
+.full-width-field {
+    grid-column: 1 / -1; /* Spans from the first to the last column line */
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.full-width-field .form-label {
+    /* Ensure label width is respected even in full-width context */
+    width: 150px; 
+    flex-shrink: 0;
+}
+
+
+.form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #1f2937;
+    background-color: #fff;
+    box-sizing: border-box;
+    /* Remove default appearance for selects */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* For specific paired selects/inputs to share space */
+.half-input {
+    flex: 1;
+}
+
+/* Style for the action buttons at the bottom */
+.modal-actions {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+
+/*
+====================================
+     LOADING OVERLAY STYLES
+====================================
+*/
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    z-index: 10; 
+}
+
+.spinner-border {
+    display: inline-block;
+    vertical-align: text-bottom;
+    border: 0.2em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border .75s linear infinite;
+    color: #4f46e5;
+}
+
+.spinner-border.large-spinner {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3em;
+}
+
+@keyframes spinner-border {
+    to { transform: rotate(360deg); }
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+
+/*
+====================================
+     SUCCESS CONTENT STYLES
+====================================
+*/
+
+.success-content { 
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; 
+    text-align: center;
+}
+
+.success-icon-wrapper {
+    margin-bottom: 20px;
+}
+
+.success-icon-svg {
+    width: 60px;
+    height: 60px;
+    stroke-width: 5;
+    stroke: #10b981;
+    fill: none;
+    display: block;
+}
+
+.success-check-path {
+    stroke: #10b981;
+}
+
+.success-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #10b981;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+.success-subtitle {
+    font-size: 16px;
+    color: #4b5563;
+    margin: 8px 0 25px 0;
+}
+
+.btn-close-message {
+    width: 150px;
+    height: 45px;
+    border: none;
+    border-radius: 8px;
+    background-color: #4f46e5;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-close-message:hover {
+    background-color: #4338ca;
+}

@@ -1,0 +1,209 @@
+/* resources/sass/settings.scss */
+
+:root {
+    --bg-app: #eef0ff;
+    --bg-sidebar: #111827;
+    --bg-accent: #4338CA;
+    --text-muted: #6b7280;
+    --text-on-dark: #cbd5e1;
+    --card-bg: #ffffff;
+    --border: #e5e7eb;
+    --shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    --success: #16a34a;
+}
+
+.settings-content {
+    padding: 24px;
+    background: var(--bg-app);
+    min-height: 100vh;
+}
+
+// Modal styles (shared for settings modals)
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+
+.modal-card {
+    width: 560px;
+    background: #f6f7ff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    padding: 20px;
+    border: 1px solid #d9dcff;
+}
+
+.page-title {
+    margin: 0;
+}
+
+.page-subtitle {
+    margin: 4px 0 16px;
+    color: var(--text-muted);
+}
+
+.tabs {
+    display: inline-flex;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.tab {
+    border: 1px solid var(--border);
+    background: #f4f5ff;
+    color: #374151;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+.tab.active {
+    background: #e7e8ff;
+}
+
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.card-title {
+    margin: 0;
+    font-size: 16px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn {
+    border: 1px solid var(--border);
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 6px 10px;
+}
+
+.btn-primary {
+    background: #6366f1;
+    color: #fff;
+    border-color: #6366f1;
+}
+
+.btn-light {
+    background: #eef2ff;
+}
+
+.btn-success {
+    background: #a7f3d0;
+    border-color: #a7f3d0;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.badge-success {
+    background: #dcfce7;
+    color: var(--success);
+}
+
+/* align tables with students */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.settings-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 14px;
+}
+
+.settings-table thead {
+    background: #f9fafb;
+    font-weight: 600;
+    text-align: left;
+}
+
+.settings-table th,
+.settings-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.settings-table th {
+    color: #374151;
+    font-size: 14px;
+}
+
+.settings-table td {
+    color: #111827;
+    vertical-align: middle;
+}
+
+.settings-table tbody tr:nth-child(even) {
+    background: #fafbfc;
+}
+
+.settings-table tbody tr:hover {
+    background: #f3f4f6;
+}
+
+.settings-table th:last-child,
+.settings-table td:last-child {
+    width: 180px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.settings-table td:last-child {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    align-items: center;
+}
+
+.settings-table th:first-child {
+    border-top-left-radius: 10px;
+}
+
+.settings-table th:last-child {
+    border-top-right-radius: 10px;
+}
+
+.settings-table tr:last-child td:first-child {
+    border-bottom-left-radius: 10px;
+}
+
+.settings-table tr:last-child td:last-child {
+    border-bottom-right-radius: 10px;
+}
