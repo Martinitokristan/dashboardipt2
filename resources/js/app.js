@@ -4,19 +4,19 @@
  * building robust, powerful web applications using React + Laravel.
  */
 
-import './bootstrap';
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './components/Login';
-import Dashboard from './components/Dashboard';
-import Settings from './components/Settings';
-import Layout from './components/Layout';
-import Students from './components/Students';
-import Faculty from './components/Faculty';
-import Report from './components/Report';
-import MyProfile from './components/MyProfile';
-import ArchivedAll from './components/ArchivedAll';
+import "./bootstrap";
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./components/Login";
+import Dashboard from "./components/Dashboard";
+import Settings from "./components/Settings";
+import Layout from "./components/Layout";
+import Students from "./components/Students";
+import Faculty from "./components/Faculty";
+import Report from "./components/Report";
+import MyProfile from "./components/MyProfile";
+import ArchivedAll from "./components/ArchivedAll";
 
 function App() {
     return (
@@ -38,7 +38,7 @@ function App() {
     );
 }
 
-const appElement = document.getElementById('app');
+const appElement = document.getElementById("app");
 if (appElement) {
     const root = createRoot(appElement);
     root.render(<App />);

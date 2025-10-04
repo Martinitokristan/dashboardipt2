@@ -13,7 +13,7 @@ class AdminController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth:sanctum');
         $this->middleware('role:admin');
     }
 
@@ -84,5 +84,53 @@ class AdminController extends Controller
 
         return redirect()->route('admin.profile')
             ->with('success', 'Profile updated successfully.');
+    }
+
+    // API endpoints for dashboard statistics
+    public function getDashboardStats()
+    {
+        $data = [
+            'total_students' => StudentProfile::count(),
+            'total_faculty' => FacultyProfile::count(),
+            'total_courses' => Course::count(),
+            'total_departments' => Department::count(),
+            'students_by_course' => $this->getStudentsByCourse(),
+            'faculty_by_department' => $this->getFacultyByDepartment(),
+        ];
+
+        return response()->json($data);
+    }
+
+    public function updateProfileJson(Request $request)
+    {
+        $user = auth()->user();
+        
+        $validated = $request->validate([
+            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
+            'current_password' => 'required_with:new_password',
+            'new_password' => 'nullable|min:8|confirmed',
+        ]);
+
+        // Verify current password if changing password
+        if (!empty($validated['current_password'])) {
+            if (!\Hash::check($validated['current_password'], $user->password)) {
+                return response()->json([
+                    'errors' => ['current_password' => ['Current password is incorrect.']]
+                ], 422);
+            }
+        }
+
+        $user->username = $validated['username'];
+        
+        if (!empty($validated['new_password'])) {
+            $user->password = \Hash::make($validated['new_password']);
+        }
+        
+        $user->save();
+
+        return response()->json([
+            'message' => 'Profile updated successfully.',
+            'user' => $user->only(['id', 'username', 'role'])
+        ]);
     }
 }

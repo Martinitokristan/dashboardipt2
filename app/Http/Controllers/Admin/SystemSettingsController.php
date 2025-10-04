@@ -17,6 +17,77 @@ class SystemSettingsController extends Controller
         $this->middleware('role:admin');
     }
 
+    // API Resource Methods
+    public function index(Request $request)
+    {
+        // Determine which resource to return based on route
+        $routeName = $request->route()->getName();
+        
+        if (str_contains($routeName, 'departments')) {
+            return $this->departmentsIndexJson($request);
+        } elseif (str_contains($routeName, 'courses')) {
+            return $this->coursesIndexJson($request);
+        } elseif (str_contains($routeName, 'academic-years')) {
+            return $this->academicYearsIndexJson($request);
+        }
+        
+        return response()->json(['error' => 'Invalid resource'], 400);
+    }
+
+    public function store(Request $request)
+    {
+        // Determine which resource to create based on route
+        $routeName = $request->route()->getName();
+        
+        if (str_contains($routeName, 'departments')) {
+            return $this->storeDepartmentJson($request);
+        } elseif (str_contains($routeName, 'courses')) {
+            return $this->storeCourseJson($request);
+        } elseif (str_contains($routeName, 'academic-years')) {
+            return $this->storeAcademicYearJson($request);
+        }
+        
+        return response()->json(['error' => 'Invalid resource'], 400);
+    }
+
+    public function show(Request $request, $id)
+    {
+        // Determine which resource to show based on route
+        $routeName = $request->route()->getName();
+        
+        if (str_contains($routeName, 'departments')) {
+            $department = Department::withTrashed()->findOrFail($id);
+            return response()->json($department);
+        } elseif (str_contains($routeName, 'courses')) {
+            $course = Course::withTrashed()->findOrFail($id);
+            return response()->json($course->load('department'));
+        } elseif (str_contains($routeName, 'academic-years')) {
+            $academicYear = AcademicYear::findOrFail($id);
+            return response()->json($academicYear);
+        }
+        
+        return response()->json(['error' => 'Invalid resource'], 400);
+    }
+
+    public function update(Request $request, $id)
+    {
+        // Determine which resource to update based on route
+        $routeName = $request->route()->getName();
+        
+        if (str_contains($routeName, 'departments')) {
+            $department = Department::findOrFail($id);
+            return $this->updateDepartmentJson($request, $department);
+        } elseif (str_contains($routeName, 'courses')) {
+            $course = Course::findOrFail($id);
+            return $this->updateCourseJson($request, $course);
+        } elseif (str_contains($routeName, 'academic-years')) {
+            $academicYear = AcademicYear::findOrFail($id);
+            return $this->updateAcademicYearJson($request, $academicYear);
+        }
+        
+        return response()->json(['error' => 'Invalid resource'], 400);
+    }
+
     // Department Methods
     public function departments()
     {
@@ -29,7 +100,6 @@ class SystemSettingsController extends Controller
         $validated = $request->validate([
             'department_name' => 'required|string|max:255|unique:departments,department_name',
             'department_head' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
         ]);
 
         Department::create($validated);
@@ -48,7 +118,6 @@ class SystemSettingsController extends Controller
                 Rule::unique('departments', 'department_name')->ignore($department->department_id, 'department_id')
             ],
             'department_head' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
         ]);
 
         $department->update($validated);
@@ -82,7 +151,6 @@ class SystemSettingsController extends Controller
         $validated = $request->validate([
             'course_name' => 'required|string|max:255|unique:courses,course_name',
             'course_status' => 'required|in:active,inactive',
-            'description' => 'nullable|string',
         ]);
 
         Course::create($validated);
@@ -101,7 +169,6 @@ class SystemSettingsController extends Controller
                 Rule::unique('courses', 'course_name')->ignore($course->course_id, 'course_id')
             ],
             'course_status' => 'required|in:active,inactive',
-            'description' => 'nullable|string',
         ]);
 
         $course->update($validated);
@@ -184,7 +251,6 @@ class SystemSettingsController extends Controller
         $validated = $request->validate([
             'department_name' => 'required|string|max:255|unique:departments,department_name',
             'department_head' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
         ]);
         $department = Department::create($validated);
         return response()->json($department, 201);
@@ -198,7 +264,6 @@ class SystemSettingsController extends Controller
                 Rule::unique('departments', 'department_name')->ignore($department->department_id, 'department_id')
             ],
             'department_head' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
         ]);
         $department->update($validated);
         return response()->json($department);

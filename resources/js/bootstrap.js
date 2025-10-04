@@ -1,7 +1,7 @@
-window._ = require('lodash');
+window._ = require("lodash");
 
 try {
-    require('bootstrap');
+    require("bootstrap");
 } catch (e) {}
 
 /**
@@ -10,19 +10,19 @@ try {
  * CSRF token as a header based on the value of the "XSRF" token cookie.
  */
 
-window.axios = require('axios');
+window.axios = require("axios");
 
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+window.axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 window.axios.defaults.withCredentials = true;
 const token = document.head.querySelector('meta[name="csrf-token"]');
 if (token) {
-    window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+    window.axios.defaults.headers.common["X-CSRF-TOKEN"] = token.content;
 }
 
 // Ensure Sanctum CSRF cookie is set before first API call
-if (typeof window.__sanctumInitialized === 'undefined') {
+if (typeof window.__sanctumInitialized === "undefined") {
     window.__sanctumInitialized = true;
-    window.axios.get('/sanctum/csrf-cookie').catch(() => {});
+    window.axios.get("/sanctum/csrf-cookie").catch(() => {});
 }
 
 /**

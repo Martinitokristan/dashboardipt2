@@ -16,21 +16,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        if (!User::where('username', 'admin')->exists()) {
-            $data = [
-                'username' => 'admin',
-                'password' => Hash::make('admin12345'),
-                'role' => 'admin',
-            ];
-
-            if (Schema::hasColumn('users', 'name')) {
-                $data['name'] = 'Administrator';
-            }
-            if (Schema::hasColumn('users', 'email')) {
-                $data['email'] = 'admin@example.com';
-            }
-
-            User::create($data);
-        }
+        // Call the AdminSeeder
+        $this->call([
+            AdminSeeder::class,
+            SampleDataSeeder::class,
+        ]);
     }
 }

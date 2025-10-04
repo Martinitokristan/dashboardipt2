@@ -19,7 +19,30 @@ class StudentController extends Controller
         $this->middleware('role:admin');
     }
 
+    // API Resource Methods
     public function index(Request $request)
+    {
+        return $this->indexJson($request);
+    }
+
+    public function store(Request $request)
+    {
+        return $this->storeJson($request);
+    }
+
+    public function show(Request $request, $id)
+    {
+        $student = StudentProfile::withTrashed()->findOrFail($id);
+        return response()->json($student->load(['department', 'course']));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $student = StudentProfile::findOrFail($id);
+        return $this->updateJson($request, $student);
+    }
+
+    public function indexWeb(Request $request)
     {
         $query = StudentProfile::with(['department', 'course']);
         
@@ -56,7 +79,7 @@ class StudentController extends Controller
         return view('admin.students.create', compact('courses', 'departments'));
     }
 
-    public function store(Request $request)
+    public function storeWeb(Request $request)
     {
         $validated = $request->validate([
             'username' => 'required|string|max:255|unique:users,username',
@@ -99,7 +122,7 @@ class StudentController extends Controller
         return view('admin.students.edit', compact('student', 'courses', 'departments'));
     }
 
-    public function update(Request $request, StudentProfile $student)
+    public function updateWeb(Request $request, StudentProfile $student)
     {
         $validated = $request->validate([
             'f_name' => 'required|string|max:255',

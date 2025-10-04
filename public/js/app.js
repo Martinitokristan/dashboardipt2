@@ -70600,7 +70600,7 @@ function App() {
     })
   });
 }
-var appElement = document.getElementById('app');
+var appElement = document.getElementById("app");
 if (appElement) {
   var root = (0,react_dom_client__WEBPACK_IMPORTED_MODULE_2__.createRoot)(appElement);
   root.render(/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(App, {}));
@@ -70626,17 +70626,17 @@ try {
  */
 
 window.axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+window.axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 window.axios.defaults.withCredentials = true;
 var token = document.head.querySelector('meta[name="csrf-token"]');
 if (token) {
-  window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+  window.axios.defaults.headers.common["X-CSRF-TOKEN"] = token.content;
 }
 
 // Ensure Sanctum CSRF cookie is set before first API call
-if (typeof window.__sanctumInitialized === 'undefined') {
+if (typeof window.__sanctumInitialized === "undefined") {
   window.__sanctumInitialized = true;
-  window.axios.get('/sanctum/csrf-cookie')["catch"](function () {});
+  window.axios.get("/sanctum/csrf-cookie")["catch"](function () {});
 }
 
 /**

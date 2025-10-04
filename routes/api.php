@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\Admin\ArchiveController;
 use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\FacultyController;
+use App\Http\Controllers\Admin\ReportController;
 // API-only; SPA JSON endpoints are handled in routes/web.php for session auth
 
 /*
@@ -18,32 +21,51 @@ use App\Http\Controllers\Admin\StudentController;
 |
 */
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
 
+    // Dashboard and Profile endpoints
+    Route::get('/dashboard/stats', [AdminController::class, 'getDashboardStats']);
+    Route::put('/profile', [AdminController::class, 'updateProfileJson']);
+
     Route::prefix('admin')->group(function () {
-        Route::get('/departments', [SystemSettingsController::class, 'departmentsIndexJson']);
-        Route::post('/departments', [SystemSettingsController::class, 'storeDepartmentJson']);
-        Route::put('/departments/{department}', [SystemSettingsController::class, 'updateDepartmentJson']);
+        // Department API Resource
+        Route::apiResource('departments', SystemSettingsController::class)->only([
+            'index', 'store', 'show', 'update'
+        ]);
         Route::post('/departments/{department}/archive', [SystemSettingsController::class, 'archiveDepartmentJson']);
         Route::post('/departments/{department}/unarchive', [SystemSettingsController::class, 'unarchiveDepartmentJson']);
 
-        Route::get('/courses', [SystemSettingsController::class, 'coursesIndexJson']);
-        Route::post('/courses', [SystemSettingsController::class, 'storeCourseJson']);
-        Route::put('/courses/{course}', [SystemSettingsController::class, 'updateCourseJson']);
+        // Course API Resource
+        Route::apiResource('courses', SystemSettingsController::class)->only([
+            'index', 'store', 'show', 'update'
+        ]);
         Route::post('/courses/{course}/archive', [SystemSettingsController::class, 'archiveCourseJson']);
         Route::post('/courses/{course}/unarchive', [SystemSettingsController::class, 'unarchiveCourseJson']);
 
-        Route::get('/academic-years', [SystemSettingsController::class, 'academicYearsIndexJson']);
-        Route::post('/academic-years', [SystemSettingsController::class, 'storeAcademicYearJson']);
-        Route::put('/academic-years/{academicYear}', [SystemSettingsController::class, 'updateAcademicYearJson']);
-        Route::get('/archived', [ArchiveController::class, 'index']);
+        // Academic Year API Resource
+        Route::apiResource('academic-years', SystemSettingsController::class)->only([
+            'index', 'store', 'show', 'update'
+        ]);
 
-        // Students JSON
-        Route::get('/students', [StudentController::class, 'indexJson']);
-        Route::post('/students', [StudentController::class, 'storeJson']);
-        Route::put('/students/{student}', [StudentController::class, 'updateJson']);
+        // Archive API Resource
+        Route::apiResource('archived', ArchiveController::class)->only(['index']);
+
+        // Student API Resource
+        Route::apiResource('students', StudentController::class)->only([
+            'index', 'store', 'show', 'update'
+        ]);
+
+        // Faculty API Resource
+        Route::apiResource('faculty', FacultyController::class)->only([
+            'index', 'store', 'show', 'update'
+        ]);
+
+        // Reports API Resource
+        Route::apiResource('reports', ReportController::class)->only(['index']);
+        Route::post('/reports/students', [ReportController::class, 'generateStudentReport']);
+        Route::post('/reports/faculty', [ReportController::class, 'generateFacultyReport']);
     });
 });
