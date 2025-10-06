@@ -25,44 +25,28 @@ Route::get('/login', [LoginController::class, 'showLoginForm']);
 Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Protected routes - require authentication and admin role
+// Protected SPA routes - require authentication and admin role for ALL app paths
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/dashboard', function () {
+    // Primary sections rendered by the SPA shell
+    Route::view('/dashboard', 'dashboard')->name('dashboard');
+    Route::view('/settings', 'dashboard')->name('settings');
+    Route::view('/students', 'dashboard')->name('students');
+    Route::view('/faculty', 'dashboard')->name('faculty');
+    Route::view('/reports', 'dashboard')->name('reports');
+    Route::view('/profile', 'dashboard')->name('profile');
+
+    // Settings subpaths (same SPA shell)
+    Route::view('/settings/departments', 'dashboard')->name('settings.departments');
+    Route::view('/settings/courses', 'dashboard')->name('settings.courses');
+    Route::view('/settings/academic-years', 'dashboard')->name('settings.academic-years');
+
+    // Authenticated catch-all for any other non-API path → serve SPA shell
+    Route::get('/{any}', function () {
         return view('dashboard');
-    })->name('dashboard');
-    
-    // Settings routes - require authentication and admin role
-    Route::get('/settings', function () {
-        return view('dashboard');
-    })->name('settings');
-    
-    Route::get('/settings/departments', function () {
-        return view('dashboard');
-    })->name('settings.departments');
-    
-    Route::get('/settings/courses', function () {
-        return view('dashboard');
-    })->name('settings.courses');
-    
-    Route::get('/settings/academic-years', function () {
-        return view('dashboard');
-    })->name('settings.academic-years');
+    })->where('any', '^(?!api/).*$');
 });
 
-// SPA catch-all: if authenticated, serve dashboard shell, otherwise login shell
-Route::get('/{any}', function () {
-    if (!Auth::check()) {
-        return view('login');
-    }
-    
-    // Check if user is admin
-    if (!Auth::user()->isAdmin()) {
-        Auth::logout();
-        return view('login')->with('error', 'Unauthorized access. Admin only.');
-    }
-    
-    return view('dashboard');
-})->where('any', '^(?!api/|dashboard|settings).*$');
+// Unauthenticated users will hit explicit auth routes above; any other path will 404 or be redirected by auth middleware.
 
 
 // Admin JSON endpoints are now in routes/api.php with auth:sanctum
