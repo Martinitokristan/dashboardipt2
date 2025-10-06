@@ -14,8 +14,7 @@ class FacultyController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:sanctum');
-        $this->middleware('role:admin');
+        // Middleware is applied at route level
     }
 
     // API Resource Methods
@@ -61,8 +60,7 @@ class FacultyController extends Controller
                 $q->where('f_name', 'like', "%{$search}%")
                   ->orWhere('m_name', 'like', "%{$search}%")
                   ->orWhere('l_name', 'like', "%{$search}%")
-                  ->orWhere('email_address', 'like', "%{$search}%")
-                  ->orWhere('position', 'like', "%{$search}%");
+                  ->orWhere('email_address', 'like', "%{$search}%");
             });
         }
         
@@ -82,11 +80,10 @@ class FacultyController extends Controller
             'phone_number' => 'required|string|max:20',
             'email_address' => 'required|email|unique:faculty_profiles,email_address',
             'address' => 'required|string',
-            'position' => 'required|string|max:255',
             'department_id' => 'required|exists:departments,department_id',
         ]);
 
-        // Auto-provision a basic user silently for relational integrity
+        // Create faculty profile (admin-only system, no user accounts needed)
         $faculty = FacultyProfile::create($validated);
 
         return response()->json($faculty->load('department'), 201);
@@ -107,7 +104,6 @@ class FacultyController extends Controller
                 Rule::unique('faculty_profiles', 'email_address')->ignore($faculty->faculty_id, 'faculty_id')
             ],
             'address' => 'required|string',
-            'position' => 'required|string|max:255',
             'department_id' => 'required|exists:departments,department_id',
         ]);
 
@@ -130,8 +126,7 @@ class FacultyController extends Controller
                 $q->where('f_name', 'like', "%{$search}%")
                   ->orWhere('m_name', 'like', "%{$search}%")
                   ->orWhere('l_name', 'like', "%{$search}%")
-                  ->orWhere('email_address', 'like', "%{$search}%")
-                  ->orWhere('position', 'like', "%{$search}%");
+                  ->orWhere('email_address', 'like', "%{$search}%");
             });
         }
         
@@ -150,8 +145,6 @@ class FacultyController extends Controller
     public function storeWeb(Request $request)
     {
         $validated = $request->validate([
-            'username' => 'required|string|max:255|unique:users,username',
-            'password' => 'required|string|min:8|confirmed',
             'f_name' => 'required|string|max:255',
             'm_name' => 'nullable|string|max:255',
             'l_name' => 'required|string|max:255',
@@ -165,18 +158,8 @@ class FacultyController extends Controller
             'department_id' => 'required|exists:departments,department_id',
         ]);
 
-        // Create user
-        $user = User::create([
-            'username' => $validated['username'],
-            'password' => Hash::make($validated['password']),
-            'role' => 'faculty',
-        ]);
-
-        // Create faculty profile
-        $facultyData = array_merge($validated, ['user_id' => $user->id]);
-        unset($facultyData['username'], $facultyData['password']);
-        
-        FacultyProfile::create($facultyData);
+        // Create faculty profile (admin-only system, no user accounts needed)
+        FacultyProfile::create($validated);
 
         return redirect()->route('admin.faculty.index')
             ->with('success', 'Faculty member added successfully.');
@@ -216,11 +199,8 @@ class FacultyController extends Controller
 
     public function destroy(FacultyProfile $faculty)
     {
-        // Archive the faculty profile
-        $faculty->update(['archived_at' => now()]);
-        
-        // Optionally, deactivate the user account
-        $faculty->user()->update(['is_active' => false]);
+        // Archive the faculty profile (soft delete)
+        $faculty->delete();
 
         return redirect()->route('admin.faculty.index')
             ->with('success', 'Faculty member archived successfully.');

@@ -30,6 +30,23 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+    
+    // Settings routes - require authentication and admin role
+    Route::get('/settings', function () {
+        return view('dashboard');
+    })->name('settings');
+    
+    Route::get('/settings/departments', function () {
+        return view('dashboard');
+    })->name('settings.departments');
+    
+    Route::get('/settings/courses', function () {
+        return view('dashboard');
+    })->name('settings.courses');
+    
+    Route::get('/settings/academic-years', function () {
+        return view('dashboard');
+    })->name('settings.academic-years');
 });
 
 // SPA catch-all: if authenticated, serve dashboard shell, otherwise login shell
@@ -45,7 +62,7 @@ Route::get('/{any}', function () {
     }
     
     return view('dashboard');
-})->where('any', '^(?!api|dashboard).*$');
+})->where('any', '^(?!api/|dashboard|settings).*$');
 
 
 // Admin JSON endpoints are now in routes/api.php with auth:sanctum

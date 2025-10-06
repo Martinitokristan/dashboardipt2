@@ -1,7 +1,18 @@
-/* resources/sass/faculty.scss */
+// Core Page Layout
 .page {
     background: #eef0ff;
     min-height: 100vh;
+    overflow: initial; /* avoid covering modal with full-page loaders */
+}
+
+// Style for initial full-page loader (optional, but good for context)
+.page.initial-load {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #4f46e5;
+    font-weight: 600;
 }
 
 .page-header {
@@ -24,6 +35,7 @@
     top: 0;
 }
 
+// Action & Filter Bar
 .actions-row {
     display: flex;
     align-items: center;
@@ -39,6 +51,7 @@
     padding: 6px 10px;
     border-radius: 8px;
     border: 1px solid #e5e7eb;
+    cursor: pointer;
 }
 
 .filters {
@@ -56,7 +69,7 @@
     border: 1px solid #e5e7eb;
     border-radius: 10px;
     padding: 6px 10px;
-    min-width: 420px;
+    min-width: 320px;
 }
 
 .search-input {
@@ -70,19 +83,27 @@
     background: #fff;
     border-radius: 20px;
     padding: 6px 12px;
+    cursor: pointer;
 }
 
+// Buttons (General)
 .btn {
     border: 1px solid #e5e7eb;
     background: #f8fafc;
     border-radius: 8px;
     padding: 6px 10px;
+    cursor: pointer;
+    transition: background-color 0.15s;
 }
 
 .btn-primary {
     background: #6366f1;
     color: #fff;
     border-color: #6366f1;
+}
+
+.btn-primary:hover {
+    background: #4f46e5;
 }
 
 .btn-success {
@@ -94,21 +115,57 @@
     background: #eef2ff;
 }
 
-.badge {
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 12px;
+.btn-secondary {
+    background: #e5e7eb;
+    color: #374151;
 }
 
-.badge-success {
-    background: #dcfce7;
-    color: #16a34a;
+// Messages (Success/Error)
+.message {
+    padding: 12px;
+    border-radius: 8px;
+    margin: 16px 0;
+    font-weight: 600;
+}
+.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #34d399;
+}
+.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #f87171;
 }
 
-/* ---------- Table Styles (aligned with students) ---------- */
+// Table Styles
 .table-wrapper {
+    position: relative; // Important for positioning the fetching overlay
     width: 100%;
     overflow-x: auto;
+}
+
+.fetching-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7); /* Light overlay over table */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 10px;
+}
+
+.small-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #f3f4f6;
+    border-top: 3px solid #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
 .faculty-table {
@@ -174,6 +231,10 @@
     border-top-right-radius: 10px;
 }
 
+.faculty-table tr:last-child td {
+    border-bottom: none;
+}
+
 .faculty-table tr:last-child td:first-child {
     border-bottom-left-radius: 10px;
 }
@@ -188,4 +249,249 @@
     border-top: none;
     border-radius: 0 0 10px 10px;
     background: #fff;
+}
+
+
+// ------------------------------------------
+// MODAL STYLES (UPDATED)
+// ------------------------------------------
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(20, 23, 28, 0.45);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 24px;
+}
+
+.modal-card {
+    width: 100%;
+    max-width: 600px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh; /* Allow modal to take up more vertical space and scroll */
+    overflow: hidden;
+}
+
+// New Header for "Add New Faculty"
+.modal-header-add {
+    padding: 30px 30px 10px; /* Adjusted padding to match screenshot */
+    border-bottom: 1px solid #e5e7eb; /* Subtle separator */
+    margin-bottom: 20px; /* Space before first field */
+}
+
+.modal-header-title {
+    margin: 0;
+    color: #374151;
+    font-size: 24px; /* Slightly larger title */
+    font-weight: 700;
+}
+
+.modal-header-add .modal-header-subtitle {
+    margin-top: 5px;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+// Header for "Edit Faculty" - simpler
+.modal-card > h3.modal-header-title { /* Target the H3 directly when it's the only header element */
+    padding: 30px 30px 10px; /* Adjusted padding to match screenshot */
+    margin: 0;
+    color: #374151;
+    font-size: 24px;
+    font-weight: 700;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 20px;
+}
+
+
+.modal-body {
+    padding: 0 30px;
+    overflow-y: auto; /* Allow scrolling for the form fields */
+    flex-grow: 1; /* Allow body to grow and take available space */
+}
+
+.modal-footer {
+    padding: 24px 30px 30px;
+    border-top: none;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+/* Form Styles */
+.form-row {
+    display: block;
+    gap: 0;
+    margin-bottom: 0;
+}
+
+.form-row.inline {
+    display: flex;
+    gap: 20px;
+    & > .form-group {
+        flex: 1;
+        margin-bottom: 12px; /* Maintain spacing between inline groups */
+    }
+}
+
+.form-group {
+    display: block;
+    margin-bottom: 12px;
+    flex: none;
+}
+
+.form-group label {
+    font-weight: 500;
+    margin-bottom: 4px;
+    font-size: 14px;
+    color: #1f2937;
+    display: block;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="tel"],
+.form-group input[type="email"],
+.form-group select,
+.form-group textarea {
+    padding: 10px 15px;
+    border: 1px solid #c8c5f0;
+    border-radius: 10px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #fcfcff;
+}
+
+.form-group textarea {
+    min-height: 80px;
+}
+
+
+// Specific Button Styles for Modal Footer
+.modal-footer .btn {
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    min-width: 140px; /* Use min-width instead of fixed width */
+    border-radius: 10px;
+}
+
+.modal-footer .btn-secondary {
+    background: #fff;
+    color: #6366f1;
+    border: 2px solid #6366f1;
+    transition: background-color 0.2s;
+    &:hover {
+        background: #f1f1ff;
+    }
+}
+
+.modal-footer .btn-primary {
+    background: #6366f1;
+    color: #fff;
+    border: none;
+    &:hover {
+        background: #4f46e5;
+    }
+}
+
+/* --- Spinner/Loading Animation (for both modal and table) --- */
+
+.loading-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    min-height: 200px;
+    text-align: center;
+    flex-grow: 1; /* Allow it to take full modal height */
+}
+
+.success-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    min-height: 200px;
+    text-align: center;
+    flex-grow: 1; /* Allow it to take full modal height */
+}
+
+.spinner-border {
+    display: inline-block;
+    vertical-align: text-bottom;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
+
+.large-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #f3f4f6;
+    border-top: 4px solid #6366f1;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.success-icon-wrapper {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 4;
+    stroke: #fff;
+    margin: 0 auto 10px;
+    background: #10b981;
+}
+
+.success-icon-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.success-check-path {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 0;
+    stroke: white;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke-dashoffset 0.6s ease 0.2s, opacity 0.3s linear;
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+@keyframes stroke {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+.success-title {
+    color: #10b981;
+    margin-bottom: 5px;
+}
+
+.success-subtitle {
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+.btn-close-message {
+    min-width: 100px;
 }

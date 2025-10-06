@@ -8,6 +8,8 @@ use App\Models\FacultyProfile;
 use App\Models\Course;
 use App\Models\Department;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
@@ -106,31 +108,65 @@ class AdminController extends Controller
         $user = auth()->user();
         
         $validated = $request->validate([
-            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'current_password' => 'required_with:new_password',
             'new_password' => 'nullable|min:8|confirmed',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Verify current password if changing password
         if (!empty($validated['current_password'])) {
-            if (!\Hash::check($validated['current_password'], $user->password)) {
+            if (!Hash::check($validated['current_password'], $user->password)) {
                 return response()->json([
                     'errors' => ['current_password' => ['Current password is incorrect.']]
                 ], 422);
             }
         }
 
-        $user->username = $validated['username'];
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $avatarPath;
+        }
+
+        $user->first_name = $validated['first_name'];
+        $user->last_name = $validated['last_name'];
+        $user->email = $validated['email'];
         
         if (!empty($validated['new_password'])) {
-            $user->password = \Hash::make($validated['new_password']);
+            $user->password = Hash::make($validated['new_password']);
         }
         
         $user->save();
 
         return response()->json([
             'message' => 'Profile updated successfully.',
-            'user' => $user->only(['id', 'username', 'role'])
+            'user' => $user->only(['id', 'first_name', 'last_name', 'email', 'role', 'avatar'])
+        ]);
+    }
+
+    public function getProfile()
+    {
+        $user = auth()->user();
+        
+        return response()->json([
+            'user' => $user->only(['id', 'first_name', 'last_name', 'email', 'role', 'avatar'])
+        ]);
+    }
+
+    public function logout()
+    {
+        auth()->user()->tokens()->delete();
+        
+        return response()->json([
+            'message' => 'Logged out successfully.'
         ]);
     }
 }

@@ -8,14 +8,13 @@ use App\Models\FacultyProfile;
 use App\Models\Course;
 use App\Models\Department;
 use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
+// use Barryvdh\DomPDF\Facade\Pdf; // Temporarily disabled due to package installation issues
 
 class ReportController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:sanctum');
-        $this->middleware('role:admin');
+        // Middleware is applied at route level
     }
 
     // API Resource Methods
@@ -74,20 +73,18 @@ class ReportController extends Controller
         $department = $request->filled('department_id') ? Department::findOrFail($request->department_id) : null;
         $academicYear = $request->filled('academic_year_id') ? \App\Models\AcademicYear::findOrFail($request->academic_year_id) : null;
         
+        // PDF export temporarily disabled - will return JSON data instead
         if ($request->has('export') && $request->export === 'pdf') {
-            $pdf = Pdf::loadView('admin.reports.students-pdf', [
+            return response()->json([
+                'message' => 'PDF export temporarily unavailable. Please use JSON data.',
                 'students' => $students,
-                'course' => $course,
-                'department' => $department,
-                'academic_year' => $academicYear,
-                'status' => $request->status ?? 'all'
+                'filters' => [
+                    'course' => $course,
+                    'department' => $department,
+                    'academic_year' => $academicYear,
+                    'status' => $request->status ?? 'all'
+                ]
             ]);
-            
-            $filename = 'students-report';
-            if ($course) $filename .= "-{$course->course_name}";
-            if ($academicYear) $filename .= "-{$academicYear->school_year}";
-            
-            return $pdf->download("{$filename}.pdf");
         }
 
         return response()->json([
@@ -117,16 +114,15 @@ class ReportController extends Controller
             
         $department = $request->filled('department_id') ? Department::findOrFail($request->department_id) : null;
         
+        // PDF export temporarily disabled - will return JSON data instead
         if ($request->has('export') && $request->export === 'pdf') {
-            $pdf = Pdf::loadView('admin.reports.faculty-pdf', [
+            return response()->json([
+                'message' => 'PDF export temporarily unavailable. Please use JSON data.',
                 'faculty' => $faculty,
-                'department' => $department,
+                'filters' => [
+                    'department' => $department
+                ]
             ]);
-            
-            $filename = 'faculty-report';
-            if ($department) $filename .= "-{$department->department_name}";
-            
-            return $pdf->download("{$filename}.pdf");
         }
 
         return response()->json([
