@@ -14755,7 +14755,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "/* resources/sass/profile.scss */\n.page {\n  background: #eef0ff;\n  min-height: 100vh;\n}\n\n.profile-header {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n}\n\n.page-header {\n  padding: 16px 0;\n}\n\n.page-title {\n  margin: 0;\n}\n\n.page-subtitle {\n  margin: 2px 0;\n  color: #6b7280;\n}\n\n.page-subtitle.subtle {\n  color: #9ca3af;\n}\n\n.btn {\n  border: 1px solid #e5e7eb;\n  background: #f8fafc;\n  border-radius: 8px;\n  padding: 8px 14px;\n}\n\n.btn-primary {\n  background: #4f46e5;\n  color: #fff;\n  border-color: #4f46e5;\n}\n\n.btn-secondary {\n  background: #fff;\n  color: #4f46e5;\n  border-color: #4f46e5;\n}\n\n.btn-danger {\n  background: #ef4444;\n  color: #fff;\n  border-color: #ef4444;\n}\n\n.profile-sections {\n  display: grid;\n  grid-template-columns: 260px 1fr;\n  gap: 16px;\n}\n\n.profile-info {\n  background: #fff;\n  border: 1px solid #e5e7eb;\n  border-radius: 10px;\n  padding: 16px;\n}\n\n.avatar {\n  text-align: center;\n  margin-bottom: 16px;\n}\n\n.avatar-placeholder {\n  width: 96px;\n  height: 96px;\n  background: #e5e7eb;\n  border-radius: 50%;\n  display: inline-block;\n  line-height: 96px;\n  color: #6b7280;\n}\n\n.form-row {\n  display: flex;\n  flex-direction: column;\n  gap: 6px;\n  margin-bottom: 12px;\n}\n\n.form-row label {\n  font-size: 12px;\n  color: #6b7280;\n}\n\n.form-row input {\n  height: 36px;\n  border: 1px solid #e5e7eb;\n  border-radius: 8px;\n  padding: 0 10px;\n}\n\n.form-actions {\n  display: flex;\n  justify-content: flex-start;\n  gap: 8px;\n}\n\n.account-action {\n  margin-top: 16px;\n  background: #fff;\n  border: 1px solid #e5e7eb;\n  border-radius: 10px;\n  padding: 16px;\n}\n\n.action-title {\n  font-weight: 600;\n  margin-bottom: 8px;\n}\n\n.logout-box {\n  background: #fee2e2;\n  border: 1px solid #fecaca;\n  border-radius: 6px;\n  padding: 12px;\n  color: #991b1b;\n}\n\n.logout-box span {\n  font-size: 12px;\n  color: #7f1d1d;\n}\n\n.loading {\n  text-align: center;\n  padding: 20px;\n}\n\n.alert {\n  padding: 10px;\n  margin-bottom: 16px;\n  border-radius: 8px;\n}\n\n.alert.success {\n  background: #d1fae5;\n  color: #065f46;\n}\n\n.alert.error {\n  background: #fee2e2;\n  color: #991b1b;\n}\n\n.page-title {\n  font-size: 24px;\n  font-weight: 700;\n  color: #111827;\n  margin: 0;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "/* resources/sass/profile.scss */\n.page {\n  background: #eef0ff;\n  min-height: 100vh;\n}\n\n.profile-header {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n}\n\n.page-header {\n  padding: 16px 0;\n}\n\n.page-title {\n  margin: 0;\n}\n\n.page-subtitle {\n  margin: 2px 0;\n  color: #6b7280;\n}\n\n.page-subtitle.subtle {\n  color: #9ca3af;\n}\n\n.btn {\n  border: 1px solid #e5e7eb;\n  background: #f8fafc;\n  border-radius: 8px;\n  padding: 8px 14px;\n}\n\n.btn-primary {\n  background: #4f46e5;\n  color: #fff;\n  border-color: #4f46e5;\n}\n\n.btn-danger {\n  background: #ef4444;\n  color: #fff;\n  border-color: #ef4444;\n}\n\n.profile-grid {\n  display: grid;\n  grid-template-columns: 260px 1fr;\n  gap: 16px;\n}\n\n.profile-card {\n  background: #fff;\n  border: 1px solid #e5e7eb;\n  border-radius: 10px;\n  padding: 16px;\n  text-align: center;\n}\n\n.avatar img {\n  width: 96px;\n  height: 96px;\n  border-radius: 50%;\n}\n\n.profile-name {\n  font-weight: 700;\n  margin-top: 8px;\n}\n\n.profile-email {\n  color: #6b7280;\n  font-size: 12px;\n}\n\n.profile-role {\n  margin-top: 4px;\n}\n\n.card {\n  background: #fff;\n  border: 1px solid #e5e7eb;\n  border-radius: 10px;\n  padding: 16px;\n}\n\n.form-row {\n  display: flex;\n  flex-direction: column;\n  gap: 6px;\n  margin-bottom: 12px;\n}\n\n.form-row label {\n  font-size: 12px;\n  color: #6b7280;\n}\n\n.form-row input {\n  height: 36px;\n  border: 1px solid #e5e7eb;\n  border-radius: 8px;\n  padding: 0 10px;\n}\n\n.form-actions {\n  display: flex;\n  justify-content: flex-start;\n}\n\n.account-action {\n  margin-top: 16px;\n  background: #fff;\n  border: 1px solid #e5e7eb;\n  border-radius: 10px;\n  padding: 16px;\n}\n\n.action-title {\n  font-weight: 600;\n  margin-bottom: 8px;\n}\n\n.logout-box {\n  background: #fee2e2;\n  border: 1px solid #fecaca;\n  border-radius: 6px;\n  padding: 12px;\n  color: #991b1b;\n}\n\n.logout-box span {\n  font-size: 12px;\n  color: #7f1d1d;\n}\n\n.page-title {\n  font-size: 24px;\n  font-weight: 700;\n  color: #111827;\n  margin: 0;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -72303,6 +72303,16 @@ function MyProfile() {
       return _objectSpread(_objectSpread({}, prev), {}, _defineProperty({}, name, value));
     });
   };
+  var handleAvatarChange = function handleAvatarChange(e) {
+    var file = e.target.files[0];
+    if (file) {
+      setProfile(function (prev) {
+        return _objectSpread(_objectSpread({}, prev), {}, {
+          avatar: file
+        });
+      });
+    }
+  };
   var handleSave = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
       var formData, response, data, _t2;
@@ -72316,6 +72326,9 @@ function MyProfile() {
             formData.append("first_name", profile.first_name);
             formData.append("last_name", profile.last_name);
             formData.append("email", profile.email);
+            if (profile.avatar && typeof profile.avatar !== "string") {
+              formData.append("avatar", profile.avatar);
+            }
             _context2.n = 2;
             return fetch("/api/profile", {
               method: "PUT",
@@ -72408,7 +72421,7 @@ function MyProfile() {
       className: "page-header",
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("h1", {
         className: "page-title",
-        children: "Manage your Admin Account"
+        children: "Manage your admin account"
       })
     }), loading && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
       className: "loading",
@@ -72422,12 +72435,12 @@ function MyProfile() {
         className: "profile-info",
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
           className: "avatar",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+          children: profile.avatar ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("img", {
+            src: typeof profile.avatar === "string" ? "/storage/".concat(profile.avatar) : URL.createObjectURL(profile.avatar),
+            alt: "Avatar"
+          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
             className: "avatar-placeholder",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
-              className: "placeholder-text",
-              children: "Add Avatar"
-            })
+            children: "No Avatar"
           })
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
           className: "form-row",
@@ -72478,6 +72491,7 @@ function MyProfile() {
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("input", {
             type: "file",
             accept: "image/png,image/jpeg",
+            onChange: handleAvatarChange,
             disabled: !isEditing
           })]
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {

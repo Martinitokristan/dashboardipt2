@@ -49,6 +49,13 @@ function MyProfile() {
         setProfile((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handleAvatarChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setProfile((prev) => ({ ...prev, avatar: file }));
+        }
+    };
+
     const handleSave = async () => {
         setSaving(true);
         setError("");
@@ -57,6 +64,9 @@ function MyProfile() {
             formData.append("first_name", profile.first_name);
             formData.append("last_name", profile.last_name);
             formData.append("email", profile.email);
+            if (profile.avatar && typeof profile.avatar !== "string") {
+                formData.append("avatar", profile.avatar);
+            }
             const response = await fetch("/api/profile", {
                 method: "PUT",
                 headers: {
@@ -103,7 +113,7 @@ function MyProfile() {
     return (
         <div className="profile-content">
             <header className="page-header">
-                <h1 className="page-title">Manage your Admin Account</h1>
+                <h1 className="page-title">Manage your admin account</h1>
             </header>
 
             {loading && <div className="loading">Loading...</div>}
@@ -120,9 +130,18 @@ function MyProfile() {
             <div className="profile-sections">
                 <section className="profile-info">
                     <div className="avatar">
-                        <div className="avatar-placeholder">
-                            <span className="placeholder-text">Add Avatar</span>
-                        </div>
+                        {profile.avatar ? (
+                            <img
+                                src={
+                                    typeof profile.avatar === "string"
+                                        ? `/storage/${profile.avatar}`
+                                        : URL.createObjectURL(profile.avatar)
+                                }
+                                alt="Avatar"
+                            />
+                        ) : (
+                            <div className="avatar-placeholder">No Avatar</div>
+                        )}
                     </div>
                     <div className="form-row">
                         <label>First Name</label>
@@ -167,6 +186,7 @@ function MyProfile() {
                         <input
                             type="file"
                             accept="image/png,image/jpeg"
+                            onChange={handleAvatarChange}
                             disabled={!isEditing}
                         />
                     </div>
