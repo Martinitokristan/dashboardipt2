@@ -18,7 +18,6 @@ class Department extends Model
     protected $fillable = [
         'department_name',
         'department_head',
-        'description',
     ];
 
     protected $dates = [

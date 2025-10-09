@@ -13,7 +13,7 @@ class StudentProfile extends Model
     public $incrementing = true;
     protected $keyType = 'int';
 
-    const DELETED_AT = 'archived_at';
+    const DELETED_AT = 'archived_at'; // Use archived_at for soft deletes
 
     protected $fillable = [
         'f_name',
@@ -28,14 +28,14 @@ class StudentProfile extends Model
         'status',
         'department_id',
         'course_id',
+        'academic_year_id',
+        'year_level',
     ];
 
     protected $dates = [
         'date_of_birth',
         'archived_at',
     ];
-
-    // No user relation; admin-only dashboard
 
     public function department()
     {
@@ -47,20 +47,21 @@ class StudentProfile extends Model
         return $this->belongsTo(Course::class, 'course_id');
     }
 
+    public function academicYear()
+    {
+        return $this->belongsTo(AcademicYear::class, 'academic_year_id');
+    }
+
     public function getFullNameAttribute()
     {
-        $name = "{$this->f_name}";
-        
+        $name = trim("{$this->f_name}");
         if ($this->m_name) {
-            $name .= " {$this->m_name}";
+            $name .= " " . trim($this->m_name);
         }
-        
-        $name .= " {$this->l_name}";
-        
+        $name .= " " . trim($this->l_name);
         if ($this->suffix) {
-            $name .= " {$this->suffix}";
+            $name .= " " . trim($this->suffix);
         }
-        
-        return $name;
+        return trim($name);
     }
 }

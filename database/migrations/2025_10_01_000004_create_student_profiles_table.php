@@ -10,7 +10,6 @@ return new class extends Migration
     {
         Schema::create('student_profiles', function (Blueprint $table) {
             $table->id('student_id');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('f_name');
             $table->string('m_name')->nullable();
             $table->string('l_name');
@@ -18,13 +17,15 @@ return new class extends Migration
             $table->date('date_of_birth');
             $table->enum('sex', ['male', 'female', 'other']);
             $table->string('phone_number');
-            $table->string('email_address');
+            $table->string('email_address')->unique();
             $table->text('address');
             $table->enum('status', ['active', 'inactive', 'graduated', 'dropped'])->default('active');
-            $table->foreignId('department_id')->constrained('departments', 'department_id');
-            $table->foreignId('course_id')->constrained('courses', 'course_id');
+            $table->foreignId('department_id')->constrained('departments', 'department_id')->onDelete('cascade');
+            $table->foreignId('course_id')->constrained('courses', 'course_id')->onDelete('cascade');
+            $table->foreignId('academic_year_id')->nullable()->constrained('academic_years', 'academic_year_id')->onDelete('set null');
+            $table->string('year_level', 1)->nullable();
             $table->timestamps();
-            $table->timestamp('archived_at')->nullable();
+            $table->timestamp('archived_at')->nullable(); // Soft delete column
         });
     }
 

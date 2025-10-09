@@ -1,40 +1,44 @@
-// resources/js/components/MyProfile.js
-import React, { useState, useEffect } from 'react';
-import '../../sass/profile.scss';
+import React, { useState, useEffect } from "react";
+import "../../sass/profile.scss";
 
 function MyProfile() {
     const [profile, setProfile] = useState({
-        first_name: '',
-        last_name: '',
-        email: '',
-        role: 'admin',
-        avatar: null
+        first_name: "",
+        last_name: "",
+        email: "",
+        role: "admin",
+        avatar: null,
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [message, setMessage] = useState('');
+    const [error, setError] = useState("");
     const [isEditing, setIsEditing] = useState(false);
 
-    // Load profile data on component mount
     useEffect(() => {
         loadProfile();
     }, []);
 
     const loadProfile = async () => {
         try {
-            const response = await fetch('/api/profile', {
+            const response = await fetch("/api/profile", {
                 headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
+                    Accept: "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
             });
-            
+            if (response.status === 401 || response.status === 403) {
+                window.location.href = "/login";
+                return;
+            }
             if (response.ok) {
                 const data = await response.json();
                 setProfile(data.user);
+            } else {
+                setError("Failed to load profile");
             }
         } catch (error) {
-            console.error('Error loading profile:', error);
+            setError("Error loading profile");
+            console.error("Error loading profile:", error);
         } finally {
             setLoading(false);
         }
@@ -42,56 +46,40 @@ function MyProfile() {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setProfile(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    const handleAvatarChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setProfile(prev => ({
-                ...prev,
-                avatar: file
-            }));
-        }
+        setProfile((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSave = async () => {
         setSaving(true);
-        setMessage('');
-
+        setError("");
         try {
             const formData = new FormData();
-            formData.append('first_name', profile.first_name);
-            formData.append('last_name', profile.last_name);
-            formData.append('email', profile.email);
-            
-            if (profile.avatar) {
-                formData.append('avatar', profile.avatar);
-            }
-
-            const response = await fetch('/api/profile', {
-                method: 'PUT',
+            formData.append("first_name", profile.first_name);
+            formData.append("last_name", profile.last_name);
+            formData.append("email", profile.email);
+            const response = await fetch("/api/profile", {
+                method: "PUT",
                 headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    Accept: "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
-                body: formData
+                body: formData,
             });
-
+            if (response.status === 401 || response.status === 403) {
+                window.location.href = "/login";
+                return;
+            }
             if (response.ok) {
                 const data = await response.json();
                 setProfile(data.user);
-                setMessage('Profile updated successfully!');
+                setError("Profile updated successfully!");
+                setIsEditing(false);
             } else {
-                const error = await response.json();
-                setMessage('Error: ' + (error.message || 'Failed to update profile'));
+                setError("Failed to update profile");
             }
         } catch (error) {
-            console.error('Error updating profile:', error);
-            setMessage('Error updating profile');
+            setError("Error updating profile");
+            console.error("Error updating profile:", error);
         } finally {
             setSaving(false);
         }
@@ -99,137 +87,135 @@ function MyProfile() {
 
     const handleLogout = async () => {
         try {
-            await fetch('/api/logout', {
-                method: 'POST',
+            await fetch("/api/logout", {
+                method: "POST",
                 headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
             });
+            localStorage.removeItem("token");
+            window.location.href = "/";
         } catch (error) {
-            console.error('Logout error:', error);
-        } finally {
-            // Clear token and redirect to login
-            localStorage.removeItem('token');
-            window.location.href = '/login';
+            console.error("Error logging out:", error);
         }
     };
 
-    if (loading) {
-        return <div className="page">Loading...</div>;
-    }
-
     return (
-        <div className="page">
-            <header className="page-header profile-header">
-                <div>
-                    <h1 className="page-title">My Profile</h1>
-                    <p className="page-subtitle">Profile Information</p>
-                    <p className="page-subtitle subtle">Update your personal details and contact information</p>
-                </div>
-                <div style={{display:'flex', gap:'8px'}}>
-                    <button 
-                        className="btn btn-light" 
-                        onClick={() => setIsEditing(prev => !prev)}
-                    >
-                        {isEditing ? 'Cancel' : 'Edit Profile'}
-                    </button>
-                    <button className="btn btn-danger" onClick={handleLogout}>⎋ Log out</button>
-                </div>
+        <div className="profile-content">
+            <header className="page-header">
+                <h1 className="page-title">Manage your Admin Account</h1>
             </header>
 
-            <div className="profile-grid">
-                <aside className="profile-card">
-                    <div className="avatar">
-                        {profile.avatar ? (
-                            <img src={profile.avatar} alt="avatar" />
-                        ) : (
-                            <img src="https://via.placeholder.com/96" alt="avatar" />
-                        )}
-                    </div>
-                    <div className="profile-name">{profile.first_name} {profile.last_name}</div>
-                    <div className="profile-email">{profile.email}</div>
-                    <div className="profile-role">ADMIN</div>
-                </aside>
+            {loading && <div className="loading">Loading...</div>}
+            {error && (
+                <div
+                    className={`alert ${
+                        error.includes("successfully") ? "success" : "error"
+                    }`}
+                >
+                    {error}
+                </div>
+            )}
 
-                <section className="profile-form card">
+            <div className="profile-sections">
+                <section className="profile-info">
+                    <div className="avatar">
+                        <div className="avatar-placeholder">
+                            <span className="placeholder-text">Add Avatar</span>
+                        </div>
+                    </div>
                     <div className="form-row">
                         <label>First Name</label>
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             name="first_name"
-                            value={profile.first_name} 
+                            value={profile.first_name}
                             onChange={handleInputChange}
                             disabled={!isEditing}
                         />
                     </div>
                     <div className="form-row">
                         <label>Last Name</label>
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             name="last_name"
-                            value={profile.last_name} 
+                            value={profile.last_name}
                             onChange={handleInputChange}
                             disabled={!isEditing}
                         />
                     </div>
                     <div className="form-row">
                         <label>Email</label>
-                        <input 
-                            type="email" 
+                        <input
+                            type="email"
                             name="email"
-                            value={profile.email} 
+                            value={profile.email}
                             onChange={handleInputChange}
                             disabled={!isEditing}
                         />
                     </div>
                     <div className="form-row">
                         <label>Role</label>
-                        <input 
-                            type="text" 
-                            value="System Administrator" 
+                        <input
+                            type="text"
+                            value="System Administrator"
                             readOnly
                         />
                     </div>
                     <div className="form-row">
                         <label>Avatar</label>
-                        <input 
-                            type="file" 
-                            accept="image/png, image/jpeg"
-                            onChange={handleAvatarChange}
+                        <input
+                            type="file"
+                            accept="image/png,image/jpeg"
                             disabled={!isEditing}
                         />
                     </div>
                     <div className="form-actions">
-                        {isEditing && (
-                            <button 
-                                className="btn btn-primary" 
-                                onClick={handleSave}
-                                disabled={saving}
+                        {!isEditing ? (
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => setIsEditing(true)}
                             >
-                                {saving ? 'Saving...' : 'Save Profile'}
+                                Edit Profile
                             </button>
+                        ) : (
+                            <>
+                                <button
+                                    className="btn btn-secondary"
+                                    onClick={() => setIsEditing(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={handleSave}
+                                    disabled={saving}
+                                >
+                                    {saving ? "Saving..." : "Save Profile"}
+                                </button>
+                            </>
                         )}
                     </div>
-                    {message && (
-                        <div className={`message ${message.includes('Error') ? 'error' : 'success'}`}>
-                            {message}
-                        </div>
-                    )}
+                </section>
+
+                <section className="account-action">
+                    <div className="action-title">Account Action</div>
+                    <div
+                        className="logout-box"
+                        onClick={handleLogout}
+                        style={{ cursor: "pointer" }}
+                    >
+                        Log out from Account
+                        <br />
+                        <span>
+                            This will end your session and redirect you to the
+                            login page.
+                        </span>
+                    </div>
                 </section>
             </div>
-
-            <section className="account-action">
-                <div className="action-title">Account Action</div>
-                <div className="logout-box" onClick={handleLogout} style={{cursor: 'pointer'}}>
-                    Log out from Account<br />
-                    <span>This will end your session and redirect you to the log in page.</span>
-                </div>
-            </section>
         </div>
     );
 }
 
 export default MyProfile;
-
-

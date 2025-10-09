@@ -2,14 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, Notifiable;
 
     protected $fillable = [
         'username',
@@ -18,7 +17,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'avatar'
+        'avatar',
     ];
 
     protected $hidden = [
@@ -30,28 +29,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function studentProfile()
-    {
-        return $this->hasOne(StudentProfile::class, 'user_id');
-    }
-
-    public function facultyProfile()
-    {
-        return $this->hasOne(FacultyProfile::class, 'user_id');
-    }
-
     public function isAdmin()
     {
         return $this->role === 'admin';
-    }
-
-    public function isFaculty()
-    {
-        return $this->role === 'faculty';
-    }
-
-    public function isStudent()
-    {
-        return $this->role === 'student';
     }
 }

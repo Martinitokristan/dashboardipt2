@@ -22,4 +22,9 @@ class AcademicYear extends Model
     protected $dates = [
         'archived_at',
     ];
+
+    public function students()
+    {
+        return $this->hasMany(StudentProfile::class, 'academic_year_id');
+    }
 }

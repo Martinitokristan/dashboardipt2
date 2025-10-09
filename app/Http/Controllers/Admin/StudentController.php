@@ -2,242 +2,167 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\StudentProfile;
-use App\Models\User;
-use App\Models\Course;
-use App\Models\Department;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller; // Add this line
 
-class StudentController extends Controller
+class StudentController extends Controller // Ensure it extends the base Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum');
-        $this->middleware('role:admin');
-    }
-
-    // API Resource Methods
     public function index(Request $request)
     {
-        return $this->indexJson($request);
+        try {
+            Log::info('Loading students with request: ', $request->all());
+            $query = StudentProfile::with([
+                'department' => function ($q) {
+                    $q->select('department_id', 'department_name');
+                },
+                'course' => function ($q) {
+                    $q->select('course_id', 'course_name');
+                },
+                'academicYear' => function ($q) {
+                    $q->select('academic_year_id', 'school_year');
+                }
+            ])->select(
+                'student_id',
+                'f_name',
+                'm_name',
+                'l_name',
+                'suffix',
+                'date_of_birth',
+                'sex',
+                'phone_number',
+                'email_address',
+                'address',
+                'status',
+                'department_id',
+                'course_id',
+                'academic_year_id',
+                'year_level',
+                'archived_at'
+            );
+
+            if (!$request->has('withTrashed')) {
+                $query->whereNull('archived_at');
+            } elseif ($request->has('withTrashed')) {
+                $query->withTrashed();
+            }
+
+            if ($request->has('search')) {
+                $search = trim($request->search);
+                $query->where(function ($q) use ($search) {
+                    $q->where('l_name', 'like', "%{$search}%")
+                      ->orWhere('f_name', 'like', "%{$search}%");
+                });
+            }
+            if ($request->has('department_id')) {
+                $query->where('department_id', $request->department_id);
+            }
+            if ($request->has('course_id')) {
+                $query->where('course_id', $request->course_id);
+            }
+            if ($request->has('academic_year_id')) {
+                $query->where('academic_year_id', $request->academic_year_id);
+            }
+
+            $students = $query->orderBy('l_name', 'asc')->get();
+            Log::info('Students loaded successfully: ', ['count' => $students->count()]);
+            return Response::json($students);
+        } catch (\Illuminate\Database\QueryException $e) {
+            Log::error('Database error loading students: ', ['message' => $e->getMessage(), 'sql' => $e->getSql(), 'bindings' => $e->getBindings(), 'trace' => $e->getTraceAsString()]);
+            return Response::json(['error' => 'Database error: ' . $e->getMessage()], 500);
+        } catch (\Exception $e) {
+            Log::error('General error loading students: ', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return Response::json(['error' => 'Failed to load students: ' . $e->getMessage()], 500);
+        }
     }
 
     public function store(Request $request)
     {
-        return $this->storeJson($request);
+        try {
+            $validated = $request->validate([
+                'f_name' => 'required|string|max:255',
+                'l_name' => 'required|string|max:255',
+                'date_of_birth' => 'required|date',
+                'sex' => 'required|in:male,female,other',
+                'phone_number' => 'required|string|max:20',
+                'email_address' => 'required|email|unique:student_profiles,email_address',
+                'address' => 'required|string|max:1000',
+                'status' => 'required|in:active,inactive,graduated,dropped',
+                'department_id' => 'required|exists:departments,department_id',
+                'course_id' => 'required|exists:courses,course_id',
+                'academic_year_id' => 'nullable|exists:academic_years,academic_year_id',
+                'year_level' => 'required|in:1,2,3,4,5',
+            ]);
+
+            $student = StudentProfile::create($validated);
+            return Response::json($student, 201);
+        } catch (\Exception $e) {
+            Log::error('Error creating student: ', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return Response::json(['error' => 'Failed to create student: ' . $e->getMessage()], 500);
+        }
     }
 
-    public function show(Request $request, $id)
+    public function show($id)
     {
-        $student = StudentProfile::withTrashed()->findOrFail($id);
-        return response()->json($student->load(['department', 'course']));
+        try {
+            $student = StudentProfile::with(['department', 'course', 'academicYear'])->findOrFail($id);
+            return Response::json($student);
+        } catch (\Exception $e) {
+            Log::error('Error showing student: ', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return Response::json(['error' => 'Student not found: ' . $e->getMessage()], 404);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $student = StudentProfile::findOrFail($id);
-        return $this->updateJson($request, $student);
-    }
+        try {
+            $student = StudentProfile::findOrFail($id);
+            $validated = $request->validate([
+                'f_name' => 'required|string|max:255',
+                'l_name' => 'required|string|max:255',
+                'date_of_birth' => 'required|date',
+                'sex' => 'required|in:male,female,other',
+                'phone_number' => 'required|string|max:20',
+                'email_address' => 'required|email|unique:student_profiles,email_address,' . $id,
+                'address' => 'required|string|max:1000',
+                'status' => 'required|in:active,inactive,graduated,dropped',
+                'department_id' => 'required|exists:departments,department_id',
+                'course_id' => 'required|exists:courses,course_id',
+                'academic_year_id' => 'nullable|exists:academic_years,academic_year_id',
+                'year_level' => 'required|in:1,2,3,4,5',
+            ]);
 
-    public function indexWeb(Request $request)
-    {
-        $query = StudentProfile::with(['department', 'course']);
-        
-        // Apply filters
-        if ($request->has('course_id')) {
-            $query->where('course_id', $request->course_id);
+            $student->update($validated);
+            return Response::json($student, 200);
+        } catch (\Exception $e) {
+            Log::error('Error updating student: ', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return Response::json(['error' => 'Failed to update student: ' . $e->getMessage()], 500);
         }
-        
-        if ($request->has('department_id')) {
-            $query->where('department_id', $request->department_id);
+    }
+
+    public function softDelete($student)
+    {
+        try {
+            $student = StudentProfile::findOrFail($student);
+            $student->delete();
+            return Response::json(['message' => 'Student archived'], 200);
+        } catch (\Exception $e) {
+            Log::error('Error archiving student: ', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return Response::json(['error' => 'Failed to archive student: ' . $e->getMessage()], 500);
         }
-        
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('f_name', 'like', "%{$search}%")
-                  ->orWhere('m_name', 'like', "%{$search}%")
-                  ->orWhere('l_name', 'like', "%{$search}%")
-                  ->orWhere('email_address', 'like', "%{$search}%");
-            });
+    }
+
+    public function restore($student)
+    {
+        try {
+            $student = StudentProfile::withTrashed()->findOrFail($student);
+            $student->restore();
+            return Response::json(['message' => 'Student restored'], 200);
+        } catch (\Exception $e) {
+            Log::error('Error restoring student: ', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return Response::json(['error' => 'Failed to restore student: ' . $e->getMessage()], 500);
         }
-        
-        $students = $query->paginate(10);
-        $courses = Course::all();
-        $departments = Department::all();
-        
-        return view('admin.students.index', compact('students', 'courses', 'departments'));
-    }
-
-    public function create()
-    {
-        $courses = Course::all();
-        $departments = Department::all();
-        return view('admin.students.create', compact('courses', 'departments'));
-    }
-
-    public function storeWeb(Request $request)
-    {
-        $validated = $request->validate([
-            'username' => 'required|string|max:255|unique:users,username',
-            'password' => 'required|string|min:8|confirmed',
-            'f_name' => 'required|string|max:255',
-            'm_name' => 'nullable|string|max:255',
-            'l_name' => 'required|string|max:255',
-            'suffix' => 'nullable|string|max:20',
-            'date_of_birth' => 'required|date',
-            'sex' => 'required|in:male,female,other',
-            'phone_number' => 'required|string|max:20',
-            'email_address' => 'required|email|unique:student_profiles,email_address',
-            'address' => 'required|string',
-            'status' => 'required|in:active,inactive,graduated,dropped',
-            'department_id' => 'required|exists:departments,department_id',
-            'course_id' => 'required|exists:courses,course_id',
-        ]);
-
-        // Create user
-        $user = User::create([
-            'username' => $validated['username'],
-            'password' => Hash::make($validated['password']),
-            'role' => 'student',
-        ]);
-
-        // Create student profile
-        $studentData = array_merge($validated, ['user_id' => $user->id]);
-        unset($studentData['username'], $studentData['password']);
-        
-        StudentProfile::create($studentData);
-
-        return redirect()->route('admin.students.index')
-            ->with('success', 'Student created successfully.');
-    }
-
-    public function edit(StudentProfile $student)
-    {
-        $courses = Course::all();
-        $departments = Department::all();
-        return view('admin.students.edit', compact('student', 'courses', 'departments'));
-    }
-
-    public function updateWeb(Request $request, StudentProfile $student)
-    {
-        $validated = $request->validate([
-            'f_name' => 'required|string|max:255',
-            'm_name' => 'nullable|string|max:255',
-            'l_name' => 'required|string|max:255',
-            'suffix' => 'nullable|string|max:20',
-            'date_of_birth' => 'required|date',
-            'sex' => 'required|in:male,female,other',
-            'phone_number' => 'required|string|max:20',
-            'email_address' => [
-                'required',
-                'email',
-                Rule::unique('student_profiles', 'email_address')->ignore($student->student_id, 'student_id')
-            ],
-            'address' => 'required|string',
-            'status' => 'required|in:active,inactive,graduated,dropped',
-            'department_id' => 'required|exists:departments,department_id',
-            'course_id' => 'required|exists:courses,course_id',
-        ]);
-
-        $student->update($validated);
-
-        return redirect()->route('admin.students.index')
-            ->with('success', 'Student updated successfully.');
-    }
-
-    public function destroy(StudentProfile $student)
-    {
-        // Archive the student profile
-        $student->update(['archived_at' => now()]);
-
-        return redirect()->route('admin.students.index')
-            ->with('success', 'Student archived successfully.');
-    }
-
-    // JSON endpoints for SPA
-    public function indexJson(Request $request)
-    {
-        $query = StudentProfile::with(['department', 'course']);
-        if ($request->boolean('archived')) {
-            $query->withTrashed();
-        }
-        // Filtering precedence:
-        // - If course_id is provided, filter by course (and also by department if provided)
-        // - Else if department_id is provided, filter by department (all courses)
-        if ($request->filled('course_id')) {
-            $query->where('course_id', $request->course_id);
-            if ($request->filled('department_id')) {
-                $query->where('department_id', $request->department_id);
-            }
-        } elseif ($request->filled('department_id')) {
-            $query->where('department_id', $request->department_id);
-        }
-        if ($request->filled('academic_year_id')) {
-            $query->where('academic_year_id', $request->academic_year_id);
-        }
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('f_name', 'like', "%{$search}%")
-                  ->orWhere('m_name', 'like', "%{$search}%")
-                  ->orWhere('l_name', 'like', "%{$search}%")
-                  ->orWhere('email_address', 'like', "%{$search}%");
-            });
-        }
-        $students = $query->orderByDesc('created_at')->get();
-        return response()->json($students);
-    }
-
-    public function storeJson(Request $request)
-    {
-        $validated = $request->validate([
-            'f_name' => 'required|string|max:255',
-            'm_name' => 'nullable|string|max:255',
-            'l_name' => 'required|string|max:255',
-            'suffix' => 'nullable|string|max:20',
-            'date_of_birth' => 'required|date',
-            'sex' => 'required|in:male,female,other',
-            'phone_number' => 'required|string|max:20',
-            'email_address' => 'required|email|unique:student_profiles,email_address',
-            'address' => 'required|string',
-            'status' => 'required|in:active,inactive,graduated,dropped',
-            'department_id' => 'required|exists:departments,department_id',
-            'course_id' => 'required|exists:courses,course_id',
-            'academic_year_id' => 'nullable|exists:academic_years,academic_year_id',
-        ]);
-
-        // Auto-provision a basic user silently for relational integrity
-        $student = StudentProfile::create($validated);
-
-        return response()->json($student->load(['department', 'course']), 201);
-    }
-
-    public function updateJson(Request $request, StudentProfile $student)
-    {
-        $validated = $request->validate([
-            'f_name' => 'required|string|max:255',
-            'm_name' => 'nullable|string|max:255',
-            'l_name' => 'required|string|max:255',
-            'suffix' => 'nullable|string|max:20',
-            'date_of_birth' => 'required|date',
-            'sex' => 'required|in:male,female,other',
-            'phone_number' => 'required|string|max:20',
-            'email_address' => [
-                'required', 'email',
-                Rule::unique('student_profiles', 'email_address')->ignore($student->student_id, 'student_id')
-            ],
-            'address' => 'required|string',
-            'status' => 'required|in:active,inactive,graduated,dropped',
-            'department_id' => 'required|exists:departments,department_id',
-            'course_id' => 'required|exists:courses,course_id',
-            'academic_year_id' => 'nullable|exists:academic_years,academic_year_id',
-        ]);
-
-        $student->update($validated);
-        return response()->json($student->load(['department', 'course']));
     }
 }

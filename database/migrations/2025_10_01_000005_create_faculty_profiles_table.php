@@ -10,7 +10,6 @@ return new class extends Migration
     {
         Schema::create('faculty_profiles', function (Blueprint $table) {
             $table->id('faculty_id');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('f_name');
             $table->string('m_name')->nullable();
             $table->string('l_name');
@@ -20,10 +19,11 @@ return new class extends Migration
             $table->string('phone_number');
             $table->string('email_address');
             $table->text('address');
-            $table->string('position');
+            $table->enum('status', ['active', 'inactive', 'graduated', 'dropped'])->default('active');
             $table->foreignId('department_id')->constrained('departments', 'department_id');
             $table->timestamps();
             $table->timestamp('archived_at')->nullable();
+            $table->softDeletes();
         });
     }
 

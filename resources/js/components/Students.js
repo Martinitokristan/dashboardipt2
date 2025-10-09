@@ -1,305 +1,470 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import '../../sass/students.scss';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import "../../sass/students.scss";
 
 function Students() {
     const [courses, setCourses] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [academicYears, setAcademicYears] = useState([]);
     const [students, setStudents] = useState([]);
-    // Removed successMessage state and replaced it with modalContentState
-    const [modalContentState, setModalContentState] = useState('form'); // 'form', 'loading', or 'success'
+    const [modalContentState, setModalContentState] = useState("form");
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState(null);
-    
-    // isLoading state is no longer needed, as modalContentState handles it
-    // const [isLoading, setIsLoading] = useState(false); 
-    
+    const [error, setError] = useState("");
+    const navigate = useNavigate();
+
     const [form, setForm] = useState({
-        f_name: '',
-        m_name: '',
-        l_name: '',
-        suffix: '',
-        date_of_birth: '',
-        sex: 'male',
-        phone_number: '',
-        email_address: '',
-        address: '',
-        status: 'active',
-        department_id: '',
-        course_id: ''
+        f_name: "",
+        m_name: "",
+        l_name: "",
+        suffix: "",
+        date_of_birth: "",
+        sex: "male",
+        phone_number: "",
+        email_address: "",
+        address: "",
+        status: "active",
+        department_id: "",
+        course_id: "",
+        academic_year_id: "",
+        year_level: "1",
     });
 
-    // Close the entire modal and reset state
     const closeModalAndReset = () => {
         setShowForm(false);
-        setModalContentState('form');
+        setModalContentState("form");
+        setEditingId(null);
+        setError("");
+        setForm({
+            f_name: "",
+            m_name: "",
+            l_name: "",
+            suffix: "",
+            date_of_birth: "",
+            sex: "male",
+            phone_number: "",
+            email_address: "",
+            address: "",
+            status: "active",
+            department_id: "",
+            course_id: "",
+            academic_year_id: "",
+            year_level: "1",
+        });
     };
 
     useEffect(() => {
-        axios.get('/api/admin/courses').then(r => setCourses(r.data));
-        axios.get('/api/admin/departments').then(r => setDepartments(r.data));
-        axios.get('/api/admin/academic-years').then(r => setAcademicYears(r.data));
-        refresh();
+        Promise.all([
+            axios.get("/api/admin/courses").catch((e) => {
+                setError("Failed to load courses");
+                return [];
+            }),
+            axios.get("/api/admin/departments").catch((e) => {
+                setError("Failed to load departments");
+                return [];
+            }),
+            axios.get("/api/admin/academic-years").catch((e) => {
+                setError("Failed to load academic years");
+                return [];
+            }),
+        ])
+            .then(([coursesRes, deptsRes, yearsRes]) => {
+                setCourses(coursesRes.data || []);
+                setDepartments(deptsRes.data || []);
+                setAcademicYears(yearsRes.data || []);
+                refresh();
+            })
+            .catch((e) => {
+                if (e.response?.status === 401 || e.response?.status === 403) {
+                    window.location.href = "/login";
+                }
+            });
     }, []);
 
-    const [filters, setFilters] = useState({ search: '', department_id: '', course_id: '', academic_year_id: '' });
+    const [filters, setFilters] = useState({
+        search: "",
+        department_id: "",
+        course_id: "",
+        academic_year_id: "",
+    });
 
     const refresh = async () => {
-        const params = new URLSearchParams();
-        if (filters.search) params.set('search', filters.search);
-        if (filters.department_id) params.set('department_id', filters.department_id);
-        if (filters.course_id) params.set('course_id', filters.course_id);
-        if (filters.academic_year_id) params.set('academic_year_id', filters.academic_year_id);
-        const qs = params.toString();
-        const url = '/api/admin/students' + (qs ? ('?' + qs) : '');
-        const r = await axios.get(url);
-        setStudents(r.data);
+        try {
+            const params = new URLSearchParams();
+            if (filters.search) params.set("search", filters.search);
+            if (filters.department_id)
+                params.set("department_id", filters.department_id);
+            if (filters.course_id) params.set("course_id", filters.course_id);
+            if (filters.academic_year_id)
+                params.set("academic_year_id", filters.academic_year_id);
+            const qs = params.toString();
+            const url = "/api/admin/students" + (qs ? "?" + qs : "");
+            const response = await axios.get(url, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            setStudents(response.data);
+            setError("");
+        } catch (e) {
+            console.error("API Error:", e);
+            setError(
+                `Failed to load students: ${
+                    e.response?.data?.error || e.message
+                }`
+            );
+            if (e.response?.status === 401 || e.response?.status === 403) {
+                window.location.href = "/login";
+            }
+        }
     };
 
-    useEffect(() => { refresh(); }, [filters]);
+    useEffect(() => {
+        refresh();
+    }, [filters]);
 
     const onOpenForm = () => {
         setEditingId(null);
         setShowForm(true);
-        setModalContentState('form'); // Always show the form when opening for a new student
-        setForm({
-            f_name: '',
-            m_name: '',
-            l_name: '',
-            suffix: '',
-            date_of_birth: '',
-            sex: 'male',
-            phone_number: '',
-            email_address: '',
-            address: '',
-            status: 'active',
-            department_id: '',
-            course_id: ''
-        });
+        setModalContentState("form");
     };
 
     const onOpenEditForm = (student) => {
-
-        const formatDate = (dateString) => {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            return date.toISOString().split('T')[0];
-        };
-
+        const formatDate = (dateString) =>
+            dateString ? new Date(dateString).toISOString().split("T")[0] : "";
         setEditingId(student.student_id);
         setShowForm(true);
-        setModalContentState('form'); // Always show the form when opening for editing
+        setModalContentState("form");
         setForm({
-            f_name: student.f_name || '',
-            m_name: student.m_name || '',
-            l_name: student.l_name || '',
-            suffix: student.suffix || '',
+            f_name: student.f_name || "",
+            m_name: student.m_name || "",
+            l_name: student.l_name || "",
+            suffix: student.suffix || "",
             date_of_birth: formatDate(student.date_of_birth),
-            sex: student.sex || 'male',
-            phone_number: student.phone_number || '',
-            email_address: student.email_address || '',
-            address: student.address || '',
-            status: student.status || 'active',
-            department_id: student.department_id || '',
-            course_id: student.course_id || ''
+            sex: student.sex || "male",
+            phone_number: student.phone_number || "",
+            email_address: student.email_address || "",
+            address: student.address || "",
+            status: student.status || "active",
+            department_id: student.department_id || "",
+            course_id: student.course_id || "",
+            academic_year_id: student.academic_year_id || "",
+            year_level: student.year_level || "1",
         });
     };
 
-    const onSubmit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        // 1. Start Loading State
-        setModalContentState('loading');
-        
-        const successMessage = editingId ? 'Student updated successfully!' : 'New student added successfully!';
-
+        setModalContentState("loading");
+        setError("");
         try {
+            const payload = { ...form };
+            let response;
             if (editingId) {
-                await axios.put(`/api/admin/students/${editingId}`, form);
+                response = await axios.put(
+                    `/api/admin/students/${editingId}`,
+                    payload,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem(
+                                "token"
+                            )}`,
+                        },
+                    }
+                );
             } else {
-                await axios.post('/api/admin/students', form);
+                response = await axios.post("/api/admin/students", payload, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "token"
+                        )}`,
+                    },
+                });
             }
-
-            await refresh();
-            
-            // 2. Transition to Success State
-            setTimeout(() => {
-                setModalContentState('success');
-            }, 500); // Small delay for visual effect
-
+            if (response.status === 200 || response.status === 201) {
+                await refresh();
+                setModalContentState("success");
+            }
         } catch (error) {
-            console.error('Error saving student:', error);
-            // On error, revert back to the form or close the modal
-            closeModalAndReset(); 
-            // In a real app, you'd show an error message here.
+            console.error("Error saving student:", error);
+            setError(error.response?.data?.error || "Failed to save student");
+            setModalContentState("form");
+            if (
+                error.response?.status === 401 ||
+                error.response?.status === 403
+            ) {
+                window.location.href = "/login";
+            }
         }
     };
-    
-    // Utility function to render the correct modal content
+
+    const handleDelete = async (id) => {
+        if (!confirm("Are you sure you want to Archive this student?")) return;
+        try {
+            await axios.post(
+                `/api/admin/students/${id}/delete`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "token"
+                        )}`,
+                    },
+                }
+            );
+            await refresh();
+        } catch (error) {
+            setError(
+                error.response?.data?.error || "Failed to Archive student"
+            );
+            if (
+                error.response?.status === 401 ||
+                error.response?.status === 403
+            ) {
+                window.location.href = "/login";
+            }
+        }
+    };
+
+    const handleArchiveNavigate = () => {
+        navigate("/archived");
+    };
+
     const renderModalContent = () => {
-        if (modalContentState === 'loading') {
+        if (modalContentState === "loading") {
             return (
                 <div className="loading-overlay">
                     <div className="spinner-border large-spinner" role="status">
                         <span className="sr-only">Loading...</span>
                     </div>
-                    <p style={{ marginTop: '15px', color: '#4f46e5', fontWeight: '500' }}>
-                        {editingId ? 'Updating Student Data...' : 'Saving New Student Data...'}
+                    <p
+                        style={{
+                            marginTop: "15px",
+                            color: "#4f46e5",
+                            fontWeight: "500",
+                        }}
+                    >
+                        {editingId
+                            ? "Updating Student Data..."
+                            : "Saving New Student Data..."}
                     </p>
                 </div>
             );
         }
-
-        if (modalContentState === 'success') {
+        if (modalContentState === "success") {
             return (
                 <div className="success-content">
                     <div className="success-icon-wrapper">
-                        <svg className="success-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                            <path className="success-check-path" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                        <svg
+                            className="success-icon-svg"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 52 52"
+                        >
+                            <path
+                                className="success-check-path"
+                                fill="none"
+                                d="M14.1 27.2l7.1 7.2 16.7-16.8"
+                            />
                         </svg>
                     </div>
                     <h4 className="success-title">Success!</h4>
-                    <p className="success-subtitle">{editingId ? 'Student record has been updated.' : 'New student has been successfully added.'}</p>
-                    <button className="btn btn-primary btn-close-message" onClick={closeModalAndReset}>Done</button>
+                    <p className="success-subtitle">
+                        {editingId
+                            ? "Student record has been updated."
+                            : "New student has been successfully added."}
+                    </p>
+                    <button
+                        className="btn btn-primary btn-close-message"
+                        onClick={closeModalAndReset}
+                    >
+                        Done
+                    </button>
                 </div>
             );
         }
-        
-        // Default: 'form'
         return (
             <>
-                <h3 style={{ marginTop: 0, color: '#374151' }}>{editingId ? 'Edit Student' : 'Add Student'}</h3>
-                <form onSubmit={onSubmit}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                        {/* Form Inputs (Same as before) - Truncated for brevity */}
-                        <input 
-                            className="form-input" 
-                            placeholder="Email" 
-                            value={form.email_address} 
-                            onChange={(e) => setForm({ 
-                                ...form, 
-                                email_address: e.target.value 
-                            })} 
-                            type="email" 
-                            required 
+                <h3 style={{ marginTop: 0, color: "#374151" }}>
+                    {editingId ? "Edit Student" : "Add Student"}
+                </h3>
+                <form onSubmit={handleSubmit}>
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 12,
+                        }}
+                    >
+                        <input
+                            className="form-input"
+                            placeholder="First Name"
+                            value={form.f_name}
+                            onChange={(e) =>
+                                setForm({ ...form, f_name: e.target.value })
+                            }
+                            required
                         />
-                        <input 
-                            className="form-input" 
-                            placeholder="First name" 
-                            value={form.f_name} 
-                            onChange={(e) => setForm({ 
-                                ...form, 
-                                f_name: e.target.value 
-                            })} 
-                            required 
+                        <input
+                            className="form-input"
+                            placeholder="Middle Name"
+                            value={form.m_name}
+                            onChange={(e) =>
+                                setForm({ ...form, m_name: e.target.value })
+                            }
                         />
-                        <input 
-                            className="form-input" 
-                            placeholder="Middle name" 
-                            value={form.m_name} 
-                            onChange={(e) => setForm({ 
-                                ...form, 
-                                m_name: e.target.value 
-                            })} 
+                        <input
+                            className="form-input"
+                            placeholder="Last Name"
+                            value={form.l_name}
+                            onChange={(e) =>
+                                setForm({ ...form, l_name: e.target.value })
+                            }
+                            required
                         />
-                        <input 
-                            className="form-input" 
-                            placeholder="Last name" 
-                            value={form.l_name} 
-                            onChange={(e) => setForm({ 
-                                ...form, 
-                                l_name: e.target.value 
-                            })} 
-                            required 
+                        <input
+                            className="form-input"
+                            placeholder="Suffix"
+                            value={form.suffix}
+                            onChange={(e) =>
+                                setForm({ ...form, suffix: e.target.value })
+                            }
                         />
-                        <input 
-                            className="form-input" 
-                            placeholder="Suffix" 
-                            value={form.suffix} 
-                            onChange={(e) => setForm({ 
-                                ...form, 
-                                suffix: e.target.value 
-                            })} 
+                        <input
+                            className="form-input"
+                            placeholder="Date of Birth"
+                            value={form.date_of_birth}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    date_of_birth: e.target.value,
+                                })
+                            }
+                            type="date"
+                            required
                         />
-                        <input 
-                            className="form-input" 
-                            placeholder="Date of birth" 
-                            value={form.date_of_birth} 
-                            onChange={(e) => setForm({ 
-                                ...form, 
-                                date_of_birth: e.target.value 
-                            })} 
-                            type="date" 
-                            required 
-                        />
-                        <select 
-                            className="form-input" 
-                            value={form.sex} 
-                            onChange={(e) => setForm({ 
-                                ...form, 
-                                sex: e.target.value 
-                            })}
+                        <select
+                            className="form-input"
+                            value={form.sex}
+                            onChange={(e) =>
+                                setForm({ ...form, sex: e.target.value })
+                            }
+                            required
                         >
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                             <option value="other">Other</option>
                         </select>
-                        <input 
-                            className="form-input" 
-                            placeholder="Phone number" 
-                            value={form.phone_number} 
-                            onChange={(e) => setForm({ 
-                                ...form, 
-                                phone_number: e.target.value 
-                            })} 
-                            required 
+                        <input
+                            className="form-input"
+                            placeholder="Phone Number"
+                            value={form.phone_number}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    phone_number: e.target.value,
+                                })
+                            }
+                            required
                         />
-                        <input 
-                            className="form-input" 
-                            placeholder="Address" 
-                            value={form.address} 
-                            onChange={(e) => setForm({ 
-                                ...form, 
-                                address: e.target.value 
-                            })} 
-                            required 
+                        <input
+                            className="form-input"
+                            placeholder="Email Address"
+                            value={form.email_address}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    email_address: e.target.value,
+                                })
+                            }
+                            type="email"
+                            required
                         />
-                        <select 
-                            className="form-input" 
-                            value={form.department_id} 
-                            onChange={(e) => setForm({ 
-                                ...form, 
-                                department_id: e.target.value 
-                            })} 
+                        <input
+                            className="form-input"
+                            placeholder="Address"
+                            value={form.address}
+                            onChange={(e) =>
+                                setForm({ ...form, address: e.target.value })
+                            }
+                            required
+                        />
+                        <select
+                            className="form-input"
+                            value={form.department_id}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    department_id: e.target.value,
+                                })
+                            }
                             required
                         >
-                            <option value="" disabled>Select Department</option>
-                            {departments.map(d => (
-                                <option key={d.department_id} value={d.department_id}>{d.department_name}</option>
+                            <option value="">Select Department</option>
+                            {departments.map((d) => (
+                                <option
+                                    key={d.department_id}
+                                    value={d.department_id}
+                                >
+                                    {d.department_name}
+                                </option>
                             ))}
                         </select>
-                        <select 
-                            className="form-input" 
-                            value={form.course_id} 
-                            onChange={(e) => setForm({ 
-                                ...form, 
-                                course_id: e.target.value 
-                            })} 
+                        <select
+                            className="form-input"
+                            value={form.course_id}
+                            onChange={(e) =>
+                                setForm({ ...form, course_id: e.target.value })
+                            }
                             required
                         >
-                            <option value="" disabled>Select Course</option>
-                            {courses.map(c => (
-                                <option key={c.course_id} value={c.course_id}>{c.course_name}</option>
+                            <option value="">Select Course</option>
+                            {courses.map((c) => (
+                                <option key={c.course_id} value={c.course_id}>
+                                    {c.course_name}
+                                </option>
                             ))}
                         </select>
-                        <select 
-                            className="form-input" 
-                            value={form.status} 
-                            onChange={(e) => setForm({ 
-                                ...form, 
-                                status: e.target.value 
-                            })}
+                        <select
+                            className="form-input"
+                            value={form.academic_year_id}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    academic_year_id: e.target.value,
+                                })
+                            }
+                        >
+                            <option value="">Select Academic Year</option>
+                            {academicYears.map((a) => (
+                                <option
+                                    key={a.academic_year_id}
+                                    value={a.academic_year_id}
+                                >
+                                    {a.school_year}
+                                </option>
+                            ))}
+                        </select>
+                        <select
+                            className="form-input"
+                            value={form.year_level}
+                            onChange={(e) =>
+                                setForm({ ...form, year_level: e.target.value })
+                            }
+                            required
+                        >
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                        <select
+                            className="form-input"
+                            value={form.status}
+                            onChange={(e) =>
+                                setForm({ ...form, status: e.target.value })
+                            }
                         >
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
@@ -307,10 +472,24 @@ function Students() {
                             <option value="dropped">Dropped</option>
                         </select>
                     </div>
-                    <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-                        <button className="btn" type="button" onClick={() => setShowForm(false)}>Cancel</button>
+                    {error && <div className="alert-error">{error}</div>}
+                    <div
+                        style={{
+                            marginTop: 20,
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            gap: 12,
+                        }}
+                    >
+                        <button
+                            className="btn"
+                            type="button"
+                            onClick={closeModalAndReset}
+                        >
+                            Cancel
+                        </button>
                         <button className="btn btn-primary" type="submit">
-                            {editingId ? 'Update Student' : 'Add Student'}
+                            {editingId ? "Update Student" : "Add Student"}
                         </button>
                     </div>
                 </form>
@@ -323,49 +502,95 @@ function Students() {
             <header className="page-header">
                 <h1 className="page-title">Students</h1>
                 <p className="page-subtitle">Manage Student Information</p>
-                <button className="btn btn-primary new-btn" onClick={onOpenForm}>+ New Student</button>
+                <button
+                    className="btn btn-primary new-btn"
+                    onClick={onOpenForm}
+                >
+                    + New Student
+                </button>
             </header>
-            
-            {/* The separate successMessage modal is removed here */}
-
-            {/* Filters / Actions */}
             <div className="actions-row">
-                <label className="checkbox-pill">
-                    <input type="checkbox" />
-                    <span>Archived Students</span>
-                </label>
+                <button
+                    className="btn btn-primary"
+                    onClick={handleArchiveNavigate}
+                >
+                    View Archived Students
+                </button>
                 <div className="filters">
                     <div className="search">
                         <span className="icon">🔎</span>
-                        <input className="search-input" placeholder="Search here..." value={filters.search} onChange={(e) => setFilters({ ...filters, search: e.target.value })} onBlur={refresh} />
+                        <input
+                            className="search-input"
+                            placeholder="Search here..."
+                            value={filters.search}
+                            onChange={(e) =>
+                                setFilters({
+                                    ...filters,
+                                    search: e.target.value,
+                                })
+                            }
+                            onBlur={refresh}
+                        />
                     </div>
-                    <select className="filter" value={filters.department_id} onChange={(e) => {
-                        const nextDepartment = e.target.value;
-                        setFilters({ ...filters, department_id: nextDepartment, course_id: '' });
-                    }}>
+                    <select
+                        className="filter"
+                        value={filters.department_id}
+                        onChange={(e) =>
+                            setFilters({
+                                ...filters,
+                                department_id: e.target.value,
+                            })
+                        }
+                    >
                         <option value="">⚗ All Department</option>
-                        {departments.map(d => (
-                            <option key={d.department_id} value={d.department_id}>{d.department_name}</option>
+                        {departments.map((d) => (
+                            <option
+                                key={d.department_id}
+                                value={d.department_id}
+                            >
+                                {d.department_name}
+                            </option>
                         ))}
                     </select>
-                    <select className="filter" value={filters.course_id} onChange={(e) => {
-                        setFilters({ ...filters, course_id: e.target.value });
-                    }}>
+                    <select
+                        className="filter"
+                        value={filters.course_id}
+                        onChange={(e) =>
+                            setFilters({
+                                ...filters,
+                                course_id: e.target.value,
+                            })
+                        }
+                    >
                         <option value="">⚗ All Course</option>
-                        {courses.map(c => (
-                            <option key={c.course_id} value={c.course_id}>{c.course_name}</option>
+                        {courses.map((c) => (
+                            <option key={c.course_id} value={c.course_id}>
+                                {c.course_name}
+                            </option>
                         ))}
                     </select>
-                    <select className="filter" value={filters.academic_year_id} onChange={(e) => { setFilters({ ...filters, academic_year_id: e.target.value }); }}>
+                    <select
+                        className="filter"
+                        value={filters.academic_year_id}
+                        onChange={(e) =>
+                            setFilters({
+                                ...filters,
+                                academic_year_id: e.target.value,
+                            })
+                        }
+                    >
                         <option value="">⚗ All Academic Year</option>
-                        {academicYears.map(a => (
-                            <option key={a.academic_year_id} value={a.academic_year_id}>{a.school_year}</option>
+                        {academicYears.map((a) => (
+                            <option
+                                key={a.academic_year_id}
+                                value={a.academic_year_id}
+                            >
+                                {a.school_year}
+                            </option>
                         ))}
                     </select>
                 </div>
             </div>
-
-            {/* Students Table */}
             <div className="table-wrapper">
                 <table className="students-table">
                     <thead>
@@ -373,35 +598,59 @@ function Students() {
                             <th>Student Name</th>
                             <th>Department</th>
                             <th>Course</th>
+                            <th>Year Level</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {students.map(s => (
+                        {students.map((s) => (
                             <tr key={s.student_id}>
-                                <td>{`${s.f_name} ${s.m_name ? s.m_name + ' ' : ''}${s.l_name}`}</td>
-                                <td>{s.department?.department_name || '-'}</td>
-                                <td>{s.course?.course_name || '-'}</td>
-                                <td><span className="badge badge-success">{s.status}</span></td>
                                 <td>
-                                    <button className="btn btn-light" onClick={() => onOpenEditForm(s)}>✎ Edit</button>
-                                    <button className="btn btn-success">⬇ Archive</button>
+                                    {s.fullName ||
+                                        `${s.f_name} ${
+                                            s.m_name ? s.m_name + " " : ""
+                                        }${s.l_name}`}
+                                </td>
+                                <td>{s.department?.department_name || "-"}</td>
+                                <td>{s.course?.course_name || "-"}</td>
+                                <td>{s.year_level || "-"}</td>
+                                <td>
+                                    <span
+                                        className={`badge ${
+                                            s.status === "active"
+                                                ? "badge-success"
+                                                : "badge-warning"
+                                        }`}
+                                    >
+                                        {s.status}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button
+                                        className="btn btn-light"
+                                        onClick={() => onOpenEditForm(s)}
+                                    >
+                                        ✎ Edit
+                                    </button>
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={() =>
+                                            handleDelete(s.student_id)
+                                        }
+                                    >
+                                        Archive
+                                    </button>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
-
             <div className="table-blank" />
-
-            {/* Unified Modal for Form, Loading, and Success */}
             {showForm && (
                 <div className="modal-overlay">
-                    <div className="modal-card">
-                        {renderModalContent()}
-                    </div>
+                    <div className="modal-card">{renderModalContent()}</div>
                 </div>
             )}
         </div>

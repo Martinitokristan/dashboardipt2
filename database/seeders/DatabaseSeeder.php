@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         // Call the AdminSeeder
         $this->call([
             AdminSeeder::class,
-            ClearAllDataSeeder::class,
+            
         ]);
     }
 }

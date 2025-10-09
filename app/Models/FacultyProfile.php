@@ -15,8 +15,9 @@ class FacultyProfile extends Model
 
     const DELETED_AT = 'archived_at';
 
+    protected $table = 'faculty_profiles'; // Ensure this line is present and correct
+
     protected $fillable = [
-        'user_id',
         'f_name',
         'm_name',
         'l_name',
@@ -26,39 +27,13 @@ class FacultyProfile extends Model
         'phone_number',
         'email_address',
         'address',
-        'position',
         'department_id',
     ];
 
-    protected $dates = [
-        'date_of_birth',
-        'archived_at',
-    ];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
+    protected $dates = ['archived_at'];
 
     public function department()
     {
         return $this->belongsTo(Department::class, 'department_id');
-    }
-
-    public function getFullNameAttribute()
-    {
-        $name = "{$this->f_name}";
-        
-        if ($this->m_name) {
-            $name .= " {$this->m_name}";
-        }
-        
-        $name .= " {$this->l_name}";
-        
-        if ($this->suffix) {
-            $name .= " {$this->suffix}";
-        }
-        
-        return $name;
     }
 }

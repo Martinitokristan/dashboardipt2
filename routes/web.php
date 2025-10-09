@@ -2,9 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Admin\SystemSettingsController;
-use App\Http\Controllers\Admin\ArchiveController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Admin\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,38 +15,27 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 
-
-
 // Auth routes
 Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
 Route::get('/login', [LoginController::class, 'showLoginForm']);
 Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Protected SPA routes - require authentication and admin role for ALL app paths
+// Protected SPA routes - require authentication and admin role
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    // Primary sections rendered by the SPA shell
     Route::view('/dashboard', 'dashboard')->name('dashboard');
     Route::view('/settings', 'dashboard')->name('settings');
     Route::view('/students', 'dashboard')->name('students');
     Route::view('/faculty', 'dashboard')->name('faculty');
     Route::view('/reports', 'dashboard')->name('reports');
     Route::view('/profile', 'dashboard')->name('profile');
+    Route::view('/archived', 'dashboard')->name('archived');
 
-    // Settings subpaths (same SPA shell)
+    // Settings subpaths
     Route::view('/settings/departments', 'dashboard')->name('settings.departments');
     Route::view('/settings/courses', 'dashboard')->name('settings.courses');
     Route::view('/settings/academic-years', 'dashboard')->name('settings.academic-years');
 
-    // Authenticated catch-all for any other non-API path → serve SPA shell
-    Route::get('/{any}', function () {
-        return view('dashboard');
-    })->where('any', '^(?!api/).*$');
+    // Catch-all for SPA
+    Route::get('/{any}', [AdminController::class, 'dashboard'])->where('any', '^(?!api/).*$');
 });
-
-// Unauthenticated users will hit explicit auth routes above; any other path will 404 or be redirected by auth middleware.
-
-
-// Admin JSON endpoints are now in routes/api.php with auth:sanctum
-
-

@@ -10,7 +10,7 @@ class LoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('login');
+        return view('dashboard');
     }
 
     public function login(Request $request)
@@ -24,19 +24,19 @@ class LoginController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
 
-            $redirect = '/dashboard';
             if (!$user->isAdmin()) {
                 Auth::logout();
                 return response()->json([
-                    'errors' => ['general' => ['Unauthorized. Admins only.']]
+                    'errors' => ['general' => ['Unauthorized. Admins only.']],
                 ], 403);
             }
 
-            return response()->json(['redirect' => $redirect]);
+            $token = $user->createToken('auth_token')->plainTextToken;
+            return response()->json(['redirect' => '/dashboard', 'token' => $token]);
         }
 
         return response()->json([
-            'errors' => ['username' => ['The provided credentials do not match our records.']]
+            'errors' => ['username' => ['The provided credentials do not match our records.']],
         ], 422);
     }
 

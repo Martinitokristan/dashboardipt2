@@ -5,137 +5,131 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\StudentProfile;
 use App\Models\FacultyProfile;
-use App\Models\Department;
 use App\Models\Course;
+use App\Models\Department;
 use App\Models\AcademicYear;
 use Illuminate\Http\Request;
 
 class ArchiveController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum');
-        $this->middleware('role:admin');
-    }
-
     public function index(Request $request)
     {
-        $type = $request->input('type');
-        $courseId = $request->input('course_id');
-        $departmentId = $request->input('department_id');
-        $academicYearId = $request->input('academic_year_id');
-        $search = $request->input('search');
-
+        $type = $request->input('type', 'all');
         $items = [];
 
-        if (!$type || $type === 'students') {
-            $q = StudentProfile::onlyTrashed()->with(['department', 'course']);
-            if ($courseId) $q->where('course_id', $courseId);
-            if ($departmentId) $q->where('department_id', $departmentId);
-            if ($search) {
-                $q->where(function($qq) use ($search) {
-                    $qq->where('f_name', 'like', "%{$search}%")
-                       ->orWhere('m_name', 'like', "%{$search}%")
-                       ->orWhere('l_name', 'like', "%{$search}%")
-                       ->orWhere('email_address', 'like', "%{$search}%");
+        if ($type === 'all' || $type === 'students') {
+            $query = StudentProfile::onlyTrashed()->with(['department', 'course', 'academicYear']);
+            if ($request->filled('department_id')) {
+                $query->where('department_id', $request->department_id);
+            }
+            if ($request->filled('course_id')) {
+                $query->where('course_id', $request->course_id);
+            }
+            if ($request->filled('academic_year_id')) {
+                $query->where('academic_year_id', $request->academic_year_id);
+            }
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('f_name', 'like', "%{$search}%")
+                      ->orWhere('m_name', 'like', "%{$search}%")
+                      ->orWhere('l_name', 'like', "%{$search}%")
+                      ->orWhere('email_address', 'like', "%{$search}%");
                 });
             }
-            foreach ($q->get() as $s) {
-                $items[] = [
+            $students = $query->get()->map(function ($student) {
+                return [
                     '_type' => 'student',
-                    '_id' => $s->student_id,
-                    '_label' => ($s->f_name . ' ' . $s->l_name),
-                    '_department' => optional($s->department)->department_name,
-                    '_course' => optional($s->course)->course_name,
-                    '_academic_year' => null,
-                    'archived_at' => optional($s->archived_at)->toDateTimeString(),
-                    'student_id' => $s->student_id,
+                    '_id' => $student->student_id,
+                    '_label' => $student->full_name,
+                    '_department' => $student->department ? $student->department->department_name : '-',
+                    '_course' => $student->course ? $student->course->course_name : '-',
+                    '_academic_year' => $student->academicYear ? $student->academicYear->school_year : '-',
+                    'archived_at' => $student->archived_at,
                 ];
-            }
+            });
+            $items = array_merge($items, $students->toArray());
         }
 
-        if (!$type || $type === 'faculty') {
-            $q = FacultyProfile::onlyTrashed()->with(['department']);
-            if ($departmentId) $q->where('department_id', $departmentId);
-            if ($search) {
-                $q->where(function($qq) use ($search) {
-                    $qq->where('f_name', 'like', "%{$search}%")
-                       ->orWhere('m_name', 'like', "%{$search}%")
-                       ->orWhere('l_name', 'like', "%{$search}%")
-                       ->orWhere('email_address', 'like', "%{$search}%");
+        if ($type === 'all' || $type === 'faculty') {
+            $query = FacultyProfile::onlyTrashed()->with('department');
+            if ($request->filled('department_id')) {
+                $query->where('department_id', $request->department_id);
+            }
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('f_name', 'like', "%{$search}%")
+                      ->orWhere('m_name', 'like', "%{$search}%")
+                      ->orWhere('l_name', 'like', "%{$search}%")
+                      ->orWhere('email_address', 'like', "%{$search}%");
                 });
             }
-            foreach ($q->get() as $f) {
-                $items[] = [
+            $faculty = $query->get()->map(function ($faculty) {
+                return [
                     '_type' => 'faculty',
-                    '_id' => $f->faculty_id,
-                    '_label' => ($f->f_name . ' ' . $f->l_name),
-                    '_department' => optional($f->department)->department_name,
-                    '_course' => null,
-                    '_academic_year' => null,
-                    'archived_at' => optional($f->archived_at)->toDateTimeString(),
-                    'faculty_id' => $f->faculty_id,
+                    '_id' => $faculty->faculty_id,
+                    '_label' => $faculty->full_name,
+                    '_department' => $faculty->department ? $faculty->department->department_name : '-',
+                    '_course' => '-',
+                    '_academic_year' => '-',
+                    'archived_at' => $faculty->archived_at,
                 ];
-            }
+            });
+            $items = array_merge($items, $faculty->toArray());
         }
 
-        if (!$type || $type === 'departments') {
-            $q = Department::onlyTrashed();
-            if ($search) $q->where('department_name', 'like', "%{$search}%");
-            foreach ($q->get() as $d) {
-                $items[] = [
-                    '_type' => 'department',
-                    '_id' => $d->department_id,
-                    '_label' => $d->department_name,
-                    '_department' => null,
-                    '_course' => null,
-                    '_academic_year' => null,
-                    'archived_at' => optional($d->archived_at)->toDateTimeString(),
-                    'department_id' => $d->department_id,
-                ];
+        if ($type === 'all' || $type === 'courses') {
+            $query = Course::onlyTrashed()->with('department');
+            if ($request->filled('department_id')) {
+                $query->where('department_id', $request->department_id);
             }
-        }
-
-        if (!$type || $type === 'courses') {
-            $q = Course::onlyTrashed();
-            if ($search) $q->where('course_name', 'like', "%{$search}%");
-            foreach ($q->get() as $c) {
-                $items[] = [
+            $courses = $query->get()->map(function ($course) {
+                return [
                     '_type' => 'course',
-                    '_id' => $c->course_id,
-                    '_label' => $c->course_name,
-                    '_department' => null,
-                    '_course' => $c->course_name,
-                    '_academic_year' => null,
-                    'archived_at' => optional($c->archived_at)->toDateTimeString(),
-                    'course_id' => $c->course_id,
+                    '_id' => $course->course_id,
+                    '_label' => $course->course_name,
+                    '_department' => $course->department ? $course->department->department_name : '-',
+                    '_course' => $course->course_name,
+                    '_academic_year' => '-',
+                    'archived_at' => $course->archived_at,
                 ];
-            }
+            });
+            $items = array_merge($items, $courses->toArray());
         }
 
-        if (!$type || $type === 'academic_years') {
-            $q = AcademicYear::onlyTrashed();
-            if ($search) $q->where('school_year', 'like', "%{$search}%");
-            foreach ($q->get() as $a) {
-                $items[] = [
+        if ($type === 'all' || $type === 'departments') {
+            $query = Department::onlyTrashed();
+            $departments = $query->get()->map(function ($department) {
+                return [
+                    '_type' => 'department',
+                    '_id' => $department->department_id,
+                    '_label' => $department->department_name,
+                    '_department' => $department->department_name,
+                    '_course' => '-',
+                    '_academic_year' => '-',
+                    'archived_at' => $department->archived_at,
+                ];
+            });
+            $items = array_merge($items, $departments->toArray());
+        }
+
+        if ($type === 'all' || $type === 'academic_years') {
+            $query = AcademicYear::onlyTrashed();
+            $academicYears = $query->get()->map(function ($academicYear) {
+                return [
                     '_type' => 'academic_year',
-                    '_id' => $a->academic_year_id,
-                    '_label' => $a->school_year,
-                    '_department' => null,
-                    '_course' => null,
-                    '_academic_year' => $a->school_year,
-                    'archived_at' => optional($a->archived_at)->toDateTimeString(),
-                    'academic_year_id' => $a->academic_year_id,
+                    '_id' => $academicYear->academic_year_id,
+                    '_label' => $academicYear->school_year,
+                    '_department' => '-',
+                    '_course' => '-',
+                    '_academic_year' => $academicYear->school_year,
+                    'archived_at' => $academicYear->archived_at,
                 ];
-            }
+            });
+            $items = array_merge($items, $academicYears->toArray());
         }
 
-        usort($items, function($l, $r) {
-            return strcmp($r['archived_at'] ?? '', $l['archived_at'] ?? '');
-        });
-
-        return response()->json(array_values($items));
+        return response()->json(['items' => $items]);
     }
 }
-
-
