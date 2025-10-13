@@ -61,7 +61,7 @@ function Faculty() {
             const qs = params.toString();
             const url = "/api/admin/faculty" + (qs ? "?" + qs : "");
             const r = await axios.get(url);
-            setFaculty(r.data);
+            setFaculty(r.data.filter((f) => !f.archived_at));
         } catch (error) {
             setError("Failed to load faculty");
             if (
@@ -131,13 +131,13 @@ function Faculty() {
     };
 
     const handleDelete = async (id) => {
-        if (!confirm("Are you sure you want to delete this faculty?")) return;
+        if (!confirm("Are you sure you want to archive this faculty?")) return;
         try {
-            await axios.post(`/api/admin/faculty/${id}/delete`);
+            await axios.post(`/api/admin/faculty/${id}/archive`);
             await loadFaculty();
         } catch (error) {
             setError(
-                error.response?.data?.message || "Failed to delete faculty"
+                error.response?.data?.message || "Failed to archive faculty"
             );
             if (
                 error.response?.status === 401 ||
@@ -149,7 +149,8 @@ function Faculty() {
     };
 
     const handleArchiveNavigate = () => {
-        navigate("/archived-all");
+        navigate("/archived?type=faculty");
+        localStorage.setItem("archiveType", "faculty");
     };
 
     const onOpenEditForm = (facultyMember) => {
@@ -356,7 +357,8 @@ function Faculty() {
     return (
         <div className="page">
             <header className="page-header">
-                <h1 className="page-title">Manage Faculty Information</h1>
+                <h1 className="page-title">Faculty</h1>
+                <p className="page-subtitle">Manage faculty profiles</p>
                 <button
                     className="btn btn-primary new-btn"
                     onClick={() => setShowForm(true)}
@@ -407,7 +409,7 @@ function Faculty() {
                 <table className="faculty-table">
                     <thead>
                         <tr>
-                            <th>Faculty Name</th>
+                            <th>Name</th>
                             <th>Department</th>
                             <th>Action</th>
                         </tr>
@@ -424,10 +426,10 @@ function Faculty() {
                                         className="btn btn-light"
                                         onClick={() => onOpenEditForm(f)}
                                     >
-                                        ✎ Edit
+                                        Edit
                                     </button>
                                     <button
-                                        className="btn btn-primary"
+                                        className="btn btn-danger"
                                         onClick={() =>
                                             handleDelete(f.faculty_id)
                                         }

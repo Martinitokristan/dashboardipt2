@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import "../../sass/settings.scss";
 
 function Settings() {
@@ -22,12 +23,15 @@ function Settings() {
         school_year: "",
     });
     const [error, setError] = useState("");
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (active === "courses") {
             axios
                 .get("/api/admin/courses")
-                .then((res) => setCourses(res.data))
+                .then((res) =>
+                    setCourses(res.data.filter((c) => !c.archived_at))
+                )
                 .catch(() => {
                     setError("Failed to load courses");
                     if (
@@ -44,12 +48,16 @@ function Settings() {
         } else if (active === "departments") {
             axios
                 .get("/api/admin/departments")
-                .then((res) => setDepartments(res.data))
+                .then((res) =>
+                    setDepartments(res.data.filter((d) => !d.archived_at))
+                )
                 .catch(() => setError("Failed to load departments"));
         } else if (active === "academic-years") {
             axios
                 .get("/api/admin/academic-years")
-                .then((res) => setAcademicYears(res.data))
+                .then((res) =>
+                    setAcademicYears(res.data.filter((a) => !a.archived_at))
+                )
                 .catch(() => setError("Failed to load academic years"));
         }
     }, [active]);
@@ -76,7 +84,7 @@ function Settings() {
                 };
                 await axios.post("/api/admin/courses", payload);
                 const res = await axios.get("/api/admin/courses");
-                setCourses(res.data);
+                setCourses(res.data.filter((c) => !c.archived_at));
             } else if (active === "departments") {
                 const payload = {
                     department_name: form.department_name,
@@ -84,14 +92,14 @@ function Settings() {
                 };
                 await axios.post("/api/admin/departments", payload);
                 const res = await axios.get("/api/admin/departments");
-                setDepartments(res.data);
+                setDepartments(res.data.filter((d) => !d.archived_at));
             } else if (active === "academic-years") {
                 const payload = {
                     school_year: form.school_year,
                 };
                 await axios.post("/api/admin/academic-years", payload);
                 const res = await axios.get("/api/admin/academic-years");
-                setAcademicYears(res.data);
+                setAcademicYears(res.data.filter((a) => !a.archived_at));
             }
             setShowForm(false);
         } catch (error) {
@@ -106,24 +114,24 @@ function Settings() {
     };
 
     const handleDelete = async (id) => {
-        if (!confirm("Are you sure you want to delete this item?")) return;
+        if (!confirm("Are you sure you want to archive this item?")) return;
         try {
             if (active === "courses") {
-                await axios.post(`/api/admin/courses/${id}/delete`);
+                await axios.post(`/api/admin/courses/${id}/archive`);
                 setCourses(courses.filter((c) => c.course_id !== id));
             } else if (active === "departments") {
-                await axios.post(`/api/admin/departments/${id}/delete`);
+                await axios.post(`/api/admin/departments/${id}/archive`);
                 setDepartments(
                     departments.filter((d) => d.department_id !== id)
                 );
             } else if (active === "academic-years") {
-                await axios.post(`/api/admin/academic-years/${id}/delete`);
+                await axios.post(`/api/admin/academic-years/${id}/archive`);
                 setAcademicYears(
                     academicYears.filter((a) => a.academic_year_id !== id)
                 );
             }
         } catch (error) {
-            setError(error.response?.data?.message || "Failed to delete");
+            setError(error.response?.data?.message || "Failed to archive");
             if (
                 error.response?.status === 401 ||
                 error.response?.status === 403
@@ -131,6 +139,10 @@ function Settings() {
                 window.location.href = "/login";
             }
         }
+    };
+
+    const handleArchiveNavigate = () => {
+        navigate(`/archived?type=${active}`);
     };
 
     return (
@@ -190,14 +202,36 @@ function Settings() {
                 </div>
 
                 <div className="tab-content">
-                    <button className="btn btn-primary" onClick={onOpenForm}>
-                        Add{" "}
-                        {active === "courses"
-                            ? "Course"
-                            : active === "departments"
-                            ? "Department"
-                            : "Academic Year"}
-                    </button>
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}
+                    >
+                        <button
+                            className="btn btn-primary"
+                            onClick={onOpenForm}
+                        >
+                            Add{" "}
+                            {active === "courses"
+                                ? "Course"
+                                : active === "departments"
+                                ? "Department"
+                                : "Academic Year"}
+                        </button>
+                        <button
+                            className="btn btn-primary"
+                            onClick={handleArchiveNavigate}
+                        >
+                            View Archived{" "}
+                            {active === "courses"
+                                ? "Courses"
+                                : active === "departments"
+                                ? "Departments"
+                                : "Academic Years"}
+                        </button>
+                    </div>
 
                     {active === "courses" && (
                         <div className="table-wrapper">
@@ -226,7 +260,7 @@ function Settings() {
                                                         )
                                                     }
                                                 >
-                                                    Delete
+                                                    Archive
                                                 </button>
                                             </td>
                                         </tr>
@@ -260,7 +294,7 @@ function Settings() {
                                                         )
                                                     }
                                                 >
-                                                    Delete
+                                                    Archive
                                                 </button>
                                             </td>
                                         </tr>
@@ -292,7 +326,7 @@ function Settings() {
                                                         )
                                                     }
                                                 >
-                                                    Delete
+                                                    Archive
                                                 </button>
                                             </td>
                                         </tr>

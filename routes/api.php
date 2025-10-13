@@ -40,12 +40,12 @@ Route::middleware(['auth:sanctum', 'api.role:admin'])->group(function () {
 
         // Student API Resource
         Route::apiResource('students', StudentController::class)->only(['index', 'store', 'show', 'update']);
-        Route::post('/students/{student}/delete', [StudentController::class, 'softDelete']);
+        Route::post('/students/{student}/archive', [StudentController::class, 'archive']);
         Route::post('/students/{student}/restore', [StudentController::class, 'restore']);
 
         // Faculty API Resource
         Route::apiResource('faculty', FacultyController::class)->only(['index', 'store', 'show', 'update']);
-        Route::post('/faculty/{faculty}/delete', [FacultyController::class, 'softDelete']);
+        Route::post('/faculty/{faculty}/archive', [FacultyController::class, 'archive']);
         Route::post('/faculty/{faculty}/restore', [FacultyController::class, 'restore']);
 
         // Reports API Resource

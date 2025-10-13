@@ -38,12 +38,14 @@ class ArchiveController extends Controller
                 });
             }
             $students = $query->get()->map(function ($student) {
+                $name = trim("{$student->f_name} {$student->m_name} {$student->l_name} {$student->suffix}");
                 return [
                     '_type' => 'student',
                     '_id' => $student->student_id,
-                    '_label' => $student->full_name,
+                    '_label' => $name ?: ($student->full_name ?? '-'),
                     '_department' => $student->department ? $student->department->department_name : '-',
                     '_course' => $student->course ? $student->course->course_name : '-',
+                    '_year_level' => $student->year_level ?? '-',
                     '_academic_year' => $student->academicYear ? $student->academicYear->school_year : '-',
                     'archived_at' => $student->archived_at,
                 ];
@@ -66,13 +68,15 @@ class ArchiveController extends Controller
                 });
             }
             $faculty = $query->get()->map(function ($faculty) {
+                $name = trim("{$faculty->f_name} {$faculty->m_name} {$faculty->l_name} {$faculty->suffix}");
                 return [
                     '_type' => 'faculty',
                     '_id' => $faculty->faculty_id,
-                    '_label' => $faculty->full_name,
+                    '_label' => $name ?: ($faculty->full_name ?? '-'),
                     '_department' => $faculty->department ? $faculty->department->department_name : '-',
                     '_course' => '-',
-                    '_academic_year' => '-',
+                    '_year_level' => '-', // Not applicable for faculty
+                    '_academic_year' => '-', // Not applicable for faculty
                     'archived_at' => $faculty->archived_at,
                 ];
             });
@@ -91,7 +95,8 @@ class ArchiveController extends Controller
                     '_label' => $course->course_name,
                     '_department' => $course->department ? $course->department->department_name : '-',
                     '_course' => $course->course_name,
-                    '_academic_year' => '-',
+                    '_year_level' => '-', // Not applicable for courses
+                    '_academic_year' => '-', // Not applicable for courses
                     'archived_at' => $course->archived_at,
                 ];
             });
@@ -107,7 +112,8 @@ class ArchiveController extends Controller
                     '_label' => $department->department_name,
                     '_department' => $department->department_name,
                     '_course' => '-',
-                    '_academic_year' => '-',
+                    '_year_level' => '-', // Not applicable for departments
+                    '_academic_year' => '-', // Not applicable for departments
                     'archived_at' => $department->archived_at,
                 ];
             });
@@ -123,6 +129,7 @@ class ArchiveController extends Controller
                     '_label' => $academicYear->school_year,
                     '_department' => '-',
                     '_course' => '-',
+                    '_year_level' => '-', // Not applicable for academic years
                     '_academic_year' => $academicYear->school_year,
                     'archived_at' => $academicYear->archived_at,
                 ];

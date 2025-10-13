@@ -56,18 +56,9 @@ function Students() {
 
     useEffect(() => {
         Promise.all([
-            axios.get("/api/admin/courses").catch((e) => {
-                setError("Failed to load courses");
-                return [];
-            }),
-            axios.get("/api/admin/departments").catch((e) => {
-                setError("Failed to load departments");
-                return [];
-            }),
-            axios.get("/api/admin/academic-years").catch((e) => {
-                setError("Failed to load academic years");
-                return [];
-            }),
+            axios.get("/api/admin/courses").catch((e) => []),
+            axios.get("/api/admin/departments").catch((e) => []),
+            axios.get("/api/admin/academic-years").catch((e) => []),
         ])
             .then(([coursesRes, deptsRes, yearsRes]) => {
                 setCourses(coursesRes.data || []);
@@ -105,7 +96,7 @@ function Students() {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
-            setStudents(response.data);
+            setStudents(response.data.filter((s) => !s.archived_at));
             setError("");
         } catch (e) {
             console.error("API Error:", e);
@@ -200,10 +191,10 @@ function Students() {
     };
 
     const handleDelete = async (id) => {
-        if (!confirm("Are you sure you want to Archive this student?")) return;
+        if (!confirm("Are you sure you want to archive this student?")) return;
         try {
             await axios.post(
-                `/api/admin/students/${id}/delete`,
+                `/api/admin/students/${id}/archive`,
                 {},
                 {
                     headers: {
@@ -216,7 +207,7 @@ function Students() {
             await refresh();
         } catch (error) {
             setError(
-                error.response?.data?.error || "Failed to Archive student"
+                error.response?.data?.error || "Failed to archive student"
             );
             if (
                 error.response?.status === 401 ||
@@ -228,7 +219,8 @@ function Students() {
     };
 
     const handleArchiveNavigate = () => {
-        navigate("/archived");
+        navigate("/archived?type=students");
+        localStorage.setItem("archiveType", "students");
     };
 
     const renderModalContent = () => {

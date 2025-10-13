@@ -6,9 +6,9 @@ use App\Models\StudentProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller; // Add this line
+use App\Http\Controllers\Controller;
 
-class StudentController extends Controller // Ensure it extends the base Controller
+class StudentController extends Controller
 {
     public function index(Request $request)
     {
@@ -125,7 +125,7 @@ class StudentController extends Controller // Ensure it extends the base Control
                 'date_of_birth' => 'required|date',
                 'sex' => 'required|in:male,female,other',
                 'phone_number' => 'required|string|max:20',
-                'email_address' => 'required|email|unique:student_profiles,email_address,' . $id,
+                'email_address' => 'required|email|unique:student_profiles,email_address,' . $id . ',student_id',
                 'address' => 'required|string|max:1000',
                 'status' => 'required|in:active,inactive,graduated,dropped',
                 'department_id' => 'required|exists:departments,department_id',
@@ -142,10 +142,10 @@ class StudentController extends Controller // Ensure it extends the base Control
         }
     }
 
-    public function softDelete($student)
+    public function archive($id)
     {
         try {
-            $student = StudentProfile::findOrFail($student);
+            $student = StudentProfile::findOrFail($id);
             $student->delete();
             return Response::json(['message' => 'Student archived'], 200);
         } catch (\Exception $e) {
@@ -154,10 +154,10 @@ class StudentController extends Controller // Ensure it extends the base Control
         }
     }
 
-    public function restore($student)
+    public function restore($id)
     {
         try {
-            $student = StudentProfile::withTrashed()->findOrFail($student);
+            $student = StudentProfile::withTrashed()->findOrFail($id);
             $student->restore();
             return Response::json(['message' => 'Student restored'], 200);
         } catch (\Exception $e) {

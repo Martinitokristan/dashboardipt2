@@ -54,20 +54,20 @@ class DepartmentController extends Controller
     public function softDelete(Request $request, $id)
     {
         $department = Department::findOrFail($id);
-        if ($department->trashed()) {
-            return response()->json(['message' => 'Already deleted'], 200);
+        if ($department->archived_at) {
+            return response()->json(['message' => 'Already archived'], 200);
         }
-        $department->delete();
-        return response()->json(['message' => 'Department deleted successfully']);
+        $department->update(['archived_at' => now()]);
+        return response()->json(['message' => 'Department archived successfully']);
     }
 
     public function restore(Request $request, $id)
     {
-        $department = Department::withTrashed()->findOrFail($id);
-        if (!$department->trashed()) {
-            return response()->json(['message' => 'Not deleted'], 200);
+        $department = Department::findOrFail($id);
+        if (!$department->archived_at) {
+            return response()->json(['message' => 'Not archived'], 200);
         }
-        $department->restore();
+        $department->update(['archived_at' => null]);
         return response()->json($department->fresh());
     }
 }

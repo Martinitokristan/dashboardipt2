@@ -10,7 +10,14 @@ function ArchivedAll() {
     });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
-    const [type, setType] = useState("students");
+    const [type, setType] = useState(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        return (
+            urlParams.get("type") ||
+            localStorage.getItem("archiveType") ||
+            "students"
+        );
+    });
     const [filters, setFilters] = useState({
         department_id: "",
         course_id: "",
@@ -18,13 +25,26 @@ function ArchivedAll() {
         search: "",
     });
 
+    const token = localStorage.getItem("token");
+    if (!token) {
+        console.error("No token found in localStorage");
+        setError("Authentication required. Please log in.");
+        setIsLoading(false);
+        window.location.href = "/login";
+        return;
+    }
+    const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+    };
+
     useEffect(() => {
         const loadFilterOptions = async () => {
             try {
                 const [depts, courses, years] = await Promise.all([
-                    axios.get("/api/admin/departments"),
-                    axios.get("/api/admin/courses"),
-                    axios.get("/api/admin/academic-years"),
+                    axios.get("/api/admin/departments", { headers }),
+                    axios.get("/api/admin/courses", { headers }),
+                    axios.get("/api/admin/academic-years", { headers }),
                 ]);
                 setFilterOptions({
                     departments: depts.data,
@@ -32,6 +52,10 @@ function ArchivedAll() {
                     academicYears: years.data,
                 });
             } catch (err) {
+                console.error(
+                    "Filter options error:",
+                    err.response?.data || err.message
+                );
                 setError("Error loading filter options");
                 if (
                     err.response?.status === 401 ||
@@ -57,11 +81,17 @@ function ArchivedAll() {
             if (filters.search) params.set("search", filters.search);
             params.set("type", type);
             const url = "/api/admin/archived?" + params.toString();
-            console.log("Fetching from:", url);
-            const r = await axios.get(url);
+            console.log("Request URL:", url, "Headers:", headers);
+            const r = await axios.get(url, { headers });
+            console.log("Response:", r.data);
             setItems(r.data.items || []);
         } catch (err) {
-            console.error("API Error:", err);
+            console.error(
+                "API Error:",
+                err.response?.data || err.message,
+                "Status:",
+                err.response?.status
+            );
             setError(
                 err.response?.data?.message || "Error loading archived items"
             );
@@ -81,9 +111,14 @@ function ArchivedAll() {
         if (!confirm("Are you sure you want to restore this item?")) return;
         setIsLoading(true);
         try {
-            await axios.post(`/api/admin/students/${item._id}/restore`);
+            await axios.post(
+                `/api/admin/${type}/${item._id}/restore`,
+                {},
+                { headers }
+            );
             await refresh();
         } catch (err) {
+            console.error("Restore error:", err.response?.data || err.message);
             setError(err.response?.data?.message || "Error restoring item");
             if (err.response?.status === 401 || err.response?.status === 403) {
                 window.location.href = "/login";
@@ -98,9 +133,10 @@ function ArchivedAll() {
             return;
         setIsLoading(true);
         try {
-            await axios.delete(`/api/admin/students/${item._id}`);
+            await axios.delete(`/api/admin/${type}/${item._id}`, { headers });
             await refresh();
         } catch (err) {
+            console.error("Delete error:", err.response?.data || err.message);
             setError(err.response?.data?.message || "Error deleting item");
             if (err.response?.status === 401 || err.response?.status === 403) {
                 window.location.href = "/login";
@@ -117,10 +153,8 @@ function ArchivedAll() {
     return (
         <div className="page">
             <header className="page-header">
-                <h1 className="page-title">Archived Students</h1>
-                <p className="page-subtitle">
-                    View and manage archived students
-                </p>
+                <h1 className="page-title">Archived Data's</h1>
+                <p className="page-subtitle"></p>
             </header>
 
             {error && <div className="alert-error">{error}</div>}
@@ -133,6 +167,7 @@ function ArchivedAll() {
                         onChange={(e) => setType(e.target.value)}
                     >
                         <option value="students">Students</option>
+                        <option value="faculty">Faculty</option>
                     </select>
                     <select
                         value={filters.department_id}
@@ -209,17 +244,26 @@ function ArchivedAll() {
 
             <div className="table-wrapper">
                 {items.length === 0 ? (
-                    <p>No archived students found.</p>
+                    <p>No archived {type} found.</p>
                 ) : (
-                    <table className="students-table">
+                    <table
+                        className={
+                            type === "students"
+                                ? "students-table"
+                                : "faculty-table"
+                        }
+                    >
                         <thead>
                             <tr>
-                                <th>Student Name</th>
+                                <th>Name</th>
                                 <th>Department</th>
-                                <th>Course</th>
-                                <th>Year Level</th>
-                                <th>Deleted At</th>{" "}
-                                {/* Changed from archived_at */}
+                                {type === "students" && (
+                                    <>
+                                        <th>Course</th>
+                                        <th>Year Level</th>
+                                    </>
+                                )}
+                                <th>Deleted At</th>
                                 <th className="text-end">Actions</th>
                             </tr>
                         </thead>
@@ -228,10 +272,13 @@ function ArchivedAll() {
                                 <tr key={`${item._type}-${item._id || index}`}>
                                     <td>{item._label}</td>
                                     <td>{item._department || "-"}</td>
-                                    <td>{item._course || "-"}</td>
-                                    <td>{item._year_level || "-"}</td>
-                                    <td>{formatDate(item.deleted_at)}</td>{" "}
-                                    {/* Changed from archived_at */}
+                                    {type === "students" && (
+                                        <>
+                                            <td>{item._course || "-"}</td>
+                                            <td>{item._year_level || "-"}</td>
+                                        </>
+                                    )}
+                                    <td>{formatDate(item.archived_at)}</td>
                                     <td className="text-end">
                                         <div className="btn-group">
                                             <button

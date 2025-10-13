@@ -70708,7 +70708,10 @@ function ArchivedAll() {
     _useState8 = _slicedToArray(_useState7, 2),
     error = _useState8[0],
     setError = _useState8[1];
-  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("students"),
+  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(function () {
+      var urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get("type") || localStorage.getItem("archiveType") || "students";
+    }),
     _useState0 = _slicedToArray(_useState9, 2),
     type = _useState0[0],
     setType = _useState0[1];
@@ -70721,16 +70724,34 @@ function ArchivedAll() {
     _useState10 = _slicedToArray(_useState1, 2),
     filters = _useState10[0],
     setFilters = _useState10[1];
+  var token = localStorage.getItem("token");
+  if (!token) {
+    console.error("No token found in localStorage");
+    setError("Authentication required. Please log in.");
+    setIsLoading(false);
+    window.location.href = "/login";
+    return;
+  }
+  var headers = {
+    Authorization: "Bearer ".concat(token),
+    "Content-Type": "application/json"
+  };
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     var loadFilterOptions = /*#__PURE__*/function () {
       var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-        var _yield$Promise$all, _yield$Promise$all2, depts, courses, years, _err$response, _err$response2, _t;
+        var _yield$Promise$all, _yield$Promise$all2, depts, courses, years, _err$response, _err$response2, _err$response3, _t;
         return _regenerator().w(function (_context) {
           while (1) switch (_context.p = _context.n) {
             case 0:
               _context.p = 0;
               _context.n = 1;
-              return Promise.all([axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/admin/departments"), axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/admin/courses"), axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/admin/academic-years")]);
+              return Promise.all([axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/admin/departments", {
+                headers: headers
+              }), axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/admin/courses", {
+                headers: headers
+              }), axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/admin/academic-years", {
+                headers: headers
+              })]);
             case 1:
               _yield$Promise$all = _context.v;
               _yield$Promise$all2 = _slicedToArray(_yield$Promise$all, 3);
@@ -70747,8 +70768,9 @@ function ArchivedAll() {
             case 2:
               _context.p = 2;
               _t = _context.v;
+              console.error("Filter options error:", ((_err$response = _t.response) === null || _err$response === void 0 ? void 0 : _err$response.data) || _t.message);
               setError("Error loading filter options");
-              if (((_err$response = _t.response) === null || _err$response === void 0 ? void 0 : _err$response.status) === 401 || ((_err$response2 = _t.response) === null || _err$response2 === void 0 ? void 0 : _err$response2.status) === 403) {
+              if (((_err$response2 = _t.response) === null || _err$response2 === void 0 ? void 0 : _err$response2.status) === 401 || ((_err$response3 = _t.response) === null || _err$response3 === void 0 ? void 0 : _err$response3.status) === 403) {
                 window.location.href = "/login";
               }
             case 3:
@@ -70764,7 +70786,7 @@ function ArchivedAll() {
   }, []);
   var refresh = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-      var params, url, r, _err$response3, _err$response4, _err$response5, _t2;
+      var params, url, r, _err$response4, _err$response5, _err$response6, _err$response7, _err$response8, _t2;
       return _regenerator().w(function (_context2) {
         while (1) switch (_context2.p = _context2.n) {
           case 0:
@@ -70778,20 +70800,23 @@ function ArchivedAll() {
             if (filters.search) params.set("search", filters.search);
             params.set("type", type);
             url = "/api/admin/archived?" + params.toString();
-            console.log("Fetching from:", url);
+            console.log("Request URL:", url, "Headers:", headers);
             _context2.n = 2;
-            return axios__WEBPACK_IMPORTED_MODULE_1___default().get(url);
+            return axios__WEBPACK_IMPORTED_MODULE_1___default().get(url, {
+              headers: headers
+            });
           case 2:
             r = _context2.v;
+            console.log("Response:", r.data);
             setItems(r.data.items || []);
             _context2.n = 4;
             break;
           case 3:
             _context2.p = 3;
             _t2 = _context2.v;
-            console.error("API Error:", _t2);
-            setError(((_err$response3 = _t2.response) === null || _err$response3 === void 0 || (_err$response3 = _err$response3.data) === null || _err$response3 === void 0 ? void 0 : _err$response3.message) || "Error loading archived items");
-            if (((_err$response4 = _t2.response) === null || _err$response4 === void 0 ? void 0 : _err$response4.status) === 401 || ((_err$response5 = _t2.response) === null || _err$response5 === void 0 ? void 0 : _err$response5.status) === 403) {
+            console.error("API Error:", ((_err$response4 = _t2.response) === null || _err$response4 === void 0 ? void 0 : _err$response4.data) || _t2.message, "Status:", (_err$response5 = _t2.response) === null || _err$response5 === void 0 ? void 0 : _err$response5.status);
+            setError(((_err$response6 = _t2.response) === null || _err$response6 === void 0 || (_err$response6 = _err$response6.data) === null || _err$response6 === void 0 ? void 0 : _err$response6.message) || "Error loading archived items");
+            if (((_err$response7 = _t2.response) === null || _err$response7 === void 0 ? void 0 : _err$response7.status) === 401 || ((_err$response8 = _t2.response) === null || _err$response8 === void 0 ? void 0 : _err$response8.status) === 403) {
               window.location.href = "/login";
             }
           case 4:
@@ -70812,7 +70837,7 @@ function ArchivedAll() {
   }, [filters, type]);
   var handleRestore = /*#__PURE__*/function () {
     var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(item) {
-      var _err$response6, _err$response7, _err$response8, _t3;
+      var _err$response9, _err$response0, _err$response1, _err$response10, _t3;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.p = _context3.n) {
           case 0:
@@ -70825,7 +70850,9 @@ function ArchivedAll() {
             setIsLoading(true);
             _context3.p = 2;
             _context3.n = 3;
-            return axios__WEBPACK_IMPORTED_MODULE_1___default().post("/api/admin/students/".concat(item._id, "/restore"));
+            return axios__WEBPACK_IMPORTED_MODULE_1___default().post("/api/admin/".concat(type, "/").concat(item._id, "/restore"), {}, {
+              headers: headers
+            });
           case 3:
             _context3.n = 4;
             return refresh();
@@ -70835,8 +70862,9 @@ function ArchivedAll() {
           case 5:
             _context3.p = 5;
             _t3 = _context3.v;
-            setError(((_err$response6 = _t3.response) === null || _err$response6 === void 0 || (_err$response6 = _err$response6.data) === null || _err$response6 === void 0 ? void 0 : _err$response6.message) || "Error restoring item");
-            if (((_err$response7 = _t3.response) === null || _err$response7 === void 0 ? void 0 : _err$response7.status) === 401 || ((_err$response8 = _t3.response) === null || _err$response8 === void 0 ? void 0 : _err$response8.status) === 403) {
+            console.error("Restore error:", ((_err$response9 = _t3.response) === null || _err$response9 === void 0 ? void 0 : _err$response9.data) || _t3.message);
+            setError(((_err$response0 = _t3.response) === null || _err$response0 === void 0 || (_err$response0 = _err$response0.data) === null || _err$response0 === void 0 ? void 0 : _err$response0.message) || "Error restoring item");
+            if (((_err$response1 = _t3.response) === null || _err$response1 === void 0 ? void 0 : _err$response1.status) === 401 || ((_err$response10 = _t3.response) === null || _err$response10 === void 0 ? void 0 : _err$response10.status) === 403) {
               window.location.href = "/login";
             }
           case 6:
@@ -70854,7 +70882,7 @@ function ArchivedAll() {
   }();
   var handleDelete = /*#__PURE__*/function () {
     var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(item) {
-      var _err$response9, _err$response0, _err$response1, _t4;
+      var _err$response11, _err$response12, _err$response13, _err$response14, _t4;
       return _regenerator().w(function (_context4) {
         while (1) switch (_context4.p = _context4.n) {
           case 0:
@@ -70867,7 +70895,9 @@ function ArchivedAll() {
             setIsLoading(true);
             _context4.p = 2;
             _context4.n = 3;
-            return axios__WEBPACK_IMPORTED_MODULE_1___default()["delete"]("/api/admin/students/".concat(item._id));
+            return axios__WEBPACK_IMPORTED_MODULE_1___default()["delete"]("/api/admin/".concat(type, "/").concat(item._id), {
+              headers: headers
+            });
           case 3:
             _context4.n = 4;
             return refresh();
@@ -70877,8 +70907,9 @@ function ArchivedAll() {
           case 5:
             _context4.p = 5;
             _t4 = _context4.v;
-            setError(((_err$response9 = _t4.response) === null || _err$response9 === void 0 || (_err$response9 = _err$response9.data) === null || _err$response9 === void 0 ? void 0 : _err$response9.message) || "Error deleting item");
-            if (((_err$response0 = _t4.response) === null || _err$response0 === void 0 ? void 0 : _err$response0.status) === 401 || ((_err$response1 = _t4.response) === null || _err$response1 === void 0 ? void 0 : _err$response1.status) === 403) {
+            console.error("Delete error:", ((_err$response11 = _t4.response) === null || _err$response11 === void 0 ? void 0 : _err$response11.data) || _t4.message);
+            setError(((_err$response12 = _t4.response) === null || _err$response12 === void 0 || (_err$response12 = _err$response12.data) === null || _err$response12 === void 0 ? void 0 : _err$response12.message) || "Error deleting item");
+            if (((_err$response13 = _t4.response) === null || _err$response13 === void 0 ? void 0 : _err$response13.status) === 401 || ((_err$response14 = _t4.response) === null || _err$response14 === void 0 ? void 0 : _err$response14.status) === 403) {
               window.location.href = "/login";
             }
           case 6:
@@ -70903,10 +70934,9 @@ function ArchivedAll() {
       className: "page-header",
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("h1", {
         className: "page-title",
-        children: "Archived Students"
+        children: "Archived Data's"
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p", {
-        className: "page-subtitle",
-        children: "View and manage archived students"
+        className: "page-subtitle"
       })]
     }), error && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
       className: "alert-error",
@@ -70918,15 +70948,18 @@ function ArchivedAll() {
       className: "controls",
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
         className: "filters",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("select", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("select", {
           value: type,
           onChange: function onChange(e) {
             return setType(e.target.value);
           },
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("option", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("option", {
             value: "students",
             children: "Students"
-          })
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("option", {
+            value: "faculty",
+            children: "Faculty"
+          })]
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("select", {
           value: filters.department_id,
           onChange: function onChange(e) {
@@ -70991,23 +71024,25 @@ function ArchivedAll() {
       })
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
       className: "table-wrapper",
-      children: items.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p", {
-        children: "No archived students found."
+      children: items.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("p", {
+        children: ["No archived ", type, " found."]
       }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("table", {
-        className: "students-table",
+        className: type === "students" ? "students-table" : "faculty-table",
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("thead", {
           children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("tr", {
             children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("th", {
-              children: "Student Name"
+              children: "Name"
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("th", {
               children: "Department"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("th", {
-              children: "Course"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("th", {
-              children: "Year Level"
+            }), type === "students" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.Fragment, {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("th", {
+                children: "Course"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("th", {
+                children: "Year Level"
+              })]
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("th", {
               children: "Deleted At"
-            }), " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("th", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("th", {
               className: "text-end",
               children: "Actions"
             })]
@@ -71019,13 +71054,15 @@ function ArchivedAll() {
                 children: item._label
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("td", {
                 children: item._department || "-"
+              }), type === "students" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.Fragment, {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("td", {
+                  children: item._course || "-"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("td", {
+                  children: item._year_level || "-"
+                })]
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("td", {
-                children: item._course || "-"
+                children: formatDate(item.archived_at)
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("td", {
-                children: item._year_level || "-"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("td", {
-                children: formatDate(item.deleted_at)
-              }), " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("td", {
                 className: "text-end",
                 children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
                   className: "btn-group",
@@ -71375,7 +71412,9 @@ function Faculty() {
             return axios__WEBPACK_IMPORTED_MODULE_1___default().get(url);
           case 2:
             r = _context.v;
-            setFaculty(r.data);
+            setFaculty(r.data.filter(function (f) {
+              return !f.archived_at;
+            }));
             _context.n = 4;
             break;
           case 3:
@@ -71502,7 +71541,7 @@ function Faculty() {
       return _regenerator().w(function (_context4) {
         while (1) switch (_context4.p = _context4.n) {
           case 0:
-            if (confirm("Are you sure you want to delete this faculty?")) {
+            if (confirm("Are you sure you want to archive this faculty?")) {
               _context4.n = 1;
               break;
             }
@@ -71510,7 +71549,7 @@ function Faculty() {
           case 1:
             _context4.p = 1;
             _context4.n = 2;
-            return axios__WEBPACK_IMPORTED_MODULE_1___default().post("/api/admin/faculty/".concat(id, "/delete"));
+            return axios__WEBPACK_IMPORTED_MODULE_1___default().post("/api/admin/faculty/".concat(id, "/archive"));
           case 2:
             _context4.n = 3;
             return loadFaculty();
@@ -71520,7 +71559,7 @@ function Faculty() {
           case 4:
             _context4.p = 4;
             _t4 = _context4.v;
-            setError(((_error$response8 = _t4.response) === null || _error$response8 === void 0 || (_error$response8 = _error$response8.data) === null || _error$response8 === void 0 ? void 0 : _error$response8.message) || "Failed to delete faculty");
+            setError(((_error$response8 = _t4.response) === null || _error$response8 === void 0 || (_error$response8 = _error$response8.data) === null || _error$response8 === void 0 ? void 0 : _error$response8.message) || "Failed to archive faculty");
             if (((_error$response9 = _t4.response) === null || _error$response9 === void 0 ? void 0 : _error$response9.status) === 401 || ((_error$response0 = _t4.response) === null || _error$response0 === void 0 ? void 0 : _error$response0.status) === 403) {
               window.location.href = "/login";
             }
@@ -71534,7 +71573,8 @@ function Faculty() {
     };
   }();
   var handleArchiveNavigate = function handleArchiveNavigate() {
-    navigate("/archived-all");
+    navigate("/archived?type=faculty");
+    localStorage.setItem("archiveType", "faculty");
   };
   var onOpenEditForm = function onOpenEditForm(facultyMember) {
     setEditingId(facultyMember.faculty_id);
@@ -71735,7 +71775,10 @@ function Faculty() {
       className: "page-header",
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h1", {
         className: "page-title",
-        children: "Manage Faculty Information"
+        children: "Faculty"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+        className: "page-subtitle",
+        children: "Manage faculty profiles"
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
         className: "btn btn-primary new-btn",
         onClick: function onClick() {
@@ -71789,7 +71832,7 @@ function Faculty() {
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("thead", {
           children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("tr", {
             children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("th", {
-              children: "Faculty Name"
+              children: "Name"
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("th", {
               children: "Department"
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("th", {
@@ -71810,9 +71853,9 @@ function Faculty() {
                   onClick: function onClick() {
                     return onOpenEditForm(f);
                   },
-                  children: "\u270E Edit"
+                  children: "Edit"
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
-                  className: "btn btn-primary",
+                  className: "btn btn-danger",
                   onClick: function onClick() {
                     return handleDelete(f.faculty_id);
                   },
@@ -73014,8 +73057,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _sass_settings_scss__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../sass/settings.scss */ "./resources/sass/settings.scss");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/dist/index.js");
+/* harmony import */ var _sass_settings_scss__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../sass/settings.scss */ "./resources/sass/settings.scss");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
@@ -73032,6 +73076,7 @@ function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) 
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
 
 
 
@@ -73077,10 +73122,13 @@ function Settings() {
     _useState12 = _slicedToArray(_useState11, 2),
     error = _useState12[0],
     setError = _useState12[1];
+  var navigate = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_2__.useNavigate)();
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     if (active === "courses") {
       axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/admin/courses").then(function (res) {
-        return setCourses(res.data);
+        return setCourses(res.data.filter(function (c) {
+          return !c.archived_at;
+        }));
       })["catch"](function () {
         var _error$response, _error$response2;
         setError("Failed to load courses");
@@ -73095,13 +73143,17 @@ function Settings() {
       });
     } else if (active === "departments") {
       axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/admin/departments").then(function (res) {
-        return setDepartments(res.data);
+        return setDepartments(res.data.filter(function (d) {
+          return !d.archived_at;
+        }));
       })["catch"](function () {
         return setError("Failed to load departments");
       });
     } else if (active === "academic-years") {
       axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/admin/academic-years").then(function (res) {
-        return setAcademicYears(res.data);
+        return setAcademicYears(res.data.filter(function (a) {
+          return !a.archived_at;
+        }));
       })["catch"](function () {
         return setError("Failed to load academic years");
       });
@@ -73141,7 +73193,9 @@ function Settings() {
             return axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/admin/courses");
           case 3:
             res = _context.v;
-            setCourses(res.data);
+            setCourses(res.data.filter(function (c) {
+              return !c.archived_at;
+            }));
             _context.n = 10;
             break;
           case 4:
@@ -73160,7 +73214,9 @@ function Settings() {
             return axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/admin/departments");
           case 6:
             _res = _context.v;
-            setDepartments(_res.data);
+            setDepartments(_res.data.filter(function (d) {
+              return !d.archived_at;
+            }));
             _context.n = 10;
             break;
           case 7:
@@ -73178,7 +73234,9 @@ function Settings() {
             return axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/admin/academic-years");
           case 9:
             _res2 = _context.v;
-            setAcademicYears(_res2.data);
+            setAcademicYears(_res2.data.filter(function (a) {
+              return !a.archived_at;
+            }));
           case 10:
             setShowForm(false);
             _context.n = 12;
@@ -73205,7 +73263,7 @@ function Settings() {
       return _regenerator().w(function (_context2) {
         while (1) switch (_context2.p = _context2.n) {
           case 0:
-            if (confirm("Are you sure you want to delete this item?")) {
+            if (confirm("Are you sure you want to archive this item?")) {
               _context2.n = 1;
               break;
             }
@@ -73217,7 +73275,7 @@ function Settings() {
               break;
             }
             _context2.n = 2;
-            return axios__WEBPACK_IMPORTED_MODULE_1___default().post("/api/admin/courses/".concat(id, "/delete"));
+            return axios__WEBPACK_IMPORTED_MODULE_1___default().post("/api/admin/courses/".concat(id, "/archive"));
           case 2:
             setCourses(courses.filter(function (c) {
               return c.course_id !== id;
@@ -73230,7 +73288,7 @@ function Settings() {
               break;
             }
             _context2.n = 4;
-            return axios__WEBPACK_IMPORTED_MODULE_1___default().post("/api/admin/departments/".concat(id, "/delete"));
+            return axios__WEBPACK_IMPORTED_MODULE_1___default().post("/api/admin/departments/".concat(id, "/archive"));
           case 4:
             setDepartments(departments.filter(function (d) {
               return d.department_id !== id;
@@ -73243,7 +73301,7 @@ function Settings() {
               break;
             }
             _context2.n = 6;
-            return axios__WEBPACK_IMPORTED_MODULE_1___default().post("/api/admin/academic-years/".concat(id, "/delete"));
+            return axios__WEBPACK_IMPORTED_MODULE_1___default().post("/api/admin/academic-years/".concat(id, "/archive"));
           case 6:
             setAcademicYears(academicYears.filter(function (a) {
               return a.academic_year_id !== id;
@@ -73254,7 +73312,7 @@ function Settings() {
           case 8:
             _context2.p = 8;
             _t2 = _context2.v;
-            setError(((_error$response6 = _t2.response) === null || _error$response6 === void 0 || (_error$response6 = _error$response6.data) === null || _error$response6 === void 0 ? void 0 : _error$response6.message) || "Failed to delete");
+            setError(((_error$response6 = _t2.response) === null || _error$response6 === void 0 || (_error$response6 = _error$response6.data) === null || _error$response6 === void 0 ? void 0 : _error$response6.message) || "Failed to archive");
             if (((_error$response7 = _t2.response) === null || _error$response7 === void 0 ? void 0 : _error$response7.status) === 401 || ((_error$response8 = _t2.response) === null || _error$response8 === void 0 ? void 0 : _error$response8.status) === 403) {
               window.location.href = "/login";
             }
@@ -73267,36 +73325,39 @@ function Settings() {
       return _ref2.apply(this, arguments);
     };
   }();
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+  var handleArchiveNavigate = function handleArchiveNavigate() {
+    navigate("/archived?type=".concat(active));
+  };
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
     className: "settings-content",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("header", {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("header", {
       className: "page-header",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("h1", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h1", {
         className: "page-title",
         children: "Manage Courses, Departments, and Academic Year"
       })
-    }), error && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+    }), error && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
       className: "alert-error",
       children: error
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("section", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("section", {
       className: "settings-tabs",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
         className: "tabs",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
           className: "tab ".concat(active === "courses" ? "active" : ""),
           onClick: function onClick() {
             setActive("courses");
             localStorage.setItem("settings_active_tab", "courses");
           },
           children: "Courses"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
           className: "tab ".concat(active === "departments" ? "active" : ""),
           onClick: function onClick() {
             setActive("departments");
             localStorage.setItem("settings_active_tab", "departments");
           },
           children: "Departments"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
           className: "tab ".concat(active === "academic-years" ? "active" : ""),
           onClick: function onClick() {
             setActive("academic-years");
@@ -73304,125 +73365,136 @@ function Settings() {
           },
           children: "Academic Years"
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
         className: "tab-content",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("button", {
-          className: "btn btn-primary",
-          onClick: onOpenForm,
-          children: ["Add", " ", active === "courses" ? "Course" : active === "departments" ? "Department" : "Academic Year"]
-        }), active === "courses" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+          style: {
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center"
+          },
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("button", {
+            className: "btn btn-primary",
+            onClick: onOpenForm,
+            children: ["Add", " ", active === "courses" ? "Course" : active === "departments" ? "Department" : "Academic Year"]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("button", {
+            className: "btn btn-primary",
+            onClick: handleArchiveNavigate,
+            children: ["View Archived", " ", active === "courses" ? "Courses" : active === "departments" ? "Departments" : "Academic Years"]
+          })]
+        }), active === "courses" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
           className: "table-wrapper",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("table", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("thead", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("tr", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("th", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("table", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("thead", {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("tr", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("th", {
                   children: "Name"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("th", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("th", {
                   children: "Department"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("th", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("th", {
                   children: "Actions"
                 })]
               })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("tbody", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("tbody", {
               children: courses.map(function (c) {
                 var _c$department;
-                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("tr", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("td", {
+                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("tr", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("td", {
                     children: c.course_name
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("td", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("td", {
                     children: ((_c$department = c.department) === null || _c$department === void 0 ? void 0 : _c$department.department_name) || "-"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("td", {
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("td", {
+                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
                       className: "btn btn-danger",
                       onClick: function onClick() {
                         return handleDelete(c.course_id);
                       },
-                      children: "Delete"
+                      children: "Archive"
                     })
                   })]
                 }, c.course_id);
               })
             })]
           })
-        }), active === "departments" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+        }), active === "departments" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
           className: "table-wrapper",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("table", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("thead", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("tr", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("th", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("table", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("thead", {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("tr", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("th", {
                   children: "Name"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("th", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("th", {
                   children: "Head"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("th", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("th", {
                   children: "Actions"
                 })]
               })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("tbody", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("tbody", {
               children: departments.map(function (d) {
-                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("tr", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("td", {
+                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("tr", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("td", {
                     children: d.department_name
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("td", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("td", {
                     children: d.department_head || "-"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("td", {
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("td", {
+                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
                       className: "btn btn-danger",
                       onClick: function onClick() {
                         return handleDelete(d.department_id);
                       },
-                      children: "Delete"
+                      children: "Archive"
                     })
                   })]
                 }, d.department_id);
               })
             })]
           })
-        }), active === "academic-years" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+        }), active === "academic-years" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
           className: "table-wrapper",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("table", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("thead", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("tr", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("th", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("table", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("thead", {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("tr", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("th", {
                   children: "School Year"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("th", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("th", {
                   children: "Actions"
                 })]
               })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("tbody", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("tbody", {
               children: academicYears.map(function (a) {
-                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("tr", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("td", {
+                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("tr", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("td", {
                     children: a.school_year
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("td", {
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("td", {
+                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
                       className: "btn btn-danger",
                       onClick: function onClick() {
                         return handleDelete(a.academic_year_id);
                       },
-                      children: "Delete"
+                      children: "Archive"
                     })
                   })]
                 }, a.academic_year_id);
               })
             })]
           })
-        }), showForm && active === "courses" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+        }), showForm && active === "courses" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
           className: "modal-overlay",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
             className: "modal-card",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("h3", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h3", {
               children: "Add Course"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("form", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("form", {
               onSubmit: onSubmit,
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
                 style: {
                   display: "grid",
                   gap: 14
                 },
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("label", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("label", {
                     children: "Course Name"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("input", {
                     className: "form-input",
                     value: form.course_name,
                     onChange: function onChange(e) {
@@ -73432,10 +73504,10 @@ function Settings() {
                     },
                     required: true
                   })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("label", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("label", {
                     children: "Department"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("select", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("select", {
                     className: "form-input",
                     value: form.department_id,
                     onChange: function onChange(e) {
@@ -73444,33 +73516,33 @@ function Settings() {
                       }));
                     },
                     required: true,
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
                       value: "",
                       disabled: true,
                       children: "Select department"
                     }), departments.map(function (d) {
-                      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
+                      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
                         value: d.department_id,
                         children: d.department_name
                       }, d.department_id);
                     })]
                   })]
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
                 style: {
                   marginTop: 20,
                   display: "flex",
                   justifyContent: "flex-end",
                   gap: 12
                 },
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
                   className: "btn",
                   type: "button",
                   onClick: function onClick() {
                     return setShowForm(false);
                   },
                   children: "Cancel"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
                   className: "btn btn-primary",
                   type: "submit",
                   children: "Add Course"
@@ -73478,23 +73550,23 @@ function Settings() {
               })]
             })]
           })
-        }), showForm && active === "departments" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+        }), showForm && active === "departments" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
           className: "modal-overlay",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
             className: "modal-card",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("h3", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h3", {
               children: "Add Department"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("form", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("form", {
               onSubmit: onSubmit,
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
                 style: {
                   display: "grid",
                   gap: 14
                 },
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("label", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("label", {
                     children: "Department Name"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("input", {
                     className: "form-input",
                     value: form.department_name,
                     onChange: function onChange(e) {
@@ -73504,10 +73576,10 @@ function Settings() {
                     },
                     required: true
                   })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("label", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("label", {
                     children: "Department Head"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("input", {
                     className: "form-input",
                     value: form.department_head,
                     onChange: function onChange(e) {
@@ -73517,21 +73589,21 @@ function Settings() {
                     }
                   })]
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
                 style: {
                   marginTop: 20,
                   display: "flex",
                   justifyContent: "flex-end",
                   gap: 12
                 },
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
                   className: "btn",
                   type: "button",
                   onClick: function onClick() {
                     return setShowForm(false);
                   },
                   children: "Cancel"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
                   className: "btn btn-primary",
                   type: "submit",
                   children: "Add Department"
@@ -73539,23 +73611,23 @@ function Settings() {
               })]
             })]
           })
-        }), showForm && active === "academic-years" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+        }), showForm && active === "academic-years" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
           className: "modal-overlay",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
             className: "modal-card",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("h3", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h3", {
               children: "Add Academic Year"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("form", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("form", {
               onSubmit: onSubmit,
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
                 style: {
                   display: "grid",
                   gap: 14
                 },
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("label", {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("label", {
                     children: "School Year"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("input", {
                     className: "form-input",
                     value: form.school_year,
                     onChange: function onChange(e) {
@@ -73566,21 +73638,21 @@ function Settings() {
                     required: true
                   })]
                 })
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
                 style: {
                   marginTop: 20,
                   display: "flex",
                   justifyContent: "flex-end",
                   gap: 12
                 },
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
                   className: "btn",
                   type: "button",
                   onClick: function onClick() {
                     return setShowForm(false);
                   },
                   children: "Cancel"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
                   className: "btn btn-primary",
                   type: "submit",
                   children: "Add Academic Year"
@@ -73713,13 +73785,10 @@ function Students() {
   };
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     Promise.all([axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/admin/courses")["catch"](function (e) {
-      setError("Failed to load courses");
       return [];
     }), axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/admin/departments")["catch"](function (e) {
-      setError("Failed to load departments");
       return [];
     }), axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/admin/academic-years")["catch"](function (e) {
-      setError("Failed to load academic years");
       return [];
     })]).then(function (_ref) {
       var _ref2 = _slicedToArray(_ref, 3),
@@ -73768,7 +73837,9 @@ function Students() {
             });
           case 1:
             response = _context.v;
-            setStudents(response.data);
+            setStudents(response.data.filter(function (s) {
+              return !s.archived_at;
+            }));
             setError("");
             _context.n = 3;
             break;
@@ -73891,7 +73962,7 @@ function Students() {
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.p = _context3.n) {
           case 0:
-            if (confirm("Are you sure you want to Archive this student?")) {
+            if (confirm("Are you sure you want to archive this student?")) {
               _context3.n = 1;
               break;
             }
@@ -73899,7 +73970,7 @@ function Students() {
           case 1:
             _context3.p = 1;
             _context3.n = 2;
-            return axios__WEBPACK_IMPORTED_MODULE_1___default().post("/api/admin/students/".concat(id, "/delete"), {}, {
+            return axios__WEBPACK_IMPORTED_MODULE_1___default().post("/api/admin/students/".concat(id, "/archive"), {}, {
               headers: {
                 Authorization: "Bearer ".concat(localStorage.getItem("token"))
               }
@@ -73913,7 +73984,7 @@ function Students() {
           case 4:
             _context3.p = 4;
             _t3 = _context3.v;
-            setError(((_error$response4 = _t3.response) === null || _error$response4 === void 0 || (_error$response4 = _error$response4.data) === null || _error$response4 === void 0 ? void 0 : _error$response4.error) || "Failed to Archive student");
+            setError(((_error$response4 = _t3.response) === null || _error$response4 === void 0 || (_error$response4 = _error$response4.data) === null || _error$response4 === void 0 ? void 0 : _error$response4.error) || "Failed to archive student");
             if (((_error$response5 = _t3.response) === null || _error$response5 === void 0 ? void 0 : _error$response5.status) === 401 || ((_error$response6 = _t3.response) === null || _error$response6 === void 0 ? void 0 : _error$response6.status) === 403) {
               window.location.href = "/login";
             }
@@ -73927,7 +73998,8 @@ function Students() {
     };
   }();
   var handleArchiveNavigate = function handleArchiveNavigate() {
-    navigate("/archived");
+    navigate("/archived?type=students");
+    localStorage.setItem("archiveType", "students");
   };
   var renderModalContent = function renderModalContent() {
     if (modalContentState === "loading") {
