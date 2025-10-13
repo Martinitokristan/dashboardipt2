@@ -93,7 +93,7 @@ class StudentController extends Controller
                 'department_id' => 'required|exists:departments,department_id',
                 'course_id' => 'required|exists:courses,course_id',
                 'academic_year_id' => 'nullable|exists:academic_years,academic_year_id',
-                'year_level' => 'required|in:1,2,3,4,5',
+                'year_level' => 'required|in:1st,2nd,3rd,4th',
             ]);
 
             $student = StudentProfile::create($validated);
@@ -131,7 +131,7 @@ class StudentController extends Controller
                 'department_id' => 'required|exists:departments,department_id',
                 'course_id' => 'required|exists:courses,course_id',
                 'academic_year_id' => 'nullable|exists:academic_years,academic_year_id',
-                'year_level' => 'required|in:1,2,3,4,5',
+                'year_level' => 'required|in:1st,2nd,3rd,4th',
             ]);
 
             $student->update($validated);

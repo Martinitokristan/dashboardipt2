@@ -71041,7 +71041,7 @@ function ArchivedAll() {
                 children: "Year Level"
               })]
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("th", {
-              children: "Deleted At"
+              children: "Archive At"
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("th", {
               className: "text-end",
               children: "Actions"
@@ -73756,7 +73756,7 @@ function Students() {
       department_id: "",
       course_id: "",
       academic_year_id: "",
-      year_level: "1"
+      year_level: "1st" // Changed from "1"
     }),
     _useState16 = _slicedToArray(_useState15, 2),
     form = _useState16[0],
@@ -73780,7 +73780,7 @@ function Students() {
       department_id: "",
       course_id: "",
       academic_year_id: "",
-      year_level: "1"
+      year_level: "1st"
     });
   };
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
@@ -74227,20 +74227,17 @@ function Students() {
             },
             required: true,
             children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
-              value: "1",
-              children: "1"
+              value: "1st",
+              children: "1st Year"
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
-              value: "2",
-              children: "2"
+              value: "2nd",
+              children: "2nd Year"
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
-              value: "3",
-              children: "3"
+              value: "3rd",
+              children: "3rd Year"
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
-              value: "4",
-              children: "4"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
-              value: "5",
-              children: "5"
+              value: "4th",
+              children: "4th Year"
             })]
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("select", {
             className: "form-input",
@@ -74294,9 +74291,6 @@ function Students() {
       className: "page-header",
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h1", {
         className: "page-title",
-        children: "Students"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-        className: "page-subtitle",
         children: "Manage Student Information"
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
         className: "btn btn-primary new-btn",

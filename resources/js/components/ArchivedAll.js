@@ -263,7 +263,7 @@ function ArchivedAll() {
                                         <th>Year Level</th>
                                     </>
                                 )}
-                                <th>Deleted At</th>
+                                <th>Archive At</th>
                                 <th className="text-end">Actions</th>
                             </tr>
                         </thead>

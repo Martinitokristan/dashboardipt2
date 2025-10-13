@@ -28,7 +28,7 @@ function Students() {
         department_id: "",
         course_id: "",
         academic_year_id: "",
-        year_level: "1",
+        year_level: "1st", // Changed from "1"
     });
 
     const closeModalAndReset = () => {
@@ -50,7 +50,7 @@ function Students() {
             department_id: "",
             course_id: "",
             academic_year_id: "",
-            year_level: "1",
+            year_level: "1st",
         });
     };
 
@@ -445,11 +445,10 @@ function Students() {
                             }
                             required
                         >
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
+                            <option value="1st">1st Year</option>
+                            <option value="2nd">2nd Year</option>
+                            <option value="3rd">3rd Year</option>
+                            <option value="4th">4th Year</option>
                         </select>
                         <select
                             className="form-input"
@@ -492,8 +491,7 @@ function Students() {
     return (
         <div className="page">
             <header className="page-header">
-                <h1 className="page-title">Students</h1>
-                <p className="page-subtitle">Manage Student Information</p>
+                <h1 className="page-title">Manage Student Information</h1>
                 <button
                     className="btn btn-primary new-btn"
                     onClick={onOpenForm}
