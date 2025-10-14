@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
 import "../../sass/Login.scss";
 
 function Login() {
+    const location = useLocation();
+    const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
         username: "",
@@ -11,6 +14,14 @@ function Login() {
     });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        // Show message if redirected from protected route
+        if (location.state?.from) {
+            setError("Please log in to access this page");
+        }
+    }, [location]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -150,6 +161,7 @@ function Login() {
                     </div>
                 </div>
             )}
+            {error && <div className="alert alert-warning">{error}</div>}
         </div>
     );
 }

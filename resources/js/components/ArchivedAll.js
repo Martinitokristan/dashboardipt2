@@ -111,12 +111,22 @@ function ArchivedAll() {
         if (!confirm("Are you sure you want to restore this item?")) return;
         setIsLoading(true);
         try {
-            await axios.post(
-                `/api/admin/${type}/${item._id}/restore`,
-                {},
-                { headers }
-            );
-            await refresh();
+            // Map singular type to plural for API endpoint
+            const typeMap = {
+                course: "courses",
+                department: "departments",
+                academic_year: "academic-years",
+                student: "students",
+                faculty: "faculty",
+            };
+            const apiType = typeMap[item._type] || item._type; // Fallback to original type
+            const restoreUrl = `/api/admin/${apiType}/${item._id}/restore`;
+            console.log("Restore URL:", restoreUrl, "Item:", item); // Debug log
+            const response = await axios.post(restoreUrl, {}, { headers });
+            if (response.status === 200) {
+                await refresh();
+                setError(""); // Clear any previous errors on success
+            }
         } catch (err) {
             console.error("Restore error:", err.response?.data || err.message);
             setError(err.response?.data?.message || "Error restoring item");
@@ -133,8 +143,14 @@ function ArchivedAll() {
             return;
         setIsLoading(true);
         try {
-            await axios.delete(`/api/admin/${type}/${item._id}`, { headers });
-            await refresh();
+            const response = await axios.delete(
+                `/api/admin/${item._type}/${item._id}`,
+                { headers }
+            );
+            if (response.status === 200) {
+                await refresh();
+                setError(""); // Clear any previous errors on success
+            }
         } catch (err) {
             console.error("Delete error:", err.response?.data || err.message);
             setError(err.response?.data?.message || "Error deleting item");
@@ -168,7 +184,24 @@ function ArchivedAll() {
                     >
                         <option value="students">Students</option>
                         <option value="faculty">Faculty</option>
+                        <option value="courses">Courses</option>
+                        <option value="departments">Departments</option>
+                        <option value="academic_years">Academic Years</option>
                     </select>
+                    <div className="search">
+                        <span className="icon">🔎</span>
+                        <input
+                            className="search-input"
+                            placeholder="Search by name"
+                            value={filters.search}
+                            onChange={(e) =>
+                                setFilters({
+                                    ...filters,
+                                    search: e.target.value,
+                                })
+                            }
+                        />
+                    </div>
                     <select
                         value={filters.department_id}
                         onChange={(e) =>
@@ -189,56 +222,55 @@ function ArchivedAll() {
                             </option>
                         ))}
                     </select>
-                    <select
-                        value={filters.course_id}
-                        onChange={(e) =>
-                            setFilters({
-                                ...filters,
-                                course_id: e.target.value,
-                            })
-                        }
-                    >
-                        <option value="">All Courses</option>
-                        {filterOptions.courses
-                            .filter(
-                                (c) =>
-                                    !filters.department_id ||
-                                    c.department_id ===
-                                        parseInt(filters.department_id)
-                            )
-                            .map((c) => (
-                                <option key={c.course_id} value={c.course_id}>
-                                    {c.course_name}
+                    {(type === "students" || type === "courses") && (
+                        <select
+                            value={filters.course_id}
+                            onChange={(e) =>
+                                setFilters({
+                                    ...filters,
+                                    course_id: e.target.value,
+                                })
+                            }
+                        >
+                            <option value="">All Courses</option>
+                            {filterOptions.courses
+                                .filter(
+                                    (c) =>
+                                        !filters.department_id ||
+                                        c.department_id ===
+                                            parseInt(filters.department_id)
+                                )
+                                .map((c) => (
+                                    <option
+                                        key={c.course_id}
+                                        value={c.course_id}
+                                    >
+                                        {c.course_name}
+                                    </option>
+                                ))}
+                        </select>
+                    )}
+                    {type === "students" && (
+                        <select
+                            value={filters.academic_year_id}
+                            onChange={(e) =>
+                                setFilters({
+                                    ...filters,
+                                    academic_year_id: e.target.value,
+                                })
+                            }
+                        >
+                            <option value="">All Academic Years</option>
+                            {filterOptions.academicYears.map((a) => (
+                                <option
+                                    key={a.academic_year_id}
+                                    value={a.academic_year_id}
+                                >
+                                    {a.school_year}
                                 </option>
                             ))}
-                    </select>
-                    <select
-                        value={filters.academic_year_id}
-                        onChange={(e) =>
-                            setFilters({
-                                ...filters,
-                                academic_year_id: e.target.value,
-                            })
-                        }
-                    >
-                        <option value="">All Academic Years</option>
-                        {filterOptions.academicYears.map((a) => (
-                            <option
-                                key={a.academic_year_id}
-                                value={a.academic_year_id}
-                            >
-                                {a.school_year}
-                            </option>
-                        ))}
-                    </select>
-                    <input
-                        type="text"
-                        placeholder="Search by name"
-                        value={filters.search}
-                        onChange={(e) =>
-                            setFilters({ ...filters, search: e.target.value })
-                        }
-                    />
+                        </select>
+                    )}
                 </div>
             </div>
 
@@ -257,12 +289,9 @@ function ArchivedAll() {
                             <tr>
                                 <th>Name</th>
                                 <th>Department</th>
-                                {type === "students" && (
-                                    <>
-                                        <th>Course</th>
-                                        <th>Year Level</th>
-                                    </>
-                                )}
+                                {(type === "students" ||
+                                    type === "courses") && <th>Course</th>}
+                                {type === "students" && <th>Year Level</th>}
                                 <th>Archive At</th>
                                 <th className="text-end">Actions</th>
                             </tr>
@@ -272,11 +301,12 @@ function ArchivedAll() {
                                 <tr key={`${item._type}-${item._id || index}`}>
                                     <td>{item._label}</td>
                                     <td>{item._department || "-"}</td>
+                                    {(type === "students" ||
+                                        type === "courses") && (
+                                        <td>{item._course || "-"}</td>
+                                    )}
                                     {type === "students" && (
-                                        <>
-                                            <td>{item._course || "-"}</td>
-                                            <td>{item._year_level || "-"}</td>
-                                        </>
+                                        <td>{item._year_level || "-"}</td>
                                     )}
                                     <td>{formatDate(item.archived_at)}</td>
                                     <td className="text-end">

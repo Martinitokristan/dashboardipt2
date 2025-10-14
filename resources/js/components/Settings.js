@@ -25,41 +25,30 @@ function Settings() {
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (active === "courses") {
-            axios
-                .get("/api/admin/courses")
-                .then((res) =>
-                    setCourses(res.data.filter((c) => !c.archived_at))
-                )
-                .catch(() => {
-                    setError("Failed to load courses");
-                    if (
-                        error.response?.status === 401 ||
-                        error.response?.status === 403
-                    ) {
-                        window.location.href = "/login";
-                    }
-                });
-            axios
-                .get("/api/admin/departments")
-                .then((res) => setDepartments(res.data))
-                .catch(() => setError("Failed to load departments"));
-        } else if (active === "departments") {
-            axios
-                .get("/api/admin/departments")
-                .then((res) =>
-                    setDepartments(res.data.filter((d) => !d.archived_at))
-                )
-                .catch(() => setError("Failed to load departments"));
-        } else if (active === "academic-years") {
-            axios
-                .get("/api/admin/academic-years")
-                .then((res) =>
-                    setAcademicYears(res.data.filter((a) => !a.archived_at))
-                )
-                .catch(() => setError("Failed to load academic years"));
+    const refreshData = async () => {
+        try {
+            if (active === "courses") {
+                const res = await axios.get("/api/admin/courses");
+                setCourses(res.data.filter((c) => !c.archived_at));
+                const deptRes = await axios.get("/api/admin/departments");
+                setDepartments(deptRes.data);
+            } else if (active === "departments") {
+                const res = await axios.get("/api/admin/departments");
+                setDepartments(res.data.filter((d) => !d.archived_at));
+            } else if (active === "academic-years") {
+                const res = await axios.get("/api/admin/academic-years");
+                setAcademicYears(res.data.filter((a) => !a.archived_at));
+            }
+        } catch (err) {
+            setError("Failed to load data");
+            if (err.response?.status === 401 || err.response?.status === 403) {
+                window.location.href = "/login";
+            }
         }
+    };
+
+    useEffect(() => {
+        refreshData();
     }, [active]);
 
     const onOpenForm = () => {
@@ -76,34 +65,58 @@ function Settings() {
 
     const onSubmit = async (e) => {
         e.preventDefault();
+        console.log("Form Data:", form); // Debug log
         try {
             if (active === "courses") {
                 const payload = {
-                    course_name: form.course_name,
-                    department_id: form.department_id,
+                    course_name: form.course_name.trim(),
+                    department_id: form.department_id || undefined, // Ensure valid ID or omit
                 };
-                await axios.post("/api/admin/courses", payload);
-                const res = await axios.get("/api/admin/courses");
-                setCourses(res.data.filter((c) => !c.archived_at));
+                if (!payload.department_id) {
+                    throw new Error("Please select a department.");
+                }
+                const response = await axios.post(
+                    "/api/admin/courses",
+                    payload
+                );
+                if (response.status === 201) {
+                    await refreshData();
+                }
             } else if (active === "departments") {
                 const payload = {
-                    department_name: form.department_name,
-                    department_head: form.department_head || null,
+                    department_name: form.department_name.trim(),
+                    department_head: form.department_head.trim() || null,
                 };
-                await axios.post("/api/admin/departments", payload);
-                const res = await axios.get("/api/admin/departments");
-                setDepartments(res.data.filter((d) => !d.archived_at));
+                const response = await axios.post(
+                    "/api/admin/departments",
+                    payload
+                );
+                if (response.status === 201) {
+                    await refreshData();
+                }
             } else if (active === "academic-years") {
                 const payload = {
-                    school_year: form.school_year,
+                    school_year: form.school_year.trim(),
                 };
-                await axios.post("/api/admin/academic-years", payload);
-                const res = await axios.get("/api/admin/academic-years");
-                setAcademicYears(res.data.filter((a) => !a.archived_at));
+                const response = await axios.post(
+                    "/api/admin/academic-years",
+                    payload
+                );
+                if (response.status === 201) {
+                    await refreshData();
+                }
             }
             setShowForm(false);
         } catch (error) {
-            setError(error.response?.data?.message || "Failed to save");
+            const errorMsg =
+                error.response?.data?.message ||
+                error.message ||
+                "Failed to save";
+            setError(errorMsg);
+            console.error(
+                "Submission Error:",
+                error.response?.data || error.message
+            );
             if (
                 error.response?.status === 401 ||
                 error.response?.status === 403
@@ -116,20 +129,9 @@ function Settings() {
     const handleDelete = async (id) => {
         if (!confirm("Are you sure you want to archive this item?")) return;
         try {
-            if (active === "courses") {
-                await axios.post(`/api/admin/courses/${id}/archive`);
-                setCourses(courses.filter((c) => c.course_id !== id));
-            } else if (active === "departments") {
-                await axios.post(`/api/admin/departments/${id}/archive`);
-                setDepartments(
-                    departments.filter((d) => d.department_id !== id)
-                );
-            } else if (active === "academic-years") {
-                await axios.post(`/api/admin/academic-years/${id}/archive`);
-                setAcademicYears(
-                    academicYears.filter((a) => a.academic_year_id !== id)
-                );
-            }
+            const url = `/api/admin/${active}/${id}/archive`;
+            await axios.post(url);
+            await refreshData();
         } catch (error) {
             setError(error.response?.data?.message || "Failed to archive");
             if (
@@ -141,7 +143,7 @@ function Settings() {
         }
     };
 
-    const handleArchiveNavigate = () => {
+    const handleRestoreNavigate = () => {
         navigate(`/archived?type=${active}`);
     };
 
@@ -222,7 +224,7 @@ function Settings() {
                         </button>
                         <button
                             className="btn btn-primary"
-                            onClick={handleArchiveNavigate}
+                            onClick={handleRestoreNavigate}
                         >
                             View Archived{" "}
                             {active === "courses"

@@ -3,6 +3,11 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../../sass/students.scss";
 
+// Add this utility function
+const getCsrfCookie = async () => {
+    await axios.get("/sanctum/csrf-cookie", { withCredentials: true });
+};
+
 function Students() {
     const [courses, setCourses] = useState([]);
     const [departments, setDepartments] = useState([]);
@@ -28,7 +33,7 @@ function Students() {
         department_id: "",
         course_id: "",
         academic_year_id: "",
-        year_level: "1st", // Changed from "1"
+        year_level: "1st",
     });
 
     const closeModalAndReset = () => {
@@ -141,7 +146,7 @@ function Students() {
             department_id: student.department_id || "",
             course_id: student.course_id || "",
             academic_year_id: student.academic_year_id || "",
-            year_level: student.year_level || "1",
+            year_level: student.year_level || "1st",
         });
     };
 
@@ -178,8 +183,7 @@ function Students() {
                 setModalContentState("success");
             }
         } catch (error) {
-            console.error("Error saving student:", error);
-            setError(error.response?.data?.error || "Failed to save student");
+            setError(error.response?.data?.message || "Failed to save student");
             setModalContentState("form");
             if (
                 error.response?.status === 401 ||
@@ -193,7 +197,8 @@ function Students() {
     const handleDelete = async (id) => {
         if (!confirm("Are you sure you want to archive this student?")) return;
         try {
-            await axios.post(
+            await getCsrfCookie(); // Fetch CSRF token
+            const response = await axios.post(
                 `/api/admin/students/${id}/archive`,
                 {},
                 {
@@ -202,9 +207,13 @@ function Students() {
                             "token"
                         )}`,
                     },
+                    withCredentials: true, // Include cookies
                 }
             );
-            await refresh();
+            if (response.status === 200) {
+                await refresh();
+                setError("");
+            }
         } catch (error) {
             setError(
                 error.response?.data?.error || "Failed to archive student"
@@ -218,178 +227,139 @@ function Students() {
         }
     };
 
-    const handleArchiveNavigate = () => {
-        navigate("/archived?type=students");
-        localStorage.setItem("archiveType", "students");
-    };
-
     const renderModalContent = () => {
         if (modalContentState === "loading") {
-            return (
-                <div className="loading-overlay">
-                    <div className="spinner-border large-spinner" role="status">
-                        <span className="sr-only">Loading...</span>
-                    </div>
-                    <p
-                        style={{
-                            marginTop: "15px",
-                            color: "#4f46e5",
-                            fontWeight: "500",
-                        }}
-                    >
-                        {editingId
-                            ? "Updating Student Data..."
-                            : "Saving New Student Data..."}
-                    </p>
-                </div>
-            );
+            return <div>Loading...</div>;
         }
         if (modalContentState === "success") {
             return (
-                <div className="success-content">
-                    <div className="success-icon-wrapper">
-                        <svg
-                            className="success-icon-svg"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 52 52"
-                        >
-                            <path
-                                className="success-check-path"
-                                fill="none"
-                                d="M14.1 27.2l7.1 7.2 16.7-16.8"
-                            />
-                        </svg>
-                    </div>
-                    <h4 className="success-title">Success!</h4>
-                    <p className="success-subtitle">
-                        {editingId
-                            ? "Student record has been updated."
-                            : "New student has been successfully added."}
-                    </p>
+                <>
+                    <div>Success!</div>
                     <button
-                        className="btn btn-primary btn-close-message"
-                        onClick={closeModalAndReset}
+                        className="btn"
+                        onClick={() => {
+                            closeModalAndReset();
+                            setModalContentState("form");
+                        }}
                     >
-                        Done
+                        Close
                     </button>
-                </div>
+                </>
             );
         }
         return (
             <>
-                <h3 style={{ marginTop: 0, color: "#374151" }}>
-                    {editingId ? "Edit Student" : "Add Student"}
-                </h3>
                 <form onSubmit={handleSubmit}>
-                    <div
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 12,
-                        }}
-                    >
+                    <div className="form-group">
+                        <label>First Name</label>
                         <input
-                            className="form-input"
-                            placeholder="First Name"
+                            type="text"
+                            name="f_name"
                             value={form.f_name}
-                            onChange={(e) =>
-                                setForm({ ...form, f_name: e.target.value })
-                            }
+                            onChange={handleInputChange}
                             required
                         />
+                    </div>
+                    <div className="form-group">
+                        <label>Middle Name</label>
                         <input
-                            className="form-input"
-                            placeholder="Middle Name"
+                            type="text"
+                            name="m_name"
                             value={form.m_name}
-                            onChange={(e) =>
-                                setForm({ ...form, m_name: e.target.value })
-                            }
+                            onChange={handleInputChange}
                         />
+                    </div>
+                    <div className="form-group">
+                        <label>Last Name</label>
                         <input
-                            className="form-input"
-                            placeholder="Last Name"
+                            type="text"
+                            name="l_name"
                             value={form.l_name}
-                            onChange={(e) =>
-                                setForm({ ...form, l_name: e.target.value })
-                            }
+                            onChange={handleInputChange}
                             required
                         />
+                    </div>
+                    <div className="form-group">
+                        <label>Suffix</label>
                         <input
-                            className="form-input"
-                            placeholder="Suffix"
+                            type="text"
+                            name="suffix"
                             value={form.suffix}
-                            onChange={(e) =>
-                                setForm({ ...form, suffix: e.target.value })
-                            }
+                            onChange={handleInputChange}
                         />
+                    </div>
+                    <div className="form-group">
+                        <label>Date of Birth</label>
                         <input
-                            className="form-input"
-                            placeholder="Date of Birth"
-                            value={form.date_of_birth}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    date_of_birth: e.target.value,
-                                })
-                            }
                             type="date"
+                            name="date_of_birth"
+                            value={form.date_of_birth}
+                            onChange={handleInputChange}
                             required
                         />
+                    </div>
+                    <div className="form-group">
+                        <label>Sex</label>
                         <select
-                            className="form-input"
+                            name="sex"
                             value={form.sex}
-                            onChange={(e) =>
-                                setForm({ ...form, sex: e.target.value })
-                            }
+                            onChange={handleInputChange}
                             required
                         >
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                             <option value="other">Other</option>
                         </select>
+                    </div>
+                    <div className="form-group">
+                        <label>Phone Number</label>
                         <input
-                            className="form-input"
-                            placeholder="Phone Number"
+                            type="text"
+                            name="phone_number"
                             value={form.phone_number}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    phone_number: e.target.value,
-                                })
-                            }
+                            onChange={handleInputChange}
                             required
                         />
+                    </div>
+                    <div className="form-group">
+                        <label>Email Address</label>
                         <input
-                            className="form-input"
-                            placeholder="Email Address"
-                            value={form.email_address}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    email_address: e.target.value,
-                                })
-                            }
                             type="email"
+                            name="email_address"
+                            value={form.email_address}
+                            onChange={handleInputChange}
                             required
                         />
-                        <input
-                            className="form-input"
-                            placeholder="Address"
+                    </div>
+                    <div className="form-group">
+                        <label>Address</label>
+                        <textarea
+                            name="address"
                             value={form.address}
-                            onChange={(e) =>
-                                setForm({ ...form, address: e.target.value })
-                            }
+                            onChange={handleInputChange}
                             required
                         />
+                    </div>
+                    <div className="form-group">
+                        <label>Status</label>
                         <select
-                            className="form-input"
+                            name="status"
+                            value={form.status}
+                            onChange={handleInputChange}
+                            required
+                        >
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="graduated">Graduated</option>
+                            <option value="dropped">Dropped</option>
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label>Department</label>
+                        <select
+                            name="department_id"
                             value={form.department_id}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    department_id: e.target.value,
-                                })
-                            }
+                            onChange={handleInputChange}
                             required
                         >
                             <option value="">Select Department</option>
@@ -402,12 +372,13 @@ function Students() {
                                 </option>
                             ))}
                         </select>
+                    </div>
+                    <div className="form-group">
+                        <label>Course</label>
                         <select
-                            className="form-input"
+                            name="course_id"
                             value={form.course_id}
-                            onChange={(e) =>
-                                setForm({ ...form, course_id: e.target.value })
-                            }
+                            onChange={handleInputChange}
                             required
                         >
                             <option value="">Select Course</option>
@@ -417,15 +388,13 @@ function Students() {
                                 </option>
                             ))}
                         </select>
+                    </div>
+                    <div className="form-group">
+                        <label>Academic Year</label>
                         <select
-                            className="form-input"
+                            name="academic_year_id"
                             value={form.academic_year_id}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    academic_year_id: e.target.value,
-                                })
-                            }
+                            onChange={handleInputChange}
                         >
                             <option value="">Select Academic Year</option>
                             {academicYears.map((a) => (
@@ -437,30 +406,19 @@ function Students() {
                                 </option>
                             ))}
                         </select>
+                    </div>
+                    <div className="form-group">
+                        <label>Year Level</label>
                         <select
-                            className="form-input"
+                            name="year_level"
                             value={form.year_level}
-                            onChange={(e) =>
-                                setForm({ ...form, year_level: e.target.value })
-                            }
+                            onChange={handleInputChange}
                             required
                         >
-                            <option value="1st">1st Year</option>
-                            <option value="2nd">2nd Year</option>
-                            <option value="3rd">3rd Year</option>
-                            <option value="4th">4th Year</option>
-                        </select>
-                        <select
-                            className="form-input"
-                            value={form.status}
-                            onChange={(e) =>
-                                setForm({ ...form, status: e.target.value })
-                            }
-                        >
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                            <option value="graduated">Graduated</option>
-                            <option value="dropped">Dropped</option>
+                            <option value="1st">1st</option>
+                            <option value="2nd">2nd</option>
+                            <option value="3rd">3rd</option>
+                            <option value="4th">4th</option>
                         </select>
                     </div>
                     {error && <div className="alert-error">{error}</div>}
@@ -488,10 +446,16 @@ function Students() {
         );
     };
 
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setForm((prev) => ({ ...prev, [name]: value }));
+    };
+
     return (
         <div className="page">
             <header className="page-header">
-                <h1 className="page-title">Manage Student Information</h1>
+                <h1 className="page-title">Students</h1>
+                <p className="page-subtitle">Manage student profiles</p>
                 <button
                     className="btn btn-primary new-btn"
                     onClick={onOpenForm}
@@ -502,7 +466,10 @@ function Students() {
             <div className="actions-row">
                 <button
                     className="btn btn-primary"
-                    onClick={handleArchiveNavigate}
+                    onClick={() => {
+                        navigate("/archived?type=students");
+                        localStorage.setItem("archiveType", "students");
+                    }}
                 >
                     View Archived Students
                 </button>
@@ -511,7 +478,7 @@ function Students() {
                         <span className="icon">🔎</span>
                         <input
                             className="search-input"
-                            placeholder="Search here..."
+                            placeholder="Search by name..."
                             value={filters.search}
                             onChange={(e) =>
                                 setFilters({
@@ -519,7 +486,6 @@ function Students() {
                                     search: e.target.value,
                                 })
                             }
-                            onBlur={refresh}
                         />
                     </div>
                     <select
@@ -643,6 +609,7 @@ function Students() {
                     <div className="modal-card">{renderModalContent()}</div>
                 </div>
             )}
+            {error && <div className="alert-error">{error}</div>}
         </div>
     );
 }

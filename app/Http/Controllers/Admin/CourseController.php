@@ -12,7 +12,7 @@ class CourseController extends Controller
     public function index(Request $request)
     {
         $query = Course::with('department');
-        $courses = $query->orderByDesc('created_at')->get();
+        $courses = $query->get();
         return response()->json($courses);
     }
 
@@ -57,21 +57,21 @@ class CourseController extends Controller
         return response()->json($course);
     }
 
-    public function softDelete(Request $request, $id)
+    public function archive(Request $request, $id)
     {
         $course = Course::findOrFail($id);
         if ($course->trashed()) {
-            return response()->json(['message' => 'Already deleted'], 200);
+            return response()->json(['message' => 'Already archived'], 200);
         }
-        $course->delete();
-        return response()->json(['message' => 'Course deleted successfully']);
+        $course->delete(); // Uses SoftDeletes with archived_at
+        return response()->json(['message' => 'Course archived successfully']);
     }
 
     public function restore(Request $request, $id)
     {
         $course = Course::withTrashed()->findOrFail($id);
         if (!$course->trashed()) {
-            return response()->json(['message' => 'Not deleted'], 200);
+            return response()->json(['message' => 'Not archived'], 200);
         }
         $course->restore();
         return response()->json($course->fresh());

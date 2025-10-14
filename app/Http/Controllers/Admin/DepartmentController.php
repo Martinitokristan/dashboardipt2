@@ -12,7 +12,7 @@ class DepartmentController extends Controller
     public function index(Request $request)
     {
         $query = Department::query();
-        $departments = $query->orderByDesc('created_at')->get();
+        $departments = $query->get();
         return response()->json($departments);
     }
 
@@ -51,23 +51,23 @@ class DepartmentController extends Controller
         return response()->json($department);
     }
 
-    public function softDelete(Request $request, $id)
+    public function archive(Request $request, $id)
     {
         $department = Department::findOrFail($id);
-        if ($department->archived_at) {
+        if ($department->trashed()) {
             return response()->json(['message' => 'Already archived'], 200);
         }
-        $department->update(['archived_at' => now()]);
+        $department->delete(); // Uses SoftDeletes with archived_at
         return response()->json(['message' => 'Department archived successfully']);
     }
 
     public function restore(Request $request, $id)
     {
-        $department = Department::findOrFail($id);
-        if (!$department->archived_at) {
+        $department = Department::withTrashed()->findOrFail($id);
+        if (!$department->trashed()) {
             return response()->json(['message' => 'Not archived'], 200);
         }
-        $department->update(['archived_at' => null]);
+        $department->restore();
         return response()->json($department->fresh());
     }
 }

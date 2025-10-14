@@ -35,17 +35,23 @@ class AcademicYearController extends Controller
         return response()->json($academicYear);
     }
 
-    public function softDelete($id)
+    public function archive(Request $request, $id)
     {
         $academicYear = AcademicYear::findOrFail($id);
-        $academicYear->update(['archived_at' => now()]);
+        if ($academicYear->trashed()) {
+            return response()->json(['message' => 'Already archived'], 200);
+        }
+        $academicYear->delete(); // Uses SoftDeletes with archived_at
         return response()->json(['message' => 'Academic year archived successfully']);
     }
 
-    public function restore($id)
+    public function restore(Request $request, $id)
     {
-        $academicYear = AcademicYear::findOrFail($id);
-        $academicYear->update(['archived_at' => null]);
+        $academicYear = AcademicYear::withTrashed()->findOrFail($id);
+        if (!$academicYear->trashed()) {
+            return response()->json(['message' => 'Not archived'], 200);
+        }
+        $academicYear->restore();
         return response()->json(['message' => 'Academic year restored successfully']);
     }
 }

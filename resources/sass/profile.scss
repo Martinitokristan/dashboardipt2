@@ -1,124 +1,190 @@
 /* resources/sass/profile.scss */
-.page {
-    background: #eef0ff;
-    min-height: 100vh;
+.page-container {
+    max-width: 1200px; // Increased width for better header/button spacing
+    margin: 0 auto;
+    padding: 30px; // Increased padding for space from screen edges
 }
 .profile-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 24px;
 }
-.page-header {
-    padding: 16px 0;
-}
+
 .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
     margin: 0;
 }
 .page-subtitle {
     margin: 2px 0;
     color: #6b7280;
+    font-size: 14px;
 }
 .page-subtitle.subtle {
     color: #9ca3af;
+    font-size: 14px;
+    margin-top: 5px; // Added space below the first subtitle
 }
 .btn {
     border: 1px solid #e5e7eb;
     background: #f8fafc;
     border-radius: 8px;
     padding: 8px 14px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
 }
 .btn-primary {
     background: #4f46e5;
     color: #fff;
     border-color: #4f46e5;
+    &:hover {
+        background: #4338ca;
+    }
+}
+.btn-secondary {
+    // Default styling from 'btn' is usually sufficient for secondary
+    background: #fff;
+    color: #374151;
 }
 .btn-danger {
     background: #ef4444;
     color: #fff;
     border-color: #ef4444;
+    &:hover {
+        background: #dc2626;
+    }
 }
+.log-out-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    font-weight: 600;
+    font-size: 15px; // Slightly larger text
+}
+// --- UNIQUE BUTTON STYLING ---
+.edit-profile-button {
+    // Styling for the distinct purple button look
+    background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    // Added a slight blue box shadow to mimic the glow/depth
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
+    padding: 10px 24px;
+    border-radius: 10px; // Larger border radius
+    font-size: 16px;
+    font-weight: 600;
+    &:hover {
+        background: linear-gradient(180deg, #4f46e5 0%, #3730a3 100%);
+        box-shadow: 0 6px 15px rgba(79, 70, 229, 0.6);
+    }
+}
+// --- END UNIQUE BUTTON STYLING ---
 
 .profile-grid {
     display: grid;
     grid-template-columns: 260px 1fr;
     gap: 16px;
+    margin-top: 20px;
 }
 .profile-card {
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
-    padding: 16px;
+    padding: 32px 16px;
     text-align: center;
+    height: fit-content;
 }
 .avatar img {
-    width: 96px;
-    height: 96px;
+    width: 100px; // Slightly larger avatar
+    height: 100px;
     border-radius: 50%;
+    object-fit: cover;
 }
 .profile-name {
     font-weight: 700;
-    margin-top: 8px;
+    margin-top: 16px; // Increased space
+    font-size: 18px;
+    color: #111827;
 }
 .profile-email {
     color: #6b7280;
-    font-size: 12px;
+    font-size: 14px;
+    margin-top: 4px;
 }
 .profile-role {
-    margin-top: 4px;
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151; // Changed to dark gray for ADMIN tag in this design
 }
 
 .card {
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
-    padding: 16px;
+    padding: 24px; // Consistent padding inside form card
 }
 .form-row {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    margin-bottom: 12px;
+    margin-bottom: 20px; // Increased bottom margin
 }
 .form-row label {
-    font-size: 12px;
-    color: #6b7280;
+    font-size: 14px;
+    font-weight: 500;
+    color: #111827;
 }
 .form-row input {
-    height: 36px;
-    border: 1px solid #e5e7eb;
+    height: 44px; // Taller input field to match image
+    border: 1px solid #d1d5db;
     border-radius: 8px;
-    padding: 0 10px;
+    padding: 0 12px;
+    font-size: 16px;
+
+    &[readonly],
+    &[disabled] {
+        background-color: #f9fafb;
+        color: #4b5563;
+        border-color: #e5e7eb; // Slightly lighter border when disabled
+    }
 }
 .form-actions {
     display: flex;
-    justify-content: flex-start;
+    // --- UPDATED TO CENTER THE BUTTONS ---
+    justify-content: center;
+    // ------------------------------------
+    padding-top: 10px;
 }
 
 .account-action {
-    margin-top: 16px;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 16px;
+    grid-column: 1 / -1; // Span across both columns
+    margin-top: 30px; // Increased vertical margin
 }
 .action-title {
     font-weight: 600;
-    margin-bottom: 8px;
+    font-size: 18px;
+    margin-bottom: 12px;
 }
 .logout-box {
     background: #fee2e2;
     border: 1px solid #fecaca;
     border-radius: 6px;
-    padding: 12px;
+    padding: 16px;
     color: #991b1b;
+    cursor: pointer;
+    &:hover {
+        background: #fecaca;
+    }
 }
 .logout-box span {
-    font-size: 12px;
+    font-size: 14px;
     color: #7f1d1d;
-}
-.page-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #111827;
-    margin: 0;
+    display: block;
+    margin-top: 4px;
 }
