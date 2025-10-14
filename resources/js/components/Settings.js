@@ -209,8 +209,15 @@ function Settings() {
                             display: "flex",
                             justifyContent: "space-between",
                             alignItems: "center",
+                            marginBottom: "20px",
                         }}
                     >
+                        <button
+                            className="btn btn-primary"
+                            onClick={handleRestoreNavigate}
+                        >
+                            View Archived
+                        </button>
                         <button
                             className="btn btn-primary"
                             onClick={onOpenForm}
@@ -222,22 +229,11 @@ function Settings() {
                                 ? "Department"
                                 : "Academic Year"}
                         </button>
-                        <button
-                            className="btn btn-primary"
-                            onClick={handleRestoreNavigate}
-                        >
-                            View Archived{" "}
-                            {active === "courses"
-                                ? "Courses"
-                                : active === "departments"
-                                ? "Departments"
-                                : "Academic Years"}
-                        </button>
                     </div>
 
                     {active === "courses" && (
                         <div className="table-wrapper">
-                            <table>
+                            <table className="settings-table">
                                 <thead>
                                     <tr>
                                         <th>Name</th>
@@ -274,7 +270,7 @@ function Settings() {
 
                     {active === "departments" && (
                         <div className="table-wrapper">
-                            <table>
+                            <table className="settings-table">
                                 <thead>
                                     <tr>
                                         <th>Name</th>
@@ -308,7 +304,7 @@ function Settings() {
 
                     {active === "academic-years" && (
                         <div className="table-wrapper">
-                            <table>
+                            <table className="settings-table">
                                 <thead>
                                     <tr>
                                         <th>School Year</th>
@@ -338,6 +334,7 @@ function Settings() {
                         </div>
                     )}
 
+                    {/* Modal forms (unchanged) */}
                     {showForm && active === "courses" && (
                         <div className="modal-overlay">
                             <div className="modal-card">

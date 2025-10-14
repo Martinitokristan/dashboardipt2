@@ -3,7 +3,7 @@
 :root {
     --bg-app: #eef0ff;
     --bg-sidebar: #111827;
-    --bg-accent: #4338CA;
+    --bg-accent: #4338ca;
     --text-muted: #6b7280;
     --text-on-dark: #cbd5e1;
     --card-bg: #ffffff;
@@ -22,7 +22,7 @@
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.35);
+    background: rgba(0, 0, 0, 0.35);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -33,7 +33,7 @@
     width: 560px;
     background: #f6f7ff;
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     padding: 20px;
     border: 1px solid #d9dcff;
 }
@@ -208,4 +208,9 @@
     border-bottom-right-radius: 10px;
 }
 
-.page-title { font-size: 24px;font-weight: 700; color: #111827;margin: 0;}
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}

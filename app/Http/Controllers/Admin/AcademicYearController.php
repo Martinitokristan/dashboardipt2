@@ -41,7 +41,7 @@ class AcademicYearController extends Controller
         if ($academicYear->trashed()) {
             return response()->json(['message' => 'Already archived'], 200);
         }
-        $academicYear->delete(); // Uses SoftDeletes with archived_at
+        $academicYear->delete();
         return response()->json(['message' => 'Academic year archived successfully']);
     }
 
@@ -52,6 +52,13 @@ class AcademicYearController extends Controller
             return response()->json(['message' => 'Not archived'], 200);
         }
         $academicYear->restore();
-        return response()->json(['message' => 'Academic year restored successfully']);
+        return response()->json($academicYear->fresh(), 200); // Return refreshed model
+    }
+
+    public function destroy($id)
+    {
+        $academicYear = AcademicYear::withTrashed()->findOrFail($id);
+        $academicYear->forceDelete();
+        return response()->json(['message' => 'Academic year permanently deleted'], 200);
     }
 }

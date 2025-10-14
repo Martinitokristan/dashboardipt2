@@ -13,6 +13,7 @@ function Students() {
     const [departments, setDepartments] = useState([]);
     const [academicYears, setAcademicYears] = useState([]);
     const [students, setStudents] = useState([]);
+    // State for modal content: "form", "loading", or "success"
     const [modalContentState, setModalContentState] = useState("form");
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState(null);
@@ -33,8 +34,16 @@ function Students() {
         department_id: "",
         course_id: "",
         academic_year_id: "",
-        year_level: "1st",
+        year_level: "1st", // Changed '1' back to '1st' to match the options list
     });
+
+    // NOTE: This function's logic is kept for functionality, but its usage
+    // is replaced by direct inline state setters in the form for UI fidelity.
+    // However, I'll keep the actual helper in case other parts of the app rely on it.
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setForm((prev) => ({ ...prev, [name]: value }));
+    };
 
     const closeModalAndReset = () => {
         setShowForm(false);
@@ -57,6 +66,11 @@ function Students() {
             academic_year_id: "",
             year_level: "1st",
         });
+    };
+
+    const handleArchiveNavigate = () => {
+        navigate("/archived?type=students");
+        localStorage.setItem("archiveType", "students");
     };
 
     useEffect(() => {
@@ -146,7 +160,7 @@ function Students() {
             department_id: student.department_id || "",
             course_id: student.course_id || "",
             academic_year_id: student.academic_year_id || "",
-            year_level: student.year_level || "1st",
+            year_level: student.year_level || "1st", // Defaulted to '1st'
         });
     };
 
@@ -227,139 +241,177 @@ function Students() {
         }
     };
 
+    // START: Copied UI implementation from your old code
     const renderModalContent = () => {
         if (modalContentState === "loading") {
-            return <div>Loading...</div>;
-        }
-        if (modalContentState === "success") {
+            // Loading State UI Copy
             return (
-                <>
-                    <div>Success!</div>
-                    <button
-                        className="btn"
-                        onClick={() => {
-                            closeModalAndReset();
-                            setModalContentState("form");
+                <div className="loading-overlay">
+                    <div className="spinner-border large-spinner" role="status">
+                        <span className="sr-only">Loading...</span>
+                    </div>
+                    <p
+                        style={{
+                            marginTop: "15px",
+                            color: "#4f46e5",
+                            fontWeight: "500",
                         }}
                     >
-                        Close
-                    </button>
-                </>
+                        {editingId
+                            ? "Updating Student Data..."
+                            : "Saving New Student Data..."}
+                    </p>
+                </div>
             );
         }
+        if (modalContentState === "success") {
+            // Success State UI Copy (including the inline SVG)
+            return (
+                <div className="success-content">
+                    <div className="success-icon-wrapper">
+                        <svg
+                            className="success-icon-svg"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 52 52"
+                        >
+                            <path
+                                className="success-check-path"
+                                fill="none"
+                                d="M14.1 27.2l7.1 7.2 16.7-16.8"
+                            />
+                        </svg>
+                    </div>
+                    <h4 className="success-title">Success!</h4>
+                    <p className="success-subtitle">
+                        {editingId
+                            ? "Student record has been updated."
+                            : "New student has been successfully added."}
+                    </p>
+                    <button
+                        className="btn btn-primary btn-close-message"
+                        onClick={closeModalAndReset}
+                    >
+                        Done
+                    </button>
+                </div>
+            );
+        }
+        // Form State UI Copy (including inline styles and direct state updates)
         return (
             <>
+                <h3 style={{ marginTop: 0, color: "#374151" }}>
+                    {editingId ? "Edit Student" : "Add Student"}
+                </h3>
                 <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>First Name</label>
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 12,
+                        }}
+                    >
                         <input
-                            type="text"
-                            name="f_name"
+                            className="form-input"
+                            placeholder="First Name"
                             value={form.f_name}
-                            onChange={handleInputChange}
+                            onChange={(e) =>
+                                setForm({ ...form, f_name: e.target.value })
+                            }
                             required
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Middle Name</label>
                         <input
-                            type="text"
-                            name="m_name"
+                            className="form-input"
+                            placeholder="Middle Name"
                             value={form.m_name}
-                            onChange={handleInputChange}
+                            onChange={(e) =>
+                                setForm({ ...form, m_name: e.target.value })
+                            }
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Last Name</label>
                         <input
-                            type="text"
-                            name="l_name"
+                            className="form-input"
+                            placeholder="Last Name"
                             value={form.l_name}
-                            onChange={handleInputChange}
+                            onChange={(e) =>
+                                setForm({ ...form, l_name: e.target.value })
+                            }
                             required
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Suffix</label>
                         <input
-                            type="text"
-                            name="suffix"
+                            className="form-input"
+                            placeholder="Suffix"
                             value={form.suffix}
-                            onChange={handleInputChange}
+                            onChange={(e) =>
+                                setForm({ ...form, suffix: e.target.value })
+                            }
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Date of Birth</label>
                         <input
-                            type="date"
-                            name="date_of_birth"
+                            className="form-input"
+                            placeholder="Date of Birth"
                             value={form.date_of_birth}
-                            onChange={handleInputChange}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    date_of_birth: e.target.value,
+                                })
+                            }
+                            type="date"
                             required
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Sex</label>
                         <select
-                            name="sex"
+                            className="form-input"
                             value={form.sex}
-                            onChange={handleInputChange}
+                            onChange={(e) =>
+                                setForm({ ...form, sex: e.target.value })
+                            }
                             required
                         >
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                             <option value="other">Other</option>
                         </select>
-                    </div>
-                    <div className="form-group">
-                        <label>Phone Number</label>
                         <input
-                            type="text"
-                            name="phone_number"
+                            className="form-input"
+                            placeholder="Phone Number"
                             value={form.phone_number}
-                            onChange={handleInputChange}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    phone_number: e.target.value,
+                                })
+                            }
                             required
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Email Address</label>
                         <input
-                            type="email"
-                            name="email_address"
+                            className="form-input"
+                            placeholder="Email Address"
                             value={form.email_address}
-                            onChange={handleInputChange}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    email_address: e.target.value,
+                                })
+                            }
+                            type="email"
                             required
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Address</label>
-                        <textarea
-                            name="address"
+                        <input
+                            className="form-input"
+                            placeholder="Address"
                             value={form.address}
-                            onChange={handleInputChange}
+                            onChange={(e) =>
+                                setForm({ ...form, address: e.target.value })
+                            }
                             required
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Status</label>
                         <select
-                            name="status"
-                            value={form.status}
-                            onChange={handleInputChange}
-                            required
-                        >
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                            <option value="graduated">Graduated</option>
-                            <option value="dropped">Dropped</option>
-                        </select>
-                    </div>
-                    <div className="form-group">
-                        <label>Department</label>
-                        <select
-                            name="department_id"
+                            className="form-input"
                             value={form.department_id}
-                            onChange={handleInputChange}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    department_id: e.target.value,
+                                })
+                            }
                             required
                         >
                             <option value="">Select Department</option>
@@ -372,13 +424,12 @@ function Students() {
                                 </option>
                             ))}
                         </select>
-                    </div>
-                    <div className="form-group">
-                        <label>Course</label>
                         <select
-                            name="course_id"
+                            className="form-input"
                             value={form.course_id}
-                            onChange={handleInputChange}
+                            onChange={(e) =>
+                                setForm({ ...form, course_id: e.target.value })
+                            }
                             required
                         >
                             <option value="">Select Course</option>
@@ -388,13 +439,15 @@ function Students() {
                                 </option>
                             ))}
                         </select>
-                    </div>
-                    <div className="form-group">
-                        <label>Academic Year</label>
                         <select
-                            name="academic_year_id"
+                            className="form-input"
                             value={form.academic_year_id}
-                            onChange={handleInputChange}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    academic_year_id: e.target.value,
+                                })
+                            }
                         >
                             <option value="">Select Academic Year</option>
                             {academicYears.map((a) => (
@@ -406,19 +459,30 @@ function Students() {
                                 </option>
                             ))}
                         </select>
-                    </div>
-                    <div className="form-group">
-                        <label>Year Level</label>
                         <select
-                            name="year_level"
+                            className="form-input"
                             value={form.year_level}
-                            onChange={handleInputChange}
+                            onChange={(e) =>
+                                setForm({ ...form, year_level: e.target.value })
+                            }
                             required
                         >
-                            <option value="1st">1st</option>
-                            <option value="2nd">2nd</option>
-                            <option value="3rd">3rd</option>
-                            <option value="4th">4th</option>
+                            <option value="1st">1st Year</option>
+                            <option value="2nd">2nd Year</option>
+                            <option value="3rd">3rd Year</option>
+                            <option value="4th">4th Year</option>
+                        </select>
+                        <select
+                            className="form-input"
+                            value={form.status}
+                            onChange={(e) =>
+                                setForm({ ...form, status: e.target.value })
+                            }
+                        >
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="graduated">Graduated</option>
+                            <option value="dropped">Dropped</option>
                         </select>
                     </div>
                     {error && <div className="alert-error">{error}</div>}
@@ -445,17 +509,12 @@ function Students() {
             </>
         );
     };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
-    };
+    // END: Copied UI implementation from your old code
 
     return (
         <div className="page">
             <header className="page-header">
-                <h1 className="page-title">Students</h1>
-                <p className="page-subtitle">Manage student profiles</p>
+                <h1 className="page-title">Manage Student Information</h1>
                 <button
                     className="btn btn-primary new-btn"
                     onClick={onOpenForm}
@@ -466,10 +525,7 @@ function Students() {
             <div className="actions-row">
                 <button
                     className="btn btn-primary"
-                    onClick={() => {
-                        navigate("/archived?type=students");
-                        localStorage.setItem("archiveType", "students");
-                    }}
+                    onClick={handleArchiveNavigate}
                 >
                     View Archived Students
                 </button>
@@ -478,7 +534,7 @@ function Students() {
                         <span className="icon">🔎</span>
                         <input
                             className="search-input"
-                            placeholder="Search by name..."
+                            placeholder="Search here..."
                             value={filters.search}
                             onChange={(e) =>
                                 setFilters({
@@ -486,6 +542,7 @@ function Students() {
                                     search: e.target.value,
                                 })
                             }
+                            onBlur={refresh}
                         />
                     </div>
                     <select

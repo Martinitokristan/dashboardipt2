@@ -3,11 +3,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../../sass/faculty.scss";
 
-// Add this utility function
-const getCsrfCookie = async () => {
-    await axios.get("/sanctum/csrf-cookie", { withCredentials: true });
-};
-
 function Faculty() {
     const [faculty, setFaculty] = useState([]);
     const [departments, setDepartments] = useState([]);
@@ -138,19 +133,7 @@ function Faculty() {
     const handleDelete = async (id) => {
         if (!confirm("Are you sure you want to archive this faculty?")) return;
         try {
-            await getCsrfCookie(); // Fetch CSRF token
-            await axios.post(
-                `/api/admin/faculty/${id}/archive`,
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "token"
-                        )}`,
-                    },
-                    withCredentials: true, // Include cookies
-                }
-            );
+            await axios.post(`/api/admin/faculty/${id}/archive`);
             await loadFaculty();
         } catch (error) {
             setError(
@@ -185,82 +168,115 @@ function Faculty() {
             department_id: facultyMember.department_id || "",
         });
         setShowForm(true);
+        setModalContentState("form");
     };
 
     const renderModalContent = () => {
         if (modalContentState === "loading") {
-            return <div>Loading...</div>;
+            return (
+                <div className="loading-overlay">
+                    <div className="spinner-border large-spinner" role="status">
+                        <span className="sr-only">Loading...</span>
+                    </div>
+                    <p
+                        style={{
+                            marginTop: "15px",
+                            color: "#4f46e5",
+                            fontWeight: "500",
+                        }}
+                    >
+                        {editingId
+                            ? "Updating Faculty Data..."
+                            : "Saving New Faculty Data..."}
+                    </p>
+                </div>
+            );
         }
         if (modalContentState === "success") {
             return (
-                <>
-                    <div>Success!</div>
+                <div className="success-content">
+                    <div className="success-icon-wrapper">
+                        <svg
+                            className="success-icon-svg"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 52 52"
+                        >
+                            <path
+                                className="success-check-path"
+                                fill="none"
+                                d="M14.1 27.2l7.1 7.2 16.7-16.8"
+                            />
+                        </svg>
+                    </div>
+                    <h4 className="success-title">Success!</h4>
+                    <p className="success-subtitle">
+                        {editingId
+                            ? "Faculty record has been updated."
+                            : "New faculty has been successfully added."}
+                    </p>
                     <button
-                        className="btn"
-                        onClick={() => {
-                            closeModalAndReset();
-                            setModalContentState("form");
-                        }}
+                        className="btn btn-primary btn-close-message"
+                        onClick={closeModalAndReset}
                     >
-                        Close
+                        Done
                     </button>
-                </>
+                </div>
             );
         }
         return (
             <>
+                <h3 style={{ marginTop: 0, color: "#374151" }}>
+                    {editingId ? "Edit Faculty" : "Add Faculty"}
+                </h3>
                 <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>First Name</label>
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 12,
+                        }}
+                    >
                         <input
-                            type="text"
+                            className="form-input"
+                            placeholder="First Name"
                             name="f_name"
                             value={formData.f_name}
                             onChange={handleInputChange}
                             required
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Middle Name</label>
                         <input
-                            type="text"
+                            className="form-input"
+                            placeholder="Middle Name"
                             name="m_name"
                             value={formData.m_name}
                             onChange={handleInputChange}
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Last Name</label>
                         <input
-                            type="text"
+                            className="form-input"
+                            placeholder="Last Name"
                             name="l_name"
                             value={formData.l_name}
                             onChange={handleInputChange}
                             required
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Suffix</label>
                         <input
-                            type="text"
+                            className="form-input"
+                            placeholder="Suffix"
                             name="suffix"
                             value={formData.suffix}
                             onChange={handleInputChange}
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Date of Birth</label>
                         <input
-                            type="date"
+                            className="form-input"
+                            placeholder="Date of Birth"
                             name="date_of_birth"
                             value={formData.date_of_birth}
                             onChange={handleInputChange}
+                            type="date"
                             required
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Sex</label>
                         <select
+                            className="form-input"
                             name="sex"
                             value={formData.sex}
                             onChange={handleInputChange}
@@ -270,39 +286,33 @@ function Faculty() {
                             <option value="female">Female</option>
                             <option value="other">Other</option>
                         </select>
-                    </div>
-                    <div className="form-group">
-                        <label>Phone Number</label>
                         <input
-                            type="text"
+                            className="form-input"
+                            placeholder="Phone Number"
                             name="phone_number"
                             value={formData.phone_number}
                             onChange={handleInputChange}
                             required
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Email Address</label>
                         <input
-                            type="email"
+                            className="form-input"
+                            placeholder="Email Address"
                             name="email_address"
                             value={formData.email_address}
                             onChange={handleInputChange}
+                            type="email"
                             required
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Address</label>
-                        <textarea
+                        <input
+                            className="form-input"
+                            placeholder="Address"
                             name="address"
                             value={formData.address}
                             onChange={handleInputChange}
                             required
                         />
-                    </div>
-                    <div className="form-group">
-                        <label>Department</label>
                         <select
+                            className="form-input"
                             name="department_id"
                             value={formData.department_id}
                             onChange={handleInputChange}
@@ -416,10 +426,10 @@ function Faculty() {
                                         className="btn btn-light"
                                         onClick={() => onOpenEditForm(f)}
                                     >
-                                        Edit
+                                        ✎ Edit
                                     </button>
                                     <button
-                                        className="btn btn-danger"
+                                        className="btn btn-primary"
                                         onClick={() =>
                                             handleDelete(f.faculty_id)
                                         }
