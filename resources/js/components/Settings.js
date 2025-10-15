@@ -150,9 +150,8 @@ function Settings() {
     return (
         <div className="settings-content">
             <header className="page-header">
-                <h1 className="page-title">
-                    Manage Courses, Departments, and Academic Year
-                </h1>
+                <h1 className="page-title">Settings</h1>
+                <p className="page-subtitle">Manage courses, departments, and academic years</p>
             </header>
 
             {error && <div className="alert-error">{error}</div>}

@@ -514,7 +514,8 @@ function Students() {
     return (
         <div className="page">
             <header className="page-header">
-                <h1 className="page-title">Manage Student Information</h1>
+                <h1 className="page-title">Students</h1>
+                <p className="page-subtitle">Manage student profiles</p>
                 <button
                     className="btn btn-primary new-btn"
                     onClick={onOpenForm}

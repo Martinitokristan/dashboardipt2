@@ -175,16 +175,11 @@ function Faculty() {
         if (modalContentState === "loading") {
             return (
                 <div className="loading-overlay">
-                    <div className="spinner-border large-spinner" role="status">
-                        <span className="sr-only">Loading...</span>
-                    </div>
-                    <p
-                        style={{
-                            marginTop: "15px",
-                            color: "#4f46e5",
-                            fontWeight: "500",
-                        }}
-                    >
+                    <div
+                        className="spinner-border large-spinner"
+                        role="status"
+                    ></div>
+                    <p className="loading-text">
                         {editingId
                             ? "Updating Faculty Data..."
                             : "Saving New Faculty Data..."}
@@ -192,6 +187,7 @@ function Faculty() {
                 </div>
             );
         }
+
         if (modalContentState === "success") {
             return (
                 <div className="success-content">
@@ -223,133 +219,133 @@ function Faculty() {
                 </div>
             );
         }
+
         return (
             <>
-                <h3 style={{ marginTop: 0, color: "#374151" }}>
-                    {editingId ? "Edit Faculty" : "Add Faculty"}
-                </h3>
-                <form onSubmit={handleSubmit}>
-                    <div
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 12,
-                        }}
-                    >
-                        <input
-                            className="form-input"
-                            placeholder="First Name"
-                            name="f_name"
-                            value={formData.f_name}
-                            onChange={handleInputChange}
-                            required
-                        />
-                        <input
-                            className="form-input"
-                            placeholder="Middle Name"
-                            name="m_name"
-                            value={formData.m_name}
-                            onChange={handleInputChange}
-                        />
-                        <input
-                            className="form-input"
-                            placeholder="Last Name"
-                            name="l_name"
-                            value={formData.l_name}
-                            onChange={handleInputChange}
-                            required
-                        />
-                        <input
-                            className="form-input"
-                            placeholder="Suffix"
-                            name="suffix"
-                            value={formData.suffix}
-                            onChange={handleInputChange}
-                        />
-                        <input
-                            className="form-input"
-                            placeholder="Date of Birth"
-                            name="date_of_birth"
-                            value={formData.date_of_birth}
-                            onChange={handleInputChange}
-                            type="date"
-                            required
-                        />
-                        <select
-                            className="form-input"
-                            name="sex"
-                            value={formData.sex}
-                            onChange={handleInputChange}
-                            required
-                        >
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="other">Other</option>
-                        </select>
-                        <input
-                            className="form-input"
-                            placeholder="Phone Number"
-                            name="phone_number"
-                            value={formData.phone_number}
-                            onChange={handleInputChange}
-                            required
-                        />
-                        <input
-                            className="form-input"
-                            placeholder="Email Address"
-                            name="email_address"
-                            value={formData.email_address}
-                            onChange={handleInputChange}
-                            type="email"
-                            required
-                        />
-                        <input
-                            className="form-input"
-                            placeholder="Address"
-                            name="address"
-                            value={formData.address}
-                            onChange={handleInputChange}
-                            required
-                        />
-                        <select
-                            className="form-input"
-                            name="department_id"
-                            value={formData.department_id}
-                            onChange={handleInputChange}
-                            required
-                        >
-                            <option value="">Select Department</option>
-                            {departments.map((dept) => (
-                                <option
-                                    key={dept.department_id}
-                                    value={dept.department_id}
-                                >
-                                    {dept.department_name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    {error && <div className="alert-error">{error}</div>}
-                    <div
-                        style={{
-                            marginTop: 20,
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            gap: 12,
-                        }}
-                    >
-                        <button
-                            className="btn"
-                            type="button"
-                            onClick={closeModalAndReset}
-                        >
-                            Cancel
-                        </button>
-                        <button className="btn btn-primary" type="submit">
-                            {editingId ? "Update Faculty" : "Add Faculty"}
-                        </button>
-                    </div>
-                </form>
+                <div className="modal-header">
+                    <h3 className="modal-header-title">
+                        {editingId ? "Edit Faculty" : "Add New Faculty"}
+                    </h3>
+                    <p className="modal-header-subtitle">
+                        {editingId
+                            ? "Update faculty details below"
+                            : "Fill out the information to add a new faculty member."}
+                    </p>
+                </div>
+                <div className="modal-body">
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-scroll-area">
+                            <input
+                                className="form-input"
+                                placeholder="First Name"
+                                name="f_name"
+                                value={formData.f_name}
+                                onChange={handleInputChange}
+                                required
+                            />
+                            <input
+                                className="form-input"
+                                placeholder="Middle Name"
+                                name="m_name"
+                                value={formData.m_name}
+                                onChange={handleInputChange}
+                            />
+                            <input
+                                className="form-input"
+                                placeholder="Last Name"
+                                name="l_name"
+                                value={formData.l_name}
+                                onChange={handleInputChange}
+                                required
+                            />
+                            <input
+                                className="form-input"
+                                placeholder="Suffix"
+                                name="suffix"
+                                value={formData.suffix}
+                                onChange={handleInputChange}
+                            />
+                            <input
+                                className="form-input"
+                                type="date"
+                                placeholder="Date of Birth"
+                                name="date_of_birth"
+                                value={formData.date_of_birth}
+                                onChange={handleInputChange}
+                                required
+                            />
+                            <select
+                                className="form-input"
+                                name="sex"
+                                value={formData.sex}
+                                onChange={handleInputChange}
+                                required
+                            >
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <input
+                                className="form-input"
+                                placeholder="Phone Number"
+                                name="phone_number"
+                                value={formData.phone_number}
+                                onChange={handleInputChange}
+                                required
+                            />
+                            <input
+                                className="form-input"
+                                placeholder="Email Address"
+                                name="email_address"
+                                value={formData.email_address}
+                                onChange={handleInputChange}
+                                type="email"
+                                required
+                            />
+                            <input
+                                className="form-input"
+                                placeholder="Address"
+                                name="address"
+                                value={formData.address}
+                                onChange={handleInputChange}
+                                required
+                            />
+                            <select
+                                className="form-input"
+                                name="department_id"
+                                value={formData.department_id}
+                                onChange={handleInputChange}
+                                required
+                            >
+                                <option value="">Select Department</option>
+                                {departments.map((dept) => (
+                                    <option
+                                        key={dept.department_id}
+                                        value={dept.department_id}
+                                    >
+                                        {dept.department_name}
+                                    </option>
+                                ))}
+                            </select>
+                            {error && (
+                                <div className="alert-error">{error}</div>
+                            )}
+                        </div>
+
+                        <div className="modal-footer">
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={closeModalAndReset}
+                            >
+                                Cancel
+                            </button>
+                            <button type="submit" className="btn btn-primary">
+                                {editingId ? "Update Faculty" : "Add Faculty"}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </>
         );
     };
@@ -357,8 +353,10 @@ function Faculty() {
     return (
         <div className="page">
             <header className="page-header">
-                <h1 className="page-title">Faculty</h1>
-                <p className="page-subtitle">Manage faculty profiles</p>
+                <div className="page-header-text">
+                    <h1 className="page-title">Faculty</h1>
+                    <p className="page-subtitle">Manage faculty profiles</p>
+                </div>
                 <button
                     className="btn btn-primary new-btn"
                     onClick={() => setShowForm(true)}
@@ -366,6 +364,7 @@ function Faculty() {
                     + New Faculty
                 </button>
             </header>
+
             <div className="actions-row">
                 <button
                     className="btn btn-primary"
@@ -405,6 +404,7 @@ function Faculty() {
                     </select>
                 </div>
             </div>
+
             <div className="table-wrapper">
                 <table className="faculty-table">
                     <thead>
@@ -442,7 +442,7 @@ function Faculty() {
                     </tbody>
                 </table>
             </div>
-            <div className="table-blank" />
+
             {showForm && (
                 <div className="modal-overlay">
                     <div className="modal-card">{renderModalContent()}</div>

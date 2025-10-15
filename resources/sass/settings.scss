@@ -38,14 +38,23 @@
     border: 1px solid #d9dcff;
 }
 
-.page-title {
-    margin: 0;
+.page-header {
+  text-align: left;
+  margin-bottom: 30px;
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 4px;
+  }
+
+  .page-subtitle {
+    color: #6b7280;
+    font-size: 15px;
+  }
 }
 
-.page-subtitle {
-    margin: 4px 0 16px;
-    color: var(--text-muted);
-}
 
 .tabs {
     display: inline-flex;
