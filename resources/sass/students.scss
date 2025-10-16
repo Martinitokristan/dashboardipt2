@@ -11,20 +11,27 @@
 }
 
 .page-header {
-  text-align: left;
-  margin-bottom: 30px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-  .page-title {
+.page-title {
     font-size: 28px;
     font-weight: 700;
     color: #1f2937;
-    margin-bottom: 4px;
-  }
+    margin: 0;
+}
 
-  .page-subtitle {
+.page-subtitle {
+    font-size: 14px;
     color: #6b7280;
-    font-size: 15px;
-  }
+    margin: 0;
+    position: absolute;
+    margin-top: 35px;
 }
 
 .new-btn {
@@ -149,9 +156,9 @@
 /* Action column */
 .students-table th:last-child,
 .students-table td:last-child {
-    width: 180px; 		
-    text-align: center; 	
-    white-space: nowrap; 	
+    width: 180px;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .students-table td:last-child {
@@ -189,7 +196,6 @@
     background-color: #d1fae5;
     color: #059669;
 }
-
 
 /*
 ====================================
@@ -244,7 +250,7 @@
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.35);
+    background: rgba(0, 0, 0, 0.35);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -252,15 +258,15 @@
 }
 
 .modal-card {
-    position: relative; 
+    position: relative;
     /* Increased width for two columns */
-    width: 650px; 
+    width: 650px;
     background: #fff; /* Changed to white background for form based on image */
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     padding: 30px; /* Increased padding */
     border: 1px solid #d1d5db;
-    min-height: 400px; 
+    min-height: 400px;
     display: flex;
     flex-direction: column;
 }
@@ -320,10 +326,9 @@
 
 .full-width-field .form-label {
     /* Ensure label width is respected even in full-width context */
-    width: 150px; 
+    width: 150px;
     flex-shrink: 0;
 }
-
 
 .form-input {
     width: 100%;
@@ -355,7 +360,6 @@
     gap: 12px;
 }
 
-
 /*
 ====================================
      LOADING OVERLAY STYLES
@@ -374,7 +378,7 @@
     justify-content: center;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 12px;
-    z-index: 10; 
+    z-index: 10;
 }
 
 .spinner-border {
@@ -383,7 +387,7 @@
     border: 0.2em solid currentColor;
     border-right-color: transparent;
     border-radius: 50%;
-    animation: spinner-border .75s linear infinite;
+    animation: spinner-border 0.75s linear infinite;
     color: #4f46e5;
 }
 
@@ -394,7 +398,9 @@
 }
 
 @keyframes spinner-border {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .sr-only {
@@ -409,20 +415,19 @@
     border: 0;
 }
 
-
 /*
 ====================================
      SUCCESS CONTENT STYLES
 ====================================
 */
 
-.success-content { 
+.success-content {
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; 
+    justify-content: center;
     text-align: center;
 }
 
@@ -458,19 +463,13 @@
 }
 
 .btn-close-message {
-    width: 150px;
-    height: 45px;
-    border: none;
-    border-radius: 8px;
-    background-color: #4f46e5;
-    color: white;
-    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 32px auto 0 auto; // More top margin for visual balance
+    text-align: center;
+    min-width: 120px;
+    max-width: 200px;
     font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+    font-size: 1rem;
 }
-
-.btn-close-message:hover {
-    background-color: #4338ca;
-}
-

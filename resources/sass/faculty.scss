@@ -251,7 +251,6 @@
     background: #fff;
 }
 
-
 // ------------------------------------------
 // MODAL STYLES (UPDATED)
 // ------------------------------------------
@@ -304,7 +303,8 @@
 }
 
 // Header for "Edit Faculty" - simpler
-.modal-card > h3.modal-header-title { /* Target the H3 directly when it's the only header element */
+.modal-card > h3.modal-header-title {
+    /* Target the H3 directly when it's the only header element */
     padding: 30px 30px 10px; /* Adjusted padding to match screenshot */
     margin: 0;
     color: #374151;
@@ -313,7 +313,6 @@
     border-bottom: 1px solid #e5e7eb;
     margin-bottom: 20px;
 }
-
 
 .modal-body {
     padding: 0 30px;
@@ -377,7 +376,6 @@
 .form-group textarea {
     min-height: 80px;
 }
-
 
 // Specific Button Styles for Modal Footer
 .modal-footer .btn {
@@ -446,7 +444,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .success-icon-wrapper {
@@ -493,5 +493,13 @@
 }
 
 .btn-close-message {
-    min-width: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 32px auto 0 auto; // More top margin for visual balance
+    text-align: center;
+    min-width: 120px;
+    max-width: 200px;
+    font-weight: 600;
+    font-size: 1rem;
 }

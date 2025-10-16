@@ -17,9 +17,9 @@ function Login() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        // Show message if redirected from protected route
-        if (location.state?.from) {
-            setError("Please log in to access this page");
+        // Redirected from protected route (after logout or 401)
+        if (location.state?.from === "unauthorized") {
+            setError("Unauthorized access. Please log in again.");
         }
     }, [location]);
 
@@ -35,20 +35,32 @@ function Login() {
         e.preventDefault();
         setLoading(true);
         setErrors({});
+        setError("");
 
         try {
             const response = await axios.post("/login", formData);
+
             if (response.data.redirect) {
                 localStorage.setItem("token", response.data.token);
                 window.location.href = response.data.redirect;
             }
         } catch (error) {
-            if (error.response?.status === 422) {
-                setErrors(error.response.data.errors || {});
-            } else if (error.response?.status === 403) {
-                setErrors({ general: "Unauthorized. Admins only." });
+            if (error.response) {
+                const status = error.response.status;
+
+                if (status === 422) {
+                    setErrors(error.response.data.errors || {});
+                } else if (status === 403) {
+                    setError("Access denied. Only admins can log in here.");
+                } else if (status === 401) {
+                    setError(
+                        "Invalid username or password (401 Unauthorized)."
+                    );
+                } else {
+                    setError("Unexpected error occurred. Please try again.");
+                }
             } else {
-                setErrors({ general: "An error occurred. Please try again." });
+                setError("Network error. Please check your connection.");
             }
         } finally {
             setLoading(false);

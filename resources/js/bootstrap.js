@@ -9,11 +9,11 @@ try {
  * to our Laravel back-end. This library automatically handles sending the
  * CSRF token as a header based on the value of the "XSRF" token cookie.
  */
-
 window.axios = require("axios");
 
 window.axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 window.axios.defaults.withCredentials = true;
+
 const token = document.head.querySelector('meta[name="csrf-token"]');
 if (token) {
     window.axios.defaults.headers.common["X-CSRF-TOKEN"] = token.content;
@@ -26,18 +26,18 @@ if (typeof window.__sanctumInitialized === "undefined") {
 }
 
 /**
- * Echo exposes an expressive API for subscribing to channels and listening
- * for events that are broadcast by Laravel. Echo and event broadcasting
- * allows your team to easily build robust real-time web applications.
+ * Add a global Axios response interceptor
+ * This will catch any 401 (Unauthorized) responses and redirect users
+ * to a clean Unauthorized page (/401)
  */
+window.axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && [401, 403].includes(error.response.status)) {
+            localStorage.removeItem("token");
+            window.location.href = "/401";
+        }
 
-// import Echo from 'laravel-echo';
-
-// window.Pusher = require('pusher-js');
-
-// window.Echo = new Echo({
-//     broadcaster: 'pusher',
-//     key: process.env.MIX_PUSHER_APP_KEY,
-//     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
-//     forceTLS: true
-// });
+        return Promise.reject(error);
+    }
+);

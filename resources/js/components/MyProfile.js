@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "../../sass/profile.scss";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // ✅ Added for redirect
 
 function MyProfile() {
-    // Setting default role to match the image's text
+    const navigate = useNavigate(); // ✅ Initialize navigation
+
     const DEFAULT_ROLE_DISPLAY = "System Administrator";
 
     const [profile, setProfile] = useState({
@@ -13,7 +15,6 @@ function MyProfile() {
         role: DEFAULT_ROLE_DISPLAY,
         avatar: null,
     });
-    // Store the original profile data for the 'Cancel' button
     const [initialProfile, setInitialProfile] = useState({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -32,20 +33,21 @@ function MyProfile() {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
+
             if (response.status === 401 || response.status === 403) {
-                window.location.href = "/login";
+                navigate("/401"); // ✅ Redirect to Unauthorized page if token invalid
                 return;
             }
+
             if (response.ok) {
                 const data = await response.json();
                 const userProfile = {
                     ...data.user,
                     role: data.user.role || DEFAULT_ROLE_DISPLAY,
-                    // Ensure the initial email is available, if not provided by API
                     email: data.user.email || "AKademi@edutech.com",
                 };
                 setProfile(userProfile);
-                setInitialProfile(userProfile); // Save initial profile
+                setInitialProfile(userProfile);
             } else {
                 setError("Failed to load profile");
             }
@@ -92,7 +94,7 @@ function MyProfile() {
             });
 
             if (response.status === 401 || response.status === 403) {
-                window.location.href = "/login";
+                navigate("/401"); // ✅ Redirect if unauthorized while saving
                 return;
             }
 
@@ -126,30 +128,26 @@ function MyProfile() {
 
     const handleLogout = async () => {
         try {
-            // Clear tokens first
-            localStorage.clear();
-            sessionStorage.clear();
-
-            // Call logout endpoint
             await axios.post(
-                "/api/logout",
+                "/logout",
                 {},
                 {
                     headers: {
-                        Accept: "application/json",
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "token"
+                        )}`,
                     },
                 }
             );
-
-            // Force navigation to login
-            window.location.href = "/login";
         } catch (error) {
             console.error("Logout failed:", error);
-            window.location.href = "/login";
+        } finally {
+            localStorage.removeItem("token");
+            delete axios.defaults.headers.common["Authorization"];
+            navigate("/login", { replace: true });
         }
     };
 
-    // Helper for avatar URL
     const getAvatarUrl = (avatar) => {
         if (!avatar) return null;
         if (typeof avatar === "string") {
@@ -170,10 +168,9 @@ function MyProfile() {
                     <h1 className="page-title">My Profile</h1>
                     <p className="page-subtitle">Profile Information</p>
                     <p className="page-subtitle subtle">
-                        Update you personal details and contact information
+                        Update your personal details and contact information
                     </p>
                 </div>
-                {/* Top Right Log out button */}
                 <button
                     className="btn btn-danger log-out-top"
                     onClick={handleLogout}
@@ -182,14 +179,10 @@ function MyProfile() {
                 </button>
             </div>
 
-            {/* Main Content Area */}
             <div className="profile-main-content">
-                {/* Two-Column Grid */}
                 <div className="profile-grid">
-                    {/* Left Column: Avatar and Info Display Card */}
                     <div className="profile-card">
                         <div className="avatar">
-                            {/* Avatar Image */}
                             {profile.avatar ? (
                                 <img
                                     src={getAvatarUrl(profile.avatar)}
@@ -207,7 +200,6 @@ function MyProfile() {
                         </p>
                         <p className="profile-role admin">ADMIN</p>
 
-                        {/* Avatar Upload Field (only visible when editing) */}
                         {isEditing && (
                             <div className="avatar-upload-field">
                                 <label
@@ -227,9 +219,7 @@ function MyProfile() {
                         )}
                     </div>
 
-                    {/* Right Column: Form Fields and Actions Card */}
                     <div className="card form-card">
-                        {/* First Name */}
                         <div className="form-row">
                             <label htmlFor="first_name">First Name</label>
                             <input
@@ -243,7 +233,6 @@ function MyProfile() {
                             />
                         </div>
 
-                        {/* Last Name */}
                         <div className="form-row">
                             <label htmlFor="last_name">Last Name</label>
                             <input
@@ -257,7 +246,6 @@ function MyProfile() {
                             />
                         </div>
 
-                        {/* Role (Read Only) */}
                         <div className="form-row">
                             <label>Role</label>
                             <input
@@ -268,9 +256,7 @@ function MyProfile() {
                             />
                         </div>
 
-                        {/* Profile Action Buttons */}
                         <div className="form-actions">
-                            {/* Conditional rendering for Edit/Save/Cancel */}
                             {!isEditing ? (
                                 <button
                                     className="btn btn-primary"
@@ -281,7 +267,7 @@ function MyProfile() {
                             ) : (
                                 <>
                                     <button
-                                        className="btn" // Assuming default 'btn' is secondary
+                                        className="btn"
                                         onClick={handleCancel}
                                         disabled={saving}
                                         style={{ marginRight: "8px" }}
@@ -301,7 +287,6 @@ function MyProfile() {
                     </div>
                 </div>
 
-                {/* Account Action: Logout Section at the bottom */}
                 <div className="account-action">
                     <div className="action-title">Account Action</div>
                     <div
@@ -319,7 +304,6 @@ function MyProfile() {
                 </div>
             </div>
 
-            {/* Error/Success Message Display (Optional: Floating/fixed positioning usually) */}
             {error && (
                 <div
                     className={`alert ${
