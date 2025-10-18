@@ -3,6 +3,14 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../../sass/faculty.scss";
 
+const getCsrfCookie = async () => {
+    try {
+        await axios.get("/sanctum/csrf-cookie");
+    } catch (e) {
+        console.error("Failed to get CSRF cookie", e);
+    }
+};
+
 function Faculty() {
     const [faculty, setFaculty] = useState([]);
     const [departments, setDepartments] = useState([]);
@@ -63,11 +71,9 @@ function Faculty() {
             const r = await axios.get(url);
             setFaculty(r.data.filter((f) => !f.archived_at));
         } catch (error) {
+            console.error("Failed to load faculty", error);
             setError("Failed to load faculty");
-            if (
-                error.response?.status === 401 ||
-                error.response?.status === 403
-            ) {
+            if ([401, 403].includes(error.response?.status)) {
                 window.location.href = "/login";
             }
         } finally {
@@ -80,11 +86,9 @@ function Faculty() {
             const r = await axios.get("/api/admin/departments");
             setDepartments(r.data);
         } catch (error) {
+            console.error("Failed to load departments", error);
             setError("Failed to load departments");
-            if (
-                error.response?.status === 401 ||
-                error.response?.status === 403
-            ) {
+            if ([401, 403].includes(error.response?.status)) {
                 window.location.href = "/login";
             }
         }
@@ -104,6 +108,7 @@ function Faculty() {
         setModalContentState("loading");
         setError("");
         try {
+            await getCsrfCookie();
             const payload = { ...formData };
             let response;
             if (editingId) {
@@ -114,17 +119,15 @@ function Faculty() {
             } else {
                 response = await axios.post("/api/admin/faculty", payload);
             }
-            if (response.status === 200 || response.status === 201) {
+            if ([200, 201].includes(response.status)) {
                 await loadFaculty();
                 setModalContentState("success");
             }
         } catch (error) {
+            console.error("Save error:", error);
             setError(error.response?.data?.message || "Failed to save faculty");
             setModalContentState("form");
-            if (
-                error.response?.status === 401 ||
-                error.response?.status === 403
-            ) {
+            if ([401, 403].includes(error.response?.status)) {
                 window.location.href = "/login";
             }
         }
@@ -133,16 +136,15 @@ function Faculty() {
     const handleDelete = async (id) => {
         if (!confirm("Are you sure you want to archive this faculty?")) return;
         try {
+            await getCsrfCookie();
             await axios.post(`/api/admin/faculty/${id}/archive`);
             await loadFaculty();
         } catch (error) {
+            console.error("Archive error:", error);
             setError(
                 error.response?.data?.message || "Failed to archive faculty"
             );
-            if (
-                error.response?.status === 401 ||
-                error.response?.status === 403
-            ) {
+            if ([401, 403].includes(error.response?.status)) {
                 window.location.href = "/login";
             }
         }

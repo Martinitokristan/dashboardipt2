@@ -1,5 +1,5 @@
 import "./bootstrap";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
     BrowserRouter as Router,
@@ -18,13 +18,21 @@ import Report from "./components/Report";
 import MyProfile from "./components/MyProfile";
 import ArchivedAll from "./components/ArchivedAll";
 import Unauthorized from "./components/Unauthorized";
+import axios from "axios";
 
-// ✅ Protect specific routes
+// ✅ Secure ProtectedRoute using Sanctum session
 function ProtectedRoute({ children }) {
-    const token = localStorage.getItem("token");
-    if (!token) {
-        return <Navigate to="/401" replace />;
-    }
+    const [authorized, setAuthorized] = useState(null);
+
+    useEffect(() => {
+        axios
+            .get("/api/user")
+            .then(() => setAuthorized(true))
+            .catch(() => setAuthorized(false));
+    }, []);
+
+    if (authorized === null) return <div>Loading...</div>;
+    if (!authorized) return <Navigate to="/401" replace />;
     return children;
 }
 

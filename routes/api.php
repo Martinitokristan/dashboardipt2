@@ -11,12 +11,23 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\FacultyController;
 use App\Http\Controllers\Admin\ReportController;
 
-Route::middleware(['auth:sanctum', 'api.role:admin'])->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| is assigned the "api" middleware group. Enjoy building your API!
+|
+*/
 
-    // Dashboard and Profile endpoints
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+// Dashboard and Profile endpoints
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboardJson']);
     Route::get('/profile', [AdminController::class, 'getProfile']);
     Route::put('/profile', [AdminController::class, 'updateProfile']);

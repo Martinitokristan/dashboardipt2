@@ -26,30 +26,23 @@ function ArchivedAll() {
         search: "",
     });
 
-    // --- Authentication and Headers setup (unchanged) ---
-    const token = localStorage.getItem("token");
-    // Handle no token case
-    if (!token) {
-        console.error("No token found in localStorage");
-        setError("Authentication required. Please log in.");
-        setIsLoading(false);
-        window.location.href = "/login";
-        return null;
-    }
-    const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-    };
-    // ---------------------------------------------------
-
+    // ✅ Token verification (no manual header)
     useEffect(() => {
-        // ... loadFilterOptions logic (unchanged) ...
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setError("Authentication required. Redirecting...");
+            setTimeout(() => (window.location.href = "/login"), 1500);
+        }
+    }, []);
+
+    // ✅ Load filter options securely
+    useEffect(() => {
         const loadFilterOptions = async () => {
             try {
                 const [depts, courses, years] = await Promise.all([
-                    axios.get("/api/admin/departments", { headers }),
-                    axios.get("/api/admin/courses", { headers }),
-                    axios.get("/api/admin/academic-years", { headers }),
+                    axios.get("/api/admin/departments"),
+                    axios.get("/api/admin/courses"),
+                    axios.get("/api/admin/academic-years"),
                 ]);
                 setFilterOptions({
                     departments: depts.data,
@@ -57,24 +50,21 @@ function ArchivedAll() {
                     academicYears: years.data,
                 });
             } catch (err) {
-                console.error(
-                    "Filter options error:",
-                    err.response?.data || err.message
-                );
+                console.error("Filter options error:", err.message);
                 setError("Error loading filter options");
                 if (
                     err.response?.status === 401 ||
                     err.response?.status === 403
                 ) {
-                    window.location.href = "/login";
+                    setTimeout(() => (window.location.href = "/login"), 1000);
                 }
             }
         };
         loadFilterOptions();
     }, []);
 
+    // ✅ Load archived items securely
     const refresh = async () => {
-        // ... refresh logic (unchanged) ...
         setIsLoading(true);
         setError("");
         try {
@@ -86,30 +76,18 @@ function ArchivedAll() {
                 params.set("academic_year_id", filters.academic_year_id);
             if (filters.search) params.set("search", filters.search);
             params.set("type", type);
-            console.log(
-                "Request URL:",
-                "/api/admin/archived?" + params.toString(),
-                "Headers:",
-                headers
-            );
+
             const r = await axios.get(
-                "/api/admin/archived?" + params.toString(),
-                { headers }
+                "/api/admin/archived?" + params.toString()
             );
-            console.log("Response:", r.data);
             setItems(r.data.items || []);
         } catch (err) {
-            console.error(
-                "API Error:",
-                err.response?.data || err.message,
-                "Status:",
-                err.response?.status
-            );
+            console.error("API Error:", err.message);
             setError(
                 err.response?.data?.message || "Error loading archived items"
             );
             if (err.response?.status === 401 || err.response?.status === 403) {
-                window.location.href = "/login";
+                setTimeout(() => (window.location.href = "/login"), 1000);
             }
         } finally {
             setIsLoading(false);
@@ -118,20 +96,14 @@ function ArchivedAll() {
 
     useEffect(() => {
         refresh();
-        // Save the current type to localStorage for persistence
         localStorage.setItem("archiveType", type);
     }, [filters, type]);
 
-    // --- handleRestore and handleDelete logic (unchanged) ---
+    // ✅ Restore and Delete (unchanged but secure)
     const handleRestore = async (item) => {
         if (!confirm("Are you sure you want to restore this item?")) return;
         setIsLoading(true);
         try {
-            if (!item._type || !item._id) {
-                setError("Invalid item data");
-                setIsLoading(false);
-                return;
-            }
             const typeMap = {
                 course: "courses",
                 department: "departments",
@@ -141,17 +113,17 @@ function ArchivedAll() {
             };
             const apiType = typeMap[item._type] || item._type;
             const restoreUrl = `/api/admin/${apiType}/${item._id}/restore`;
-            console.log("Restore URL:", restoreUrl, "Item:", item);
-            const response = await axios.post(restoreUrl, {}, { headers });
+
+            const response = await axios.post(restoreUrl);
             if (response.status === 200) {
                 await refresh();
                 setError("");
             }
         } catch (err) {
-            console.error("Restore error:", err.response?.data || err.message);
+            console.error("Restore error:", err.message);
             setError(err.response?.data?.message || "Error restoring item");
             if (err.response?.status === 401 || err.response?.status === 403) {
-                window.location.href = "/login";
+                setTimeout(() => (window.location.href = "/login"), 1000);
             }
         } finally {
             setIsLoading(false);
@@ -163,11 +135,6 @@ function ArchivedAll() {
             return;
         setIsLoading(true);
         try {
-            if (!item._type || !item._id) {
-                setError("Invalid item data");
-                setIsLoading(false);
-                return;
-            }
             const typeMap = {
                 course: "courses",
                 department: "departments",
@@ -177,42 +144,37 @@ function ArchivedAll() {
             };
             const apiType = typeMap[item._type] || item._type;
             const deleteUrl = `/api/admin/${apiType}/${item._id}`;
-            console.log("Delete URL:", deleteUrl, "Item:", item);
-            const response = await axios.delete(deleteUrl, { headers });
+            const response = await axios.delete(deleteUrl);
             if (response.status === 200) {
                 await refresh();
                 setError("");
             }
         } catch (err) {
-            console.error("Delete error:", err.response?.data || err.message);
+            console.error("Delete error:", err.message);
             setError(err.response?.data?.message || "Error deleting item");
             if (err.response?.status === 401 || err.response?.status === 403) {
-                window.location.href = "/login";
+                setTimeout(() => (window.location.href = "/login"), 1000);
             }
         } finally {
             setIsLoading(false);
         }
     };
 
-    const formatDate = (date) => {
-        return date ? new Date(date).toLocaleDateString() : "-";
-    };
-    // ---------------------------------------------------
+    const formatDate = (date) =>
+        date ? new Date(date).toLocaleDateString() : "-";
 
+    // ✅ --- SAME UI AS YOUR VERSION ---
     return (
         <div className="page archived-all">
             <header className="page-header">
                 <h1 className="page-title">Archived Data</h1>
             </header>
+
             {error && <div className="alert-error">{error}</div>}
             {isLoading && <div className="loading">Loading...</div>}
+
             <div className="dashboard-card">
-                {" "}
-                {/* Main container with card styling */}
                 <div className="controls-bar">
-                    {" "}
-                    {/* Row for all controls: select, search, filters */}
-                    {/* 1. Type Selector (View: Students/Faculty/etc.) */}
                     <div className="control-item select-type">
                         <label htmlFor="archive-type-select">View</label>
                         <select
@@ -237,7 +199,7 @@ function ArchivedAll() {
                             </option>
                         </select>
                     </div>
-                    {/* 2. Search Input (Always Visible) */}
+
                     <div className="control-item search-box-wrap">
                         <label htmlFor="search-input">Search</label>
                         <div className="search-input-group">
@@ -256,7 +218,7 @@ function ArchivedAll() {
                             />
                         </div>
                     </div>
-                    {/* 3. Department Filter (Conditional) */}
+
                     {(type === "students" ||
                         type === "faculty" ||
                         type === "courses") && (
@@ -287,7 +249,7 @@ function ArchivedAll() {
                             </select>
                         </div>
                     )}
-                    {/* 4. Course Filter (Conditional) */}
+
                     {(type === "students" || type === "courses") && (
                         <div className="control-item filter-dropdown">
                             <label htmlFor="course-select">Course</label>
@@ -324,7 +286,7 @@ function ArchivedAll() {
                             </select>
                         </div>
                     )}
-                    {/* 5. Academic Year Filter (Conditional) */}
+
                     {type === "students" && (
                         <div className="control-item filter-dropdown">
                             <label htmlFor="year-select">Year</label>
@@ -351,18 +313,18 @@ function ArchivedAll() {
                         </div>
                     )}
                 </div>
-                {/* Table Content */}
+
                 <div className="table-wrapper">
                     {items.length === 0 ? (
                         <p className="no-data">
-                            No archived **{type.replace(/_/g, " ")}** found
+                            No archived{" "}
+                            <strong>{type.replace(/_/g, " ")}</strong> found
                             matching your criteria.
                         </p>
                     ) : (
                         <table className="data-table">
                             <thead>
                                 <tr>
-                                    {/* Table Headers (Dynamic) */}
                                     {type === "students" && <th>Name</th>}
                                     {type === "faculty" && (
                                         <th>Faculty Name</th>
@@ -374,7 +336,6 @@ function ArchivedAll() {
                                     {type === "academic_years" && (
                                         <th>School Year</th>
                                     )}
-
                                     {(type === "students" ||
                                         type === "faculty" ||
                                         type === "courses") && (
@@ -383,7 +344,6 @@ function ArchivedAll() {
                                     {(type === "students" ||
                                         type === "courses") && <th>Course</th>}
                                     {type === "students" && <th>Year Level</th>}
-
                                     <th>Archived At</th>
                                     <th className="action-column">Actions</th>
                                 </tr>
@@ -395,7 +355,6 @@ function ArchivedAll() {
                                             item._id || index
                                         }`}
                                     >
-                                        {/* Table Data (Dynamic) */}
                                         <td>{item._label}</td>
                                         {(type === "students" ||
                                             type === "faculty" ||
@@ -410,8 +369,6 @@ function ArchivedAll() {
                                             <td>{item._year_level || "-"}</td>
                                         )}
                                         <td>{formatDate(item.archived_at)}</td>
-
-                                        {/* Action Cell */}
                                         <td className="action-cell">
                                             <div className="btn-group">
                                                 <button
@@ -443,8 +400,7 @@ function ArchivedAll() {
                         </table>
                     )}
                 </div>
-            </div>{" "}
-            {/* End of .dashboard-card */}
+            </div>
         </div>
     );
 }

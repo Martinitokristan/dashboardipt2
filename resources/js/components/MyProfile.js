@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "../../sass/profile.scss";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // ✅ Added for redirect
+import { useNavigate } from "react-router-dom"; // ✅ Added for redirect function
 
 function MyProfile() {
     const navigate = useNavigate(); // ✅ Initialize navigation
-
     const DEFAULT_ROLE_DISPLAY = "System Administrator";
 
     const [profile, setProfile] = useState({
@@ -74,6 +73,7 @@ function MyProfile() {
     const handleSave = async () => {
         setSaving(true);
         setError("");
+
         try {
             const formData = new FormData();
             formData.append("first_name", profile.first_name);
@@ -294,8 +294,7 @@ function MyProfile() {
                         onClick={handleLogout}
                         style={{ cursor: "pointer" }}
                     >
-                        Log out from Account
-                        <br />
+                        Log out from Account <br />
                         <span>
                             This will end your session and redirect you to the
                             log in page.

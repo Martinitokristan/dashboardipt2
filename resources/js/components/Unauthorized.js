@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../sass/unauthorized.scss";
 
-export default function Unauthorized() {
+function Unauthorized() {
     const navigate = useNavigate();
     const [countdown, setCountdown] = useState(5);
 
@@ -37,3 +37,4 @@ export default function Unauthorized() {
         </div>
     );
 }
+export default Unauthorized;

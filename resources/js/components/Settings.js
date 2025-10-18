@@ -3,6 +3,15 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../../sass/settings.scss";
 
+// Secure helper — ensure Sanctum cookie exists before requests
+const ensureCsrf = async () => {
+    try {
+        await axios.get("/sanctum/csrf-cookie");
+    } catch (_) {
+        console.warn("Failed to initialize CSRF cookie");
+    }
+};
+
 function Settings() {
     const [active, setActive] = useState(() => {
         try {
@@ -27,6 +36,7 @@ function Settings() {
 
     const refreshData = async () => {
         try {
+            await ensureCsrf(); // 🧩 secure cookie check
             if (active === "courses") {
                 const res = await axios.get("/api/admin/courses");
                 setCourses(res.data.filter((c) => !c.archived_at));
@@ -39,6 +49,7 @@ function Settings() {
                 const res = await axios.get("/api/admin/academic-years");
                 setAcademicYears(res.data.filter((a) => !a.archived_at));
             }
+            setError("");
         } catch (err) {
             setError("Failed to load data");
             if (err.response?.status === 401 || err.response?.status === 403) {
@@ -65,57 +76,38 @@ function Settings() {
 
     const onSubmit = async (e) => {
         e.preventDefault();
-        console.log("Form Data:", form); // Debug log
         try {
+            await ensureCsrf();
             if (active === "courses") {
                 const payload = {
                     course_name: form.course_name.trim(),
-                    department_id: form.department_id || undefined, // Ensure valid ID or omit
+                    department_id: form.department_id || undefined,
                 };
                 if (!payload.department_id) {
                     throw new Error("Please select a department.");
                 }
-                const response = await axios.post(
-                    "/api/admin/courses",
-                    payload
-                );
-                if (response.status === 201) {
-                    await refreshData();
-                }
+                await axios.post("/api/admin/courses", payload);
+                await refreshData();
             } else if (active === "departments") {
                 const payload = {
                     department_name: form.department_name.trim(),
                     department_head: form.department_head.trim() || null,
                 };
-                const response = await axios.post(
-                    "/api/admin/departments",
-                    payload
-                );
-                if (response.status === 201) {
-                    await refreshData();
-                }
+                await axios.post("/api/admin/departments", payload);
+                await refreshData();
             } else if (active === "academic-years") {
                 const payload = {
                     school_year: form.school_year.trim(),
                 };
-                const response = await axios.post(
-                    "/api/admin/academic-years",
-                    payload
-                );
-                if (response.status === 201) {
-                    await refreshData();
-                }
+                await axios.post("/api/admin/academic-years", payload);
+                await refreshData();
             }
             setShowForm(false);
         } catch (error) {
-            const errorMsg =
+            setError(
                 error.response?.data?.message ||
-                error.message ||
-                "Failed to save";
-            setError(errorMsg);
-            console.error(
-                "Submission Error:",
-                error.response?.data || error.message
+                    error.message ||
+                    "Failed to save"
             );
             if (
                 error.response?.status === 401 ||
@@ -129,6 +121,7 @@ function Settings() {
     const handleDelete = async (id) => {
         if (!confirm("Are you sure you want to archive this item?")) return;
         try {
+            await ensureCsrf();
             const url = `/api/admin/${active}/${id}/archive`;
             await axios.post(url);
             await refreshData();
@@ -151,7 +144,9 @@ function Settings() {
         <div className="settings-content">
             <header className="page-header">
                 <h1 className="page-title">Settings</h1>
-                <p className="page-subtitle">Manage courses, departments, and academic years</p>
+                <p className="page-subtitle">
+                    Manage courses, departments, and academic years
+                </p>
             </header>
 
             {error && <div className="alert-error">{error}</div>}
@@ -230,6 +225,7 @@ function Settings() {
                         </button>
                     </div>
 
+                    {/* === Courses Table === */}
                     {active === "courses" && (
                         <div className="table-wrapper">
                             <table className="settings-table">
@@ -267,6 +263,7 @@ function Settings() {
                         </div>
                     )}
 
+                    {/* === Departments Table === */}
                     {active === "departments" && (
                         <div className="table-wrapper">
                             <table className="settings-table">
@@ -301,6 +298,7 @@ function Settings() {
                         </div>
                     )}
 
+                    {/* === Academic Years Table === */}
                     {active === "academic-years" && (
                         <div className="table-wrapper">
                             <table className="settings-table">
@@ -333,7 +331,7 @@ function Settings() {
                         </div>
                     )}
 
-                    {/* Modal forms (unchanged) */}
+                    {/* === Modals (Unchanged) === */}
                     {showForm && active === "courses" && (
                         <div className="modal-overlay">
                             <div className="modal-card">

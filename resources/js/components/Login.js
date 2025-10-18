@@ -6,6 +6,7 @@ import "../../sass/Login.scss";
 function Login() {
     const location = useLocation();
     const navigate = useNavigate();
+
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
         username: "",
@@ -17,7 +18,7 @@ function Login() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        // Redirected from protected route (after logout or 401)
+        // Handle redirection notice (e.g., after 401 or logout)
         if (location.state?.from === "unauthorized") {
             setError("Unauthorized access. Please log in again.");
         }
@@ -38,18 +39,30 @@ function Login() {
         setError("");
 
         try {
+            // ✅ Step 1: Get CSRF cookie (required by Sanctum)
+            await axios.get("/sanctum/csrf-cookie");
+
+            // ✅ Step 2: Attempt login
             const response = await axios.post("/login", formData);
 
             if (response.data.redirect) {
+                // ✅ Store the token safely (not exposed in logs)
                 localStorage.setItem("token", response.data.token);
-                window.location.href = response.data.redirect;
-            }
-        } catch (error) {
-            if (error.response) {
-                const status = error.response.status;
 
+                // ✅ Redirect to dashboard
+                window.location.href = response.data.redirect;
+            } else {
+                setError("Unexpected response from server.");
+            }
+        } catch (err) {
+            if (err.response) {
+                const { status, data } = err.response;
                 if (status === 422) {
-                    setErrors(error.response.data.errors || {});
+                    // Laravel validation or credential error
+                    setErrors(data.errors || {});
+                    if (data.errors?.username) {
+                        setError(data.errors.username[0]);
+                    }
                 } else if (status === 403) {
                     setError("Access denied. Only admins can log in here.");
                 } else if (status === 401) {
@@ -70,11 +83,13 @@ function Login() {
     const closeModal = () => {
         setShowModal(false);
         setErrors({});
+        setError("");
         setFormData({ username: "", password: "", remember: false });
     };
 
     return (
         <div className="landing-page">
+            {/* HEADER */}
             <header className="header">
                 <div className="header-container">
                     <h1 className="logo">EduTech Management</h1>
@@ -87,6 +102,7 @@ function Login() {
                 </div>
             </header>
 
+            {/* HERO SECTION */}
             <section className="hero-section">
                 <div className="hero-overlay">
                     <div className="hero-content">
@@ -98,6 +114,7 @@ function Login() {
                 </div>
             </section>
 
+            {/* FOOTER */}
             <footer className="footer">
                 <div className="footer-container">
                     <div className="contact-info">
@@ -109,6 +126,7 @@ function Login() {
                 </div>
             </footer>
 
+            {/* LOGIN MODAL */}
             {showModal && (
                 <div className="modal-overlay">
                     <div className="modal-card">
@@ -117,13 +135,16 @@ function Login() {
                                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
                             </svg>
                         </div>
+
                         <h4 className="modal-title">Administrator Log In</h4>
+
                         <form className="login-form" onSubmit={handleSubmit}>
                             {errors.general && (
                                 <div className="alert-error">
                                     {errors.general}
                                 </div>
                             )}
+
                             <div className="form-group">
                                 <input
                                     type="text"
@@ -143,6 +164,7 @@ function Login() {
                                     </span>
                                 )}
                             </div>
+
                             <div className="form-group">
                                 <input
                                     type="password"
@@ -162,6 +184,7 @@ function Login() {
                                     </span>
                                 )}
                             </div>
+
                             <button
                                 type="submit"
                                 className="btn-submit"
@@ -173,6 +196,8 @@ function Login() {
                     </div>
                 </div>
             )}
+
+            {/* ERROR MESSAGE */}
             {error && <div className="alert alert-warning">{error}</div>}
         </div>
     );

@@ -3,23 +3,31 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../../sass/students.scss";
 
-// Add this utility function
 const getCsrfCookie = async () => {
-    await axios.get("/sanctum/csrf-cookie", { withCredentials: true });
+    // optional if bootstrap already called it; safe to call again
+    try {
+        await axios.get("/sanctum/csrf-cookie");
+    } catch (e) {
+        // ignore
+    }
 };
 
 function Students() {
+    const navigate = useNavigate();
     const [courses, setCourses] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [academicYears, setAcademicYears] = useState([]);
     const [students, setStudents] = useState([]);
-    // State for modal content: "form", "loading", or "success"
-    const [modalContentState, setModalContentState] = useState("form");
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState(null);
+    const [modalContentState, setModalContentState] = useState("form"); // form | loading | success
     const [error, setError] = useState("");
-    const navigate = useNavigate();
-
+    const [filters, setFilters] = useState({
+        search: "",
+        department_id: "",
+        course_id: "",
+        academic_year_id: "",
+    });
     const [form, setForm] = useState({
         f_name: "",
         m_name: "",
@@ -34,22 +42,57 @@ function Students() {
         department_id: "",
         course_id: "",
         academic_year_id: "",
-        year_level: "1st", // Changed '1' back to '1st' to match the options list
+        year_level: "1st",
     });
 
-    // NOTE: This function's logic is kept for functionality, but its usage
-    // is replaced by direct inline state setters in the form for UI fidelity.
-    // However, I'll keep the actual helper in case other parts of the app rely on it.
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
+    useEffect(() => {
+        // load supporting data + students
+        Promise.all([
+            axios.get("/api/admin/courses").catch(() => ({ data: [] })),
+            axios.get("/api/admin/departments").catch(() => ({ data: [] })),
+            axios.get("/api/admin/academic-years").catch(() => ({ data: [] })),
+        ])
+            .then(([coursesRes, deptsRes, yearsRes]) => {
+                setCourses(coursesRes.data || []);
+                setDepartments(deptsRes.data || []);
+                setAcademicYears(yearsRes.data || []);
+                refresh();
+            })
+            .catch((err) => {
+                console.error("Initial load error:", err);
+            });
+    }, []);
+
+    useEffect(() => {
+        refresh();
+    }, [filters]);
+
+    const refresh = async () => {
+        try {
+            const params = new URLSearchParams();
+            if (filters.search) params.set("search", filters.search);
+            if (filters.department_id)
+                params.set("department_id", filters.department_id);
+            if (filters.course_id) params.set("course_id", filters.course_id);
+            if (filters.academic_year_id)
+                params.set("academic_year_id", filters.academic_year_id);
+
+            const qs = params.toString();
+            const url = "/api/admin/students" + (qs ? "?" + qs : "");
+            const response = await axios.get(url);
+
+            setStudents(response.data || []);
+            setError("");
+        } catch (e) {
+            console.error("API Error:", e);
+            setError("Failed to load students"); // axios interceptor handles 401/403
+        }
     };
 
-    const closeModalAndReset = () => {
-        setShowForm(false);
-        setModalContentState("form");
+    const onOpenForm = () => {
         setEditingId(null);
-        setError("");
+        setShowForm(true);
+        setModalContentState("form");
         setForm({
             f_name: "",
             m_name: "",
@@ -66,83 +109,13 @@ function Students() {
             academic_year_id: "",
             year_level: "1st",
         });
-    };
-
-    const handleArchiveNavigate = () => {
-        navigate("/archived?type=students");
-        localStorage.setItem("archiveType", "students");
-    };
-
-    useEffect(() => {
-        Promise.all([
-            axios.get("/api/admin/courses").catch((e) => []),
-            axios.get("/api/admin/departments").catch((e) => []),
-            axios.get("/api/admin/academic-years").catch((e) => []),
-        ])
-            .then(([coursesRes, deptsRes, yearsRes]) => {
-                setCourses(coursesRes.data || []);
-                setDepartments(deptsRes.data || []);
-                setAcademicYears(yearsRes.data || []);
-                refresh();
-            })
-            .catch((e) => {
-                if (e.response?.status === 401 || e.response?.status === 403) {
-                    window.location.href = "/login";
-                }
-            });
-    }, []);
-
-    const [filters, setFilters] = useState({
-        search: "",
-        department_id: "",
-        course_id: "",
-        academic_year_id: "",
-    });
-
-    const refresh = async () => {
-        try {
-            const params = new URLSearchParams();
-            if (filters.search) params.set("search", filters.search);
-            if (filters.department_id)
-                params.set("department_id", filters.department_id);
-            if (filters.course_id) params.set("course_id", filters.course_id);
-            if (filters.academic_year_id)
-                params.set("academic_year_id", filters.academic_year_id);
-            const qs = params.toString();
-            const url = "/api/admin/students" + (qs ? "?" + qs : "");
-            const response = await axios.get(url, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
-            setStudents(response.data.filter((s) => !s.archived_at));
-            setError("");
-        } catch (e) {
-            console.error("API Error:", e);
-            setError(
-                `Failed to load students: ${
-                    e.response?.data?.error || e.message
-                }`
-            );
-            if (e.response?.status === 401 || e.response?.status === 403) {
-                window.location.href = "/login";
-            }
-        }
-    };
-
-    useEffect(() => {
-        refresh();
-    }, [filters]);
-
-    const onOpenForm = () => {
-        setEditingId(null);
-        setShowForm(true);
-        setModalContentState("form");
+        setError("");
     };
 
     const onOpenEditForm = (student) => {
         const formatDate = (dateString) =>
             dateString ? new Date(dateString).toISOString().split("T")[0] : "";
+
         setEditingId(student.student_id);
         setShowForm(true);
         setModalContentState("form");
@@ -160,7 +133,7 @@ function Students() {
             department_id: student.department_id || "",
             course_id: student.course_id || "",
             academic_year_id: student.academic_year_id || "",
-            year_level: student.year_level || "1st", // Defaulted to '1st'
+            year_level: student.year_level || "1st",
         });
     };
 
@@ -168,83 +141,71 @@ function Students() {
         e.preventDefault();
         setModalContentState("loading");
         setError("");
+
         try {
+            await getCsrfCookie();
             const payload = { ...form };
             let response;
+
             if (editingId) {
                 response = await axios.put(
                     `/api/admin/students/${editingId}`,
-                    payload,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${localStorage.getItem(
-                                "token"
-                            )}`,
-                        },
-                    }
+                    payload
                 );
             } else {
-                response = await axios.post("/api/admin/students", payload, {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "token"
-                        )}`,
-                    },
-                });
+                response = await axios.post("/api/admin/students", payload);
             }
+
             if (response.status === 200 || response.status === 201) {
                 await refresh();
                 setModalContentState("success");
+            } else {
+                setModalContentState("form");
+                setError("Unexpected response from API");
             }
-        } catch (error) {
-            setError(error.response?.data?.message || "Failed to save student");
+        } catch (err) {
+            console.error("Save error:", err);
             setModalContentState("form");
-            if (
-                error.response?.status === 401 ||
-                error.response?.status === 403
-            ) {
-                window.location.href = "/login";
-            }
+            setError(err.response?.data?.message || "Failed to save student");
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!confirm("Are you sure you want to archive this student?")) return;
+    const handleArchive = async (id) => {
+        if (!window.confirm("Are you sure you want to archive this student?"))
+            return;
+
         try {
-            await getCsrfCookie(); // Fetch CSRF token
-            const response = await axios.post(
-                `/api/admin/students/${id}/archive`,
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "token"
-                        )}`,
-                    },
-                    withCredentials: true, // Include cookies
-                }
-            );
-            if (response.status === 200) {
-                await refresh();
-                setError("");
-            }
-        } catch (error) {
-            setError(
-                error.response?.data?.error || "Failed to archive student"
-            );
-            if (
-                error.response?.status === 401 ||
-                error.response?.status === 403
-            ) {
-                window.location.href = "/login";
-            }
+            await getCsrfCookie();
+            await axios.post(`/api/admin/students/${id}/archive`);
+            await refresh();
+        } catch (err) {
+            console.error("Archive error:", err);
+            alert(err.response?.data?.error || "Failed to archive student");
         }
     };
 
-    // START: Copied UI implementation from your old code
+    const handleRestore = async (id) => {
+        if (!window.confirm("Restore this student?")) return;
+
+        try {
+            await getCsrfCookie();
+            await axios.post(`/api/admin/students/${id}/restore`);
+            await refresh();
+        } catch (err) {
+            console.error("Restore error:", err);
+            alert(err.response?.data?.error || "Failed to restore student");
+        }
+    };
+
+    const closeModalAndReset = () => {
+        setShowForm(false);
+        setModalContentState("form");
+        setEditingId(null);
+        setError("");
+    };
+
     const renderModalContent = () => {
         if (modalContentState === "loading") {
-            // Loading State UI Copy
             return (
                 <div className="loading-overlay">
                     <div className="spinner-border large-spinner" role="status">
@@ -252,9 +213,9 @@ function Students() {
                     </div>
                     <p
                         style={{
-                            marginTop: "15px",
+                            marginTop: 15,
                             color: "#4f46e5",
-                            fontWeight: "500",
+                            fontWeight: 500,
                         }}
                     >
                         {editingId
@@ -264,8 +225,8 @@ function Students() {
                 </div>
             );
         }
+
         if (modalContentState === "success") {
-            // Success State UI Copy (including the inline SVG)
             return (
                 <div className="success-content">
                     <div className="success-icon-wrapper">
@@ -296,7 +257,7 @@ function Students() {
                 </div>
             );
         }
-        // Form State UI Copy (including inline styles and direct state updates)
+
         return (
             <>
                 <h3 style={{ marginTop: 0, color: "#374151" }}>
@@ -485,7 +446,9 @@ function Students() {
                             <option value="dropped">Dropped</option>
                         </select>
                     </div>
+
                     {error && <div className="alert-error">{error}</div>}
+
                     <div
                         style={{
                             marginTop: 20,
@@ -509,7 +472,6 @@ function Students() {
             </>
         );
     };
-    // END: Copied UI implementation from your old code
 
     return (
         <div className="page">
@@ -523,13 +485,18 @@ function Students() {
                     + New Student
                 </button>
             </header>
+
             <div className="actions-row">
                 <button
                     className="btn btn-primary"
-                    onClick={handleArchiveNavigate}
+                    onClick={() => {
+                        localStorage.setItem("archiveType", "students");
+                        window.location.href = "/archived?type=students";
+                    }}
                 >
                     View Archived Students
                 </button>
+
                 <div className="filters">
                     <div className="search">
                         <span className="icon">🔎</span>
@@ -543,9 +510,9 @@ function Students() {
                                     search: e.target.value,
                                 })
                             }
-                            onBlur={refresh}
                         />
                     </div>
+
                     <select
                         className="filter"
                         value={filters.department_id}
@@ -566,6 +533,7 @@ function Students() {
                             </option>
                         ))}
                     </select>
+
                     <select
                         className="filter"
                         value={filters.course_id}
@@ -583,6 +551,7 @@ function Students() {
                             </option>
                         ))}
                     </select>
+
                     <select
                         className="filter"
                         value={filters.academic_year_id}
@@ -605,6 +574,7 @@ function Students() {
                     </select>
                 </div>
             </div>
+
             <div className="table-wrapper">
                 <table className="students-table">
                     <thead>
@@ -647,26 +617,40 @@ function Students() {
                                     >
                                         ✎ Edit
                                     </button>
-                                    <button
-                                        className="btn btn-primary"
-                                        onClick={() =>
-                                            handleDelete(s.student_id)
-                                        }
-                                    >
-                                        Archive
-                                    </button>
+                                    {s.archived_at ? (
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={() =>
+                                                handleRestore(s.student_id)
+                                            }
+                                        >
+                                            Restore
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="btn btn-primary"
+                                            onClick={() =>
+                                                handleArchive(s.student_id)
+                                            }
+                                        >
+                                            Archive
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
+
             <div className="table-blank" />
+
             {showForm && (
                 <div className="modal-overlay">
                     <div className="modal-card">{renderModalContent()}</div>
                 </div>
             )}
+
             {error && <div className="alert-error">{error}</div>}
         </div>
     );
