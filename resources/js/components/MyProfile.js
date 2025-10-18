@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import "../../sass/profile.scss";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // ✅ Added for redirect function
+import { useNavigate } from "react-router-dom";
 
 function MyProfile() {
-    const navigate = useNavigate(); // ✅ Initialize navigation
+    const navigate = useNavigate();
     const DEFAULT_ROLE_DISPLAY = "System Administrator";
+
+    // Ensure axios sends cookies for Sanctum session auth
+    axios.defaults.withCredentials = true;
 
     const [profile, setProfile] = useState({
         first_name: "",
@@ -20,39 +23,63 @@ function MyProfile() {
     const [error, setError] = useState("");
     const [isEditing, setIsEditing] = useState(false);
 
+    // password-related transient fields (kept separate so we don't accidentally persist them)
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [newPasswordConfirmation, setNewPasswordConfirmation] = useState("");
+
     useEffect(() => {
         loadProfile();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const loadProfile = async () => {
+    const ensureCsrf = async () => {
         try {
-            const response = await fetch("/api/profile", {
-                headers: {
-                    Accept: "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
+            await axios.get("/sanctum/csrf-cookie");
+        } catch (err) {
+            console.warn("Failed to fetch CSRF cookie:", err);
+        }
+    };
+
+    const loadProfile = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            await ensureCsrf();
+
+            const response = await axios.get("/api/profile", {
+                withCredentials: true,
             });
 
             if (response.status === 401 || response.status === 403) {
-                navigate("/401"); // ✅ Redirect to Unauthorized page if token invalid
+                navigate("/401");
                 return;
             }
 
-            if (response.ok) {
-                const data = await response.json();
-                const userProfile = {
-                    ...data.user,
-                    role: data.user.role || DEFAULT_ROLE_DISPLAY,
-                    email: data.user.email || "AKademi@edutech.com",
-                };
-                setProfile(userProfile);
-                setInitialProfile(userProfile);
-            } else {
-                setError("Failed to load profile");
+            const data = response.data;
+            const userProfile = {
+                ...data.user,
+                role: data.user.role || DEFAULT_ROLE_DISPLAY,
+                email: data.user.email || "AKademi@edutech.com",
+            };
+
+            setProfile(userProfile);
+            setInitialProfile(userProfile);
+
+            // clear password fields if any
+            setCurrentPassword("");
+            setNewPassword("");
+            setNewPasswordConfirmation("");
+        } catch (err) {
+            console.error("Error loading profile:", err);
+            if (
+                err.response &&
+                (err.response.status === 401 || err.response.status === 403)
+            ) {
+                navigate("/401");
+                return;
             }
-        } catch (error) {
             setError("Error loading profile");
-            console.error("Error loading profile:", error);
         } finally {
             setLoading(false);
         }
@@ -75,46 +102,90 @@ function MyProfile() {
         setError("");
 
         try {
+            await ensureCsrf();
+
             const formData = new FormData();
             formData.append("first_name", profile.first_name);
             formData.append("last_name", profile.last_name);
             formData.append("email", profile.email);
 
+            // Avatar: only append if it's a File (i.e., user selected a new file)
             if (profile.avatar && typeof profile.avatar !== "string") {
                 formData.append("avatar", profile.avatar);
             }
 
-            const response = await fetch("/api/profile", {
-                method: "PUT",
-                headers: {
-                    Accept: "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-                body: formData,
-            });
-
-            if (response.status === 401 || response.status === 403) {
-                navigate("/401"); // ✅ Redirect if unauthorized while saving
-                return;
+            // Append password fields only if user entered a new password (and/or current)
+            if (newPassword) {
+                // current_password is required_with:new_password on backend
+                if (currentPassword) {
+                    formData.append("current_password", currentPassword);
+                }
+                formData.append("new_password", newPassword);
+                formData.append(
+                    "new_password_confirmation",
+                    newPasswordConfirmation
+                );
             }
 
-            if (response.ok) {
-                const data = await response.json();
+            // Laravel accepts file uploads more reliably via POST + _method=PUT
+            formData.append("_method", "PUT");
+
+            const response = await axios.post("/api/profile", formData, {
+                withCredentials: true,
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            if (response.status === 200 || response.status === 201) {
+                const data = response.data;
                 const updatedProfile = {
                     ...data.user,
                     role: data.user.role || DEFAULT_ROLE_DISPLAY,
                 };
+
                 setProfile(updatedProfile);
                 setInitialProfile(updatedProfile);
+                // Clear local password fields
+                setCurrentPassword("");
+                setNewPassword("");
+                setNewPasswordConfirmation("");
                 setError("Profile updated successfully!");
                 setIsEditing(false);
             } else {
-                const errorData = await response.json();
-                setError(errorData.message || "Failed to update profile");
+                setError("Failed to update profile");
             }
-        } catch (error) {
-            setError("Error updating profile");
-            console.error("Error updating profile:", error);
+        } catch (err) {
+            console.error("Error updating profile:", err);
+            if (err.response) {
+                if (
+                    err.response.status === 401 ||
+                    err.response.status === 403
+                ) {
+                    navigate("/401");
+                    return;
+                }
+                const data = err.response.data;
+                if (data && data.errors) {
+                    // Flatten the errors into a single message string
+                    const messages = [];
+                    Object.keys(data.errors).forEach((key) => {
+                        if (Array.isArray(data.errors[key])) {
+                            messages.push(...data.errors[key]);
+                        } else if (typeof data.errors[key] === "string") {
+                            messages.push(data.errors[key]);
+                        }
+                    });
+                    setError(messages.join(" "));
+                } else if (data && data.message) {
+                    setError(data.message);
+                } else {
+                    setError("Error updating profile");
+                }
+            } else {
+                setError("Network error updating profile");
+            }
         } finally {
             setSaving(false);
         }
@@ -124,26 +195,22 @@ function MyProfile() {
         setProfile(initialProfile);
         setIsEditing(false);
         setError("");
+        setCurrentPassword("");
+        setNewPassword("");
+        setNewPasswordConfirmation("");
     };
 
     const handleLogout = async () => {
         try {
-            await axios.post(
-                "/logout",
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "token"
-                        )}`,
-                    },
-                }
-            );
+            await ensureCsrf();
+            await axios.post("/logout", {}, { withCredentials: true });
         } catch (error) {
             console.error("Logout failed:", error);
         } finally {
-            localStorage.removeItem("token");
-            delete axios.defaults.headers.common["Authorization"];
+            try {
+                localStorage.removeItem("token");
+                delete axios.defaults.headers.common["Authorization"];
+            } catch (_) {}
             navigate("/login", { replace: true });
         }
     };
@@ -151,6 +218,14 @@ function MyProfile() {
     const getAvatarUrl = (avatar) => {
         if (!avatar) return null;
         if (typeof avatar === "string") {
+            // backend may return either a path (avatars/...) or full URL. If it's a path, prefix with /storage/
+            if (
+                avatar.startsWith("http://") ||
+                avatar.startsWith("https://") ||
+                avatar.startsWith("/storage/")
+            ) {
+                return avatar;
+            }
             return `/storage/${avatar}`;
         }
         return URL.createObjectURL(avatar);
@@ -245,6 +320,75 @@ function MyProfile() {
                                 className={!isEditing ? "read-only-input" : ""}
                             />
                         </div>
+
+                        {/* Inline Change Password section (appears only when editing) */}
+                        {isEditing && (
+                            <>
+                                <div
+                                    className="form-note"
+                                    style={{
+                                        marginBottom: 8,
+                                        color: "#6b7280",
+                                    }}
+                                >
+                                    Leave password fields empty if you do not
+                                    want to change your password.
+                                </div>
+
+                                <div className="form-row">
+                                    <label htmlFor="current_password">
+                                        Current Password
+                                    </label>
+                                    <input
+                                        id="current_password"
+                                        type="password"
+                                        name="current_password"
+                                        value={currentPassword}
+                                        onChange={(e) =>
+                                            setCurrentPassword(e.target.value)
+                                        }
+                                        className="form-input"
+                                        placeholder="Enter current password"
+                                    />
+                                </div>
+
+                                <div className="form-row">
+                                    <label htmlFor="new_password">
+                                        New Password
+                                    </label>
+                                    <input
+                                        id="new_password"
+                                        type="password"
+                                        name="new_password"
+                                        value={newPassword}
+                                        onChange={(e) =>
+                                            setNewPassword(e.target.value)
+                                        }
+                                        className="form-input"
+                                        placeholder="Enter new password (min 8 chars)"
+                                    />
+                                </div>
+
+                                <div className="form-row">
+                                    <label htmlFor="new_password_confirmation">
+                                        Confirm New Password
+                                    </label>
+                                    <input
+                                        id="new_password_confirmation"
+                                        type="password"
+                                        name="new_password_confirmation"
+                                        value={newPasswordConfirmation}
+                                        onChange={(e) =>
+                                            setNewPasswordConfirmation(
+                                                e.target.value
+                                            )
+                                        }
+                                        className="form-input"
+                                        placeholder="Confirm new password"
+                                    />
+                                </div>
+                            </>
+                        )}
 
                         <div className="form-row">
                             <label>Role</label>
