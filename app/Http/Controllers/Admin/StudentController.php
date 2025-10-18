@@ -116,31 +116,43 @@ class StudentController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
-        try {
-            $student = StudentProfile::findOrFail($id);
-            $validated = $request->validate([
-                'f_name' => 'required|string|max:255',
-                'l_name' => 'required|string|max:255',
-                'date_of_birth' => 'required|date',
-                'sex' => 'required|in:male,female,other',
-                'phone_number' => 'required|string|max:20',
-                'email_address' => 'required|email|unique:student_profiles,email_address,' . $id . ',student_id',
-                'address' => 'required|string|max:1000',
-                'status' => 'required|in:active,inactive,graduated,dropped',
-                'department_id' => 'required|exists:departments,department_id',
-                'course_id' => 'required|exists:courses,course_id',
-                'academic_year_id' => 'nullable|exists:academic_years,academic_year_id',
-                'year_level' => 'required|in:1st,2nd,3rd,4th',
-            ]);
+{
+    try {
+        $student = StudentProfile::findOrFail($id);
 
-            $student->update($validated);
-            return Response::json($student, 200);
-        } catch (\Exception $e) {
-            Log::error('Error updating student: ', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return Response::json(['error' => 'Failed to update student: ' . $e->getMessage()], 500);
-        }
+        $validated = $request->validate([
+            'f_name' => 'required|string|max:255',
+            'm_name' => 'nullable|string|max:255', // ✅ Added
+            'l_name' => 'required|string|max:255',
+            'suffix' => 'nullable|string|max:50', // ✅ Added
+            'date_of_birth' => 'required|date',
+            'sex' => 'required|in:male,female,other',
+            'phone_number' => 'required|string|max:20',
+            'email_address' => 'required|email|unique:student_profiles,email_address,' . $id . ',student_id',
+            'address' => 'required|string|max:1000',
+            'status' => 'required|in:active,inactive,graduated,dropped',
+            'department_id' => 'required|exists:departments,department_id',
+            'course_id' => 'required|exists:courses,course_id',
+            'academic_year_id' => 'nullable|exists:academic_years,academic_year_id',
+            'year_level' => 'required|in:1st,2nd,3rd,4th',
+        ]);
+
+        $student->update($validated);
+
+        // ✅ Force reload with updated values & relations
+        $updatedStudent = $student->fresh(['department', 'course', 'academicYear']);
+
+        return Response::json($updatedStudent, 200);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return Response::json(['error' => $e->errors()], 422);
+    } catch (\Exception $e) {
+        \Log::error('Error updating student: ', ['message' => $e->getMessage()]);
+        return Response::json(['error' => 'Failed to update student: ' . $e->getMessage()], 500);
     }
+}
+
+
+
 
     public function archive($id)
     {

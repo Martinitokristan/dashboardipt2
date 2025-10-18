@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import "../../sass/students.scss";
 
 const getCsrfCookie = async () => {
-    // optional if bootstrap already called it; safe to call again
     try {
         await axios.get("/sanctum/csrf-cookie");
     } catch (e) {
@@ -46,7 +45,6 @@ function Students() {
     });
 
     useEffect(() => {
-        // load supporting data + students
         Promise.all([
             axios.get("/api/admin/courses").catch(() => ({ data: [] })),
             axios.get("/api/admin/departments").catch(() => ({ data: [] })),
@@ -85,7 +83,7 @@ function Students() {
             setError("");
         } catch (e) {
             console.error("API Error:", e);
-            setError("Failed to load students"); // axios interceptor handles 401/403
+            setError("Failed to load students");
         }
     };
 
@@ -594,7 +592,9 @@ function Students() {
                                     {s.fullName ||
                                         `${s.f_name} ${
                                             s.m_name ? s.m_name + " " : ""
-                                        }${s.l_name}`}
+                                        }${s.l_name}${
+                                            s.suffix ? " " + s.suffix : ""
+                                        }`}
                                 </td>
                                 <td>{s.department?.department_name || "-"}</td>
                                 <td>{s.course?.course_name || "-"}</td>

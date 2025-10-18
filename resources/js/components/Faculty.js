@@ -3,14 +3,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../../sass/faculty.scss";
 
-const getCsrfCookie = async () => {
-    try {
-        await axios.get("/sanctum/csrf-cookie");
-    } catch (e) {
-        console.error("Failed to get CSRF cookie", e);
-    }
-};
-
 function Faculty() {
     const [faculty, setFaculty] = useState([]);
     const [departments, setDepartments] = useState([]);
@@ -35,7 +27,7 @@ function Faculty() {
         department_id: "",
     });
 
-    const closeModalAndReset = () => {
+    const closeModalAndReset = async () => {
         setShowForm(false);
         setModalContentState("form");
         setEditingId(null);
@@ -52,6 +44,8 @@ function Faculty() {
             address: "",
             department_id: "",
         });
+        // 🔁 Reload table after closing success modal
+        await loadFaculty();
     };
 
     useEffect(() => {
@@ -108,7 +102,6 @@ function Faculty() {
         setModalContentState("loading");
         setError("");
         try {
-            await getCsrfCookie();
             const payload = { ...formData };
             let response;
             if (editingId) {
@@ -120,7 +113,6 @@ function Faculty() {
                 response = await axios.post("/api/admin/faculty", payload);
             }
             if ([200, 201].includes(response.status)) {
-                await loadFaculty();
                 setModalContentState("success");
             }
         } catch (error) {
@@ -136,7 +128,6 @@ function Faculty() {
     const handleDelete = async (id) => {
         if (!confirm("Are you sure you want to archive this faculty?")) return;
         try {
-            await getCsrfCookie();
             await axios.post(`/api/admin/faculty/${id}/archive`);
             await loadFaculty();
         } catch (error) {
@@ -421,7 +412,9 @@ function Faculty() {
                             <tr key={f.faculty_id}>
                                 <td>{`${f.f_name} ${
                                     f.m_name ? f.m_name + " " : ""
-                                }${f.l_name}`}</td>
+                                }${f.l_name}${
+                                    f.suffix ? ", " + f.suffix : ""
+                                }`}</td>
                                 <td>{f.department?.department_name || "-"}</td>
                                 <td>
                                     <button
