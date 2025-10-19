@@ -241,7 +241,6 @@ function MyProfile() {
             <div className="profile-header">
                 <div>
                     <h1 className="page-title">My Profile</h1>
-                    <p className="page-subtitle">Profile Information</p>
                     <p className="page-subtitle subtle">
                         Update your personal details and contact information
                     </p>

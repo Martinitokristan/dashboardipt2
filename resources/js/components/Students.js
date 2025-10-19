@@ -155,7 +155,7 @@ function Students() {
             }
 
             if (response.status === 200 || response.status === 201) {
-                await refresh();
+                // ✅ Show success modal first
                 setModalContentState("success");
             } else {
                 setModalContentState("form");
@@ -195,7 +195,9 @@ function Students() {
         }
     };
 
-    const closeModalAndReset = () => {
+    // ✅ Refresh only after clicking "Done"
+    const closeModalAndReset = async () => {
+        await refresh();
         setShowForm(false);
         setModalContentState("form");
         setEditingId(null);

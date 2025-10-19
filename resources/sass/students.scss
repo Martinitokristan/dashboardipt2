@@ -11,20 +11,14 @@
 }
 
 .page-header {
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #e0e0e0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    position: relative;
+    padding: 16px 0;
 }
 
 .page-title {
-    font-size: 28px;
-    font-weight: 700;
-    color: #1f2937;
     margin: 0;
 }
+
 
 .page-subtitle {
     font-size: 14px;

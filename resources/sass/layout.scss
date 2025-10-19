@@ -1,21 +1,34 @@
 /* resources/sass/layout.scss */
 
 :root {
-  --sidebar-bg: #111827;
-  --sidebar-active: #374151;
-  --sidebar-text: #cbd5e1;
-  --sidebar-hover: #1f2937;
-  --brand-bg: #4338ca;
+  --sidebar-bg: #e6e6fa;
+  --sidebar-active: #d8bfd8;
+  --sidebar-text: #4a4a4a;
+  --sidebar-hover: #d1c4e9;
+  --brand-bg: #8b5cf6;
   --brand-color: #fff;
   --transition-speed: 0.2s;
+  --main-bg: #f8fafc;
 }
 
 .app-layout {
   display: grid;
   grid-template-columns: 240px 1fr;
   min-height: 100vh;
-  background: #f5f6ff;
+  background: var(--main-bg);
   font-family: "Inter", sans-serif;
+  position: relative;
+}
+
+.app-layout::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--header-bg);
+  z-index: 1000;
 }
 
 /* =============== SIDEBAR =============== */
@@ -61,7 +74,7 @@
 .brand-title {
   font-weight: 700;
   font-size: 15px;
-  color: #fff;
+  color: #1a1a1a;
 }
 
 .brand-subtitle {
@@ -100,19 +113,34 @@
 
 .nav-item:hover {
   background: var(--sidebar-hover);
-  color: #fff;
+  color: var(--sidebar-text);
 }
 
 .nav-item.active {
   background: var(--sidebar-active);
-  color: #fff;
+  color: var(--sidebar-text);
+  font-weight: 600;
+  position: relative;
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: var(--brand-bg);
+  border-radius: 0 2px 2px 0;
 }
 
 /* =============== MAIN CONTENT =============== */
 .main {
   padding: 32px;
-  background: #f5f6ff;
+  background: var(--main-bg);
   overflow-y: auto;
+  position: relative;
 }
 
 /* Page header consistency */
@@ -133,3 +161,4 @@
   font-size: 15px;
   color: #6b7280;
 }
+
