@@ -15,8 +15,10 @@ body {
 }
 
 .page.archived-all {
-    max-width: 1300px;
+    max-width: 1400px;
     margin: 0 auto;
+    padding: 0 40px;
+    margin-left: 60px;
 }
 
 /* --- Header & Alerts (unchanged) --- */
@@ -59,12 +61,12 @@ body {
     padding: 20px 25px; // Add internal padding
 }
 
-/* --- Controls/Filter Bar Styling (unchanged, minor adjustments) --- */
+/* --- Controls/Filter Bar Styling --- */
 .controls-bar {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
-    gap: 15px;
+    gap: 12px;
     padding: 15px 0;
     margin-bottom: 20px;
     border-bottom: 1px solid #eee;
@@ -104,27 +106,32 @@ body {
 }
 
 .search-input-group {
+    position: relative;
     display: flex;
     align-items: center;
-    border: 1px solid $border-color;
-    border-radius: 6px;
-    height: 40px;
-    background-color: white;
-    overflow: hidden;
+    width: 100%;
 
     .search-icon {
-        padding: 0 10px;
+        position: absolute;
+        left: 12px;
         color: $sub-text-color;
-        font-size: 1.1em;
+        font-size: 1em;
+        pointer-events: none;
+        z-index: 1;
     }
 
     .search-input {
-        border: none;
-        padding: 8px 0;
-        height: 100%;
+        width: 100%;
+        padding: 8px 12px 8px 38px;
+        border: 1px solid $border-color;
+        border-radius: 6px;
+        font-size: 0.95em;
+        height: 40px;
+        background-color: white;
         &:focus {
-            box-shadow: none;
-            outline: none;
+            outline: 2px solid #6366f1;
+            outline-offset: -1px;
+            border-color: #6366f1;
         }
     }
 }
@@ -149,6 +156,11 @@ body {
         text-transform: uppercase;
         letter-spacing: 0.5px;
         border-bottom: 2px solid $border-color;
+        text-align: left;
+
+        &.action-column {
+            text-align: center;
+        }
     }
 
     tbody td {
@@ -164,60 +176,79 @@ body {
 
 /* --- Action Buttons Styling - ADJUSTED --- */
 .action-cell {
-    text-align: right;
+    text-align: center;
     white-space: nowrap;
+    vertical-align: middle;
 }
 
 .btn-group {
     display: flex;
-    justify-content: flex-end;
-    gap: 10px; /* Increased gap between buttons */
+    justify-content: center;
+    gap: 10px;
     align-items: center;
 }
 
 .btn {
-    padding: 8px 15px;
-    border: 1px solid transparent; // Added transparent border for delete button
-    border-radius: 5px; /* Set border radius to 5px */
+    padding: 9px 16px;
+    border: 1px solid transparent;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 0.95em; /* Slightly larger font */
+    font-size: 0.9em;
     transition: all 0.2s;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    font-weight: 600;
+    justify-content: center;
+    font-weight: 500;
+    white-space: nowrap;
+    min-height: 38px;
 
-    .fa-undo,
+    i {
+        font-size: 0.95em;
+    }
+
+    .fa-undo {
+        margin-right: 6px;
+    }
+
     .fa-trash-alt {
-        margin-right: 5px;
-        font-size: 0.9em;
+        margin: 0;
     }
 }
 
 .btn-restore {
-    background-color: $primary-color;
-    color: white;
+    background-color: #fbbf24;
+    color: #111827;
+    border: 1px solid #fbbf24;
+    padding: 9px 16px;
+    min-width: 100px;
 
     &:hover {
-        background-color: darken($primary-color, 10%);
+        background-color: #f59e0b;
+        border-color: #f59e0b;
     }
 }
 
 .btn-delete {
-    background-color: #fff;
-    color: $danger-color;
-    border-color: $danger-color; // Explicit border color
-    padding: 8px 15px; // Ensure consistent padding for readable button
+    background-color: #dc2626;
+    color: white;
+    border: 1px solid #dc2626;
+    padding: 9px 16px;
+    min-width: 90px;
 
     .btn-label {
-        display: none; // Hiding the label for delete button to keep it icon-only
+        display: inline;
+        margin-left: 6px;
     }
-    .fa-trash-alt {
-        margin: 0; // Remove margin since it's icon-only
+
+    i.fa-trash-alt {
+        margin: 0;
+        font-size: 0.95em;
+        display: inline-block;
     }
 
     &:hover {
-        background-color: $danger-color;
-        color: white;
+        background-color: #b91c1c;
+        border-color: #b91c1c;
     }
 }
 

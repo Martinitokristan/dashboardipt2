@@ -10,7 +10,8 @@ function Faculty() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [showForm, setShowForm] = useState(false);
-    const [modalContentState, setModalContentState] = useState("form");
+    const [modalContentState, setModalContentState] = useState("form"); // form | loading | success | error
+    const [modalMessage, setModalMessage] = useState("");
     const [editingId, setEditingId] = useState(null);
     const [filters, setFilters] = useState({ search: "", department_id: "" });
     const navigate = useNavigate();
@@ -122,24 +123,26 @@ function Faculty() {
             }
         } catch (error) {
             console.error("Save error:", error);
-            setError(error.response?.data?.error || error.response?.data?.message || "Failed to save faculty");
-            setModalContentState("form");
+            setModalContentState("error");
+            setModalMessage(error.response?.data?.error || error.response?.data?.message || "Failed to save faculty");
             if ([401, 403].includes(error.response?.status)) {
                 window.location.href = "/login";
             }
         }
     };
 
-    const handleDelete = async (id) => {
+    const handleArchive = async (id) => {
         if (!confirm("Are you sure you want to archive this faculty?")) return;
         try {
             await axios.post(`/api/admin/faculty/${id}/archive`);
-            await loadFaculty();
+            setModalMessage("Faculty has been successfully archived.");
+            setModalContentState("success");
+            setShowForm(true);
         } catch (error) {
             console.error("Archive error:", error);
-            setError(
-                error.response?.data?.message || "Failed to archive faculty"
-            );
+            setModalMessage(error.response?.data?.message || "Failed to archive faculty");
+            setModalContentState("error");
+            setShowForm(true);
             if ([401, 403].includes(error.response?.status)) {
                 window.location.href = "/login";
             }
@@ -206,15 +209,45 @@ function Faculty() {
                     </div>
                     <h4 className="success-title">Success!</h4>
                     <p className="success-subtitle">
-                        {editingId
+                        {modalMessage || (editingId
                             ? "Faculty record has been updated."
-                            : "New faculty has been successfully added."}
+                            : "New faculty has been successfully added.")}
                     </p>
                     <button
                         className="btn btn-primary btn-close-message"
                         onClick={closeModalAndReset}
                     >
                         Done
+                    </button>
+                </div>
+            );
+        }
+
+        if (modalContentState === "error") {
+            return (
+                <div className="success-content">
+                    <div className="error-icon-wrapper">
+                        <svg
+                            className="error-icon-svg"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 52 52"
+                        >
+                            <path
+                                className="error-x-path"
+                                fill="none"
+                                d="M16 16 36 36 M36 16 16 36"
+                            />
+                        </svg>
+                    </div>
+                    <h4 className="error-title">Error!</h4>
+                    <p className="error-subtitle">
+                        {modalMessage || "An error occurred. Please try again."}
+                    </p>
+                    <button
+                        className="btn btn-danger btn-close-message"
+                        onClick={closeModalAndReset}
+                    >
+                        Close
                     </button>
                 </div>
             );

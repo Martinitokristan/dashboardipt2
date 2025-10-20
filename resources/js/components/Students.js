@@ -20,7 +20,8 @@ function Students() {
     const [students, setStudents] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState(null);
-    const [modalContentState, setModalContentState] = useState("form"); // form | loading | success
+    const [modalContentState, setModalContentState] = useState("form"); // form | loading | success | error
+    const [modalMessage, setModalMessage] = useState("");
     const [error, setError] = useState("");
     const [filters, setFilters] = useState({
         search: "",
@@ -164,8 +165,8 @@ function Students() {
             }
         } catch (err) {
             console.error("Save error:", err);
-            setModalContentState("form");
-            setError(err.response?.data?.message || "Failed to save student");
+            setModalContentState("error");
+            setModalMessage(err.response?.data?.error || err.response?.data?.message || "Failed to save student");
         }
     };
 
@@ -176,10 +177,14 @@ function Students() {
         try {
             await getCsrfCookie();
             await axios.post(`/api/admin/students/${id}/archive`);
-            await refresh();
+            setModalMessage("Student has been successfully archived.");
+            setModalContentState("success");
+            setShowForm(true);
         } catch (err) {
             console.error("Archive error:", err);
-            alert(err.response?.data?.error || "Failed to archive student");
+            setModalMessage(err.response?.data?.error || "Failed to archive student");
+            setModalContentState("error");
+            setShowForm(true);
         }
     };
 
@@ -245,15 +250,45 @@ function Students() {
                     </div>
                     <h4 className="success-title">Success!</h4>
                     <p className="success-subtitle">
-                        {editingId
+                        {modalMessage || (editingId
                             ? "Student record has been updated."
-                            : "New student has been successfully added."}
+                            : "New student has been successfully added.")}
                     </p>
                     <button
                         className="btn btn-primary btn-close-message"
                         onClick={closeModalAndReset}
                     >
                         Done
+                    </button>
+                </div>
+            );
+        }
+
+        if (modalContentState === "error") {
+            return (
+                <div className="success-content">
+                    <div className="error-icon-wrapper">
+                        <svg
+                            className="error-icon-svg"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 52 52"
+                        >
+                            <path
+                                className="error-x-path"
+                                fill="none"
+                                d="M16 16 36 36 M36 16 16 36"
+                            />
+                        </svg>
+                    </div>
+                    <h4 className="error-title">Error!</h4>
+                    <p className="error-subtitle">
+                        {modalMessage || "An error occurred. Please try again."}
+                    </p>
+                    <button
+                        className="btn btn-danger btn-close-message"
+                        onClick={closeModalAndReset}
+                    >
+                        Close
                     </button>
                 </div>
             );
@@ -281,6 +316,7 @@ function Students() {
                                 setForm({
                                     ...form,
                                     department_id: e.target.value,
+                                    course_id: "",
                                 })
                             }
                             required
@@ -304,13 +340,16 @@ function Students() {
                                 setForm({ ...form, course_id: e.target.value })
                             }
                             required
+                            disabled={!form.department_id}
                         >
                             <option value="">Select Course</option>
-                            {courses.map((c) => (
-                                <option key={c.course_id} value={c.course_id}>
-                                    {c.course_name}
-                                </option>
-                            ))}
+                            {courses
+                                .filter((c) => !form.department_id || c.department_id === parseInt(form.department_id))
+                                .map((c) => (
+                                    <option key={c.course_id} value={c.course_id}>
+                                        {c.course_name}
+                                    </option>
+                                ))}
                         </select>
 
                         <label className="form-label-new">First Name :</label>
@@ -526,6 +565,7 @@ function Students() {
                             setFilters({
                                 ...filters,
                                 department_id: e.target.value,
+                                course_id: "",
                             })
                         }
                     >
@@ -551,11 +591,13 @@ function Students() {
                         }
                     >
                         <option value="">⚗ All Course</option>
-                        {courses.map((c) => (
-                            <option key={c.course_id} value={c.course_id}>
-                                {c.course_name}
-                            </option>
-                        ))}
+                        {courses
+                            .filter((c) => !filters.department_id || c.department_id === parseInt(filters.department_id))
+                            .map((c) => (
+                                <option key={c.course_id} value={c.course_id}>
+                                    {c.course_name}
+                                </option>
+                            ))}
                     </select>
 
                     <select

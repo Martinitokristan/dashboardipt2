@@ -580,3 +580,69 @@
     background: #4f46e5;
     border-color: #4f46e5;
 }
+
+/*
+====================================
+     ERROR MODAL STYLES
+====================================
+*/
+
+.error-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #fee2e2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    animation: errorPulse 0.5s ease-in-out;
+}
+
+.error-icon-svg {
+    width: 40px;
+    height: 40px;
+}
+
+.error-x-path {
+    stroke: #dc2626;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: drawX 0.5s ease-in-out forwards;
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+}
+
+.error-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #dc2626;
+    margin: 0 0 10px 0;
+}
+
+.error-subtitle {
+    font-size: 15px;
+    color: #6b7280;
+    margin: 0 0 20px 0;
+}
+
+@keyframes errorPulse {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes drawX {
+    to {
+        stroke-dashoffset: 0;
+    }
+}

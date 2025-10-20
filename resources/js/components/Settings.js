@@ -35,6 +35,9 @@ function Settings() {
         school_year: "",
     });
     const [error, setError] = useState("");
+    const [showModal, setShowModal] = useState(false);
+    const [modalState, setModalState] = useState("success"); // success | error
+    const [modalMessage, setModalMessage] = useState("");
     const navigate = useNavigate();
 
     const refreshData = async () => {
@@ -140,9 +143,14 @@ function Settings() {
             await ensureCsrf();
             const url = `/api/admin/${active}/${id}/archive`;
             await axios.post(url);
-            await refreshData();
+            const itemType = active === "courses" ? "Course" : active === "departments" ? "Department" : "Academic Year";
+            setModalMessage(`${itemType} has been successfully archived.`);
+            setModalState("success");
+            setShowModal(true);
         } catch (error) {
-            setError(error.response?.data?.message || "Failed to archive");
+            setModalMessage(error.response?.data?.message || "Failed to archive");
+            setModalState("error");
+            setShowModal(true);
             if (
                 error.response?.status === 401 ||
                 error.response?.status === 403
@@ -150,6 +158,12 @@ function Settings() {
                 window.location.href = "/login";
             }
         }
+    };
+
+    const closeModal = async () => {
+        setShowModal(false);
+        setModalMessage("");
+        await refreshData();
     };
 
     const handleRestoreNavigate = () => {
@@ -554,6 +568,62 @@ function Settings() {
                                         </button>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {showModal && (
+                        <div className="modal-overlay">
+                            <div className="modal-card">
+                                {modalState === "success" ? (
+                                    <div className="success-content">
+                                        <div className="success-icon-wrapper">
+                                            <svg
+                                                className="success-icon-svg"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 52 52"
+                                            >
+                                                <path
+                                                    className="success-check-path"
+                                                    fill="none"
+                                                    d="M14.1 27.2l7.1 7.2 16.7-16.8"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <h4 className="success-title">Success!</h4>
+                                        <p className="success-subtitle">{modalMessage}</p>
+                                        <button
+                                            className="btn btn-primary btn-close-message"
+                                            onClick={closeModal}
+                                        >
+                                            Done
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="success-content">
+                                        <div className="error-icon-wrapper">
+                                            <svg
+                                                className="error-icon-svg"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 52 52"
+                                            >
+                                                <path
+                                                    className="error-x-path"
+                                                    fill="none"
+                                                    d="M16 16 36 36 M36 16 16 36"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <h4 className="error-title">Error!</h4>
+                                        <p className="error-subtitle">{modalMessage}</p>
+                                        <button
+                                            className="btn btn-danger btn-close-message"
+                                            onClick={closeModal}
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}

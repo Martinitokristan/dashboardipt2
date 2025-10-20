@@ -392,6 +392,9 @@ function ArchivedAll() {
                                                     title="Delete Permanently"
                                                 >
                                                     <i className="fas fa-trash-alt"></i>
+                                                    <span className="btn-label">
+                                                        Delete
+                                                    </span>
                                                 </button>
                                             </div>
                                         </td>
