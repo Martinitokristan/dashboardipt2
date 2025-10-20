@@ -334,6 +334,178 @@
     display: none;
 }
 
+/* =============== RESPONSIVE DESIGN =============== */
+
+/* Laptops (1024px - 1439px) */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    .page-container {
+        max-width: 1000px;
+        padding: 24px;
+    }
+    
+    .profile-grid {
+        grid-template-columns: 240px 1fr;
+        gap: 14px;
+    }
+    
+    .profile-card {
+        padding: 28px 14px;
+    }
+    
+    .avatar img {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .card {
+        padding: 20px;
+    }
+    
+    .form-row input {
+        height: 42px;
+        font-size: 15px;
+    }
+}
+
+/* Small Laptops (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .page-container {
+        max-width: 100%;
+        padding: 20px;
+    }
+    
+    .profile-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .profile-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .profile-card {
+        padding: 24px;
+    }
+    
+    .avatar img {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .profile-name {
+        font-size: 16px;
+    }
+    
+    .card {
+        padding: 18px;
+    }
+    
+    .form-row {
+        margin-bottom: 16px;
+    }
+    
+    .form-row input {
+        height: 40px;
+        font-size: 14px;
+    }
+    
+    .account-action {
+        margin-top: 20px;
+    }
+}
+
+/* Tablets and below (max-width: 767px) */
+@media (max-width: 767px) {
+    .page-container {
+        padding: 16px;
+    }
+    
+    .profile-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .page-title {
+        font-size: 20px;
+    }
+    
+    .page-subtitle {
+        font-size: 13px;
+    }
+    
+    .edit-profile-button {
+        width: 100%;
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+    
+    .profile-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .profile-card {
+        padding: 20px;
+    }
+    
+    .avatar img {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .profile-name {
+        font-size: 15px;
+        margin-top: 12px;
+    }
+    
+    .profile-email {
+        font-size: 13px;
+    }
+    
+    .card {
+        padding: 16px;
+    }
+    
+    .form-row {
+        margin-bottom: 14px;
+    }
+    
+    .form-row label {
+        font-size: 13px;
+    }
+    
+    .form-row input {
+        height: 38px;
+        font-size: 14px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .btn {
+        width: 100%;
+        padding: 10px;
+    }
+    
+    .btn-cancel-spacing {
+        margin-right: 0;
+        margin-bottom: 8px;
+    }
+    
+    .account-action {
+        margin-top: 16px;
+    }
+    
+    .action-title {
+        font-size: 16px;
+    }
+}
+
 /* Password Validation Messages */
 .password-validation-error {
     color: #dc2626;

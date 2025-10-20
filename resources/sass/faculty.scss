@@ -701,3 +701,177 @@
         stroke-dashoffset: 0;
     }
 }
+
+/* =============== RESPONSIVE DESIGN =============== */
+
+/* Laptops (1024px - 1439px) */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    .controls-bar {
+        gap: 10px;
+    }
+    
+    .search-bar {
+        max-width: 280px;
+    }
+    
+    .table-wrapper {
+        font-size: 13px;
+    }
+    
+    .table th,
+    .table td {
+        padding: 10px 12px;
+    }
+    
+    .modal-card {
+        max-width: 850px;
+        padding: 28px;
+    }
+    
+    .form-grid-new {
+        grid-template-columns: 85px 1fr 85px 1fr;
+        gap: 14px 12px;
+    }
+}
+
+/* Small Laptops (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .controls-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .search-bar {
+        max-width: 100%;
+        flex: 1 1 100%;
+    }
+    
+    .btn-add {
+        width: 100%;
+    }
+    
+    .table-wrapper {
+        font-size: 12px;
+        overflow-x: auto;
+    }
+    
+    .table {
+        min-width: 800px;
+    }
+    
+    .table th,
+    .table td {
+        padding: 8px 10px;
+    }
+    
+    .modal-card {
+        max-width: 95%;
+        padding: 24px;
+        margin: 20px;
+    }
+    
+    .form-grid-new {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .form-label-new {
+        margin-bottom: 4px;
+    }
+    
+    .full-width-label,
+    .full-width-input {
+        grid-column: 1 / 2;
+    }
+}
+
+/* Tablets and below (max-width: 767px) */
+@media (max-width: 767px) {
+    .page-header {
+        margin-bottom: 16px;
+    }
+    
+    .page-title {
+        font-size: 20px;
+    }
+    
+    .page-subtitle {
+        font-size: 13px;
+    }
+    
+    .controls-bar {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .search-bar,
+    .btn-add {
+        width: 100%;
+    }
+    
+    .table-wrapper {
+        overflow-x: auto;
+        font-size: 11px;
+    }
+    
+    .table {
+        min-width: 700px;
+    }
+    
+    .table th,
+    .table td {
+        padding: 6px 8px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .modal-overlay {
+        padding: 10px;
+    }
+    
+    .modal-card {
+        max-width: 100%;
+        padding: 20px;
+        margin: 0;
+    }
+    
+    .modal-header-new {
+        padding-bottom: 12px;
+        margin-bottom: 16px;
+    }
+    
+    .modal-title-new {
+        font-size: 18px;
+    }
+    
+    .modal-subtitle-new {
+        font-size: 12px;
+    }
+    
+    .form-grid-new {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .form-label-new {
+        font-size: 13px;
+        margin-bottom: 4px;
+    }
+    
+    .form-input-new {
+        font-size: 14px;
+        padding: 8px 10px;
+    }
+    
+    .modal-footer-new {
+        gap: 10px;
+        flex-direction: column;
+    }
+    
+    .modal-footer-new .btn {
+        width: 100%;
+    }
+}

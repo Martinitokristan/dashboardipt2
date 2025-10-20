@@ -162,3 +162,131 @@
   color: #6b7280;
 }
 
+/* =============== RESPONSIVE DESIGN =============== */
+
+/* Large Desktops (1920px and above) */
+@media (min-width: 1920px) {
+  .app-layout {
+    grid-template-columns: 260px 1fr;
+  }
+  
+  .main {
+    padding: 40px;
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+}
+
+/* Standard Desktops (1440px - 1919px) */
+@media (min-width: 1440px) and (max-width: 1919px) {
+  .app-layout {
+    grid-template-columns: 240px 1fr;
+  }
+  
+  .main {
+    padding: 32px;
+  }
+}
+
+/* Laptops (1024px - 1439px) */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .app-layout {
+    grid-template-columns: 220px 1fr;
+  }
+  
+  .sidebar {
+    padding: 20px 12px;
+  }
+  
+  .brand-title {
+    font-size: 14px;
+  }
+  
+  .brand-subtitle {
+    font-size: 11px;
+  }
+  
+  .nav-item {
+    font-size: 13px;
+    padding: 9px 10px;
+  }
+  
+  .main {
+    padding: 24px;
+  }
+  
+  .page-title {
+    font-size: 24px;
+  }
+}
+
+/* Small Laptops (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .app-layout {
+    grid-template-columns: 200px 1fr;
+  }
+  
+  .sidebar {
+    padding: 16px 10px;
+  }
+  
+  .brand {
+    gap: 8px;
+  }
+  
+  .brand-logo {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+  
+  .brand-title {
+    font-size: 13px;
+  }
+  
+  .brand-subtitle {
+    font-size: 10px;
+  }
+  
+  .nav-item {
+    font-size: 12px;
+    padding: 8px;
+    gap: 8px;
+  }
+  
+  .main {
+    padding: 20px;
+  }
+  
+  .page-title {
+    font-size: 22px;
+  }
+  
+  .page-subtitle {
+    font-size: 14px;
+  }
+}
+
+/* Tablets and below (max-width: 767px) */
+@media (max-width: 767px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar {
+    display: none; /* Hide sidebar on mobile, implement hamburger menu if needed */
+  }
+  
+  .main {
+    padding: 16px;
+  }
+  
+  .page-title {
+    font-size: 20px;
+  }
+  
+  .page-subtitle {
+    font-size: 13px;
+  }
+}
+

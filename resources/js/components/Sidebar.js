@@ -8,7 +8,7 @@ import {
     Settings,
     User,
 } from "lucide-react";
-import "../../sass/layout.scss";
+import "../../sass/sidebar.scss";
 
 function Sidebar() {
     return (

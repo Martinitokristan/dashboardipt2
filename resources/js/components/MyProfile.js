@@ -430,12 +430,12 @@ function MyProfile() {
                                     </label>
                                     {newPassword && !passwordValidation.isValid && (
                                         <div className="password-validation-error">
-                                            ⚠ {passwordValidation.message}
+                                             {passwordValidation.message}
                                         </div>
                                     )}
                                     {newPassword && passwordValidation.isValid && passwordValidation.strength && (
                                         <div className={`password-strength-indicator ${passwordValidation.strength.toLowerCase()}`}>
-                                            ✓ Password Strength: {passwordValidation.strength}
+                                             Password Strength: {passwordValidation.strength}
                                         </div>
                                     )}
                                     <input
@@ -457,7 +457,7 @@ function MyProfile() {
                                     </label>
                                     {newPasswordConfirmation && newPassword && (
                                         <div className={`password-match-indicator ${newPasswordConfirmation === newPassword ? 'match' : 'no-match'}`}>
-                                            {newPasswordConfirmation === newPassword ? "✓ Passwords match" : "⚠ Passwords do not match"}
+                                            {newPasswordConfirmation === newPassword ? " Passwords match" : " Passwords do not match"}
                                         </div>
                                     )}
                                     <input

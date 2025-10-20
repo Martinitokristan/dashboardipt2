@@ -110,3 +110,137 @@
     color: #111827;
   }
 }
+
+.chart-container {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  height: 400px;
+}
+
+/* =============== RESPONSIVE DESIGN =============== */
+
+/* Large Desktops (1920px and above) */
+@media (min-width: 1920px) {
+  .stats-cards {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px;
+  }
+  
+  .stat-card {
+    padding: 24px 28px;
+  }
+  
+  .chart-container {
+    height: 450px;
+    padding: 28px;
+  }
+}
+
+/* Standard Desktops (1440px - 1919px) */
+@media (min-width: 1440px) and (max-width: 1919px) {
+  .stats-cards {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+  
+  .chart-container {
+    height: 400px;
+  }
+}
+
+/* Laptops (1024px - 1439px) */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .stats-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .stat-card {
+    padding: 18px 20px;
+  }
+  
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+  
+  .stat-value {
+    font-size: 26px;
+  }
+  
+  .stat-label {
+    font-size: 13px;
+  }
+  
+  .chart-container {
+    height: 350px;
+    padding: 20px;
+  }
+}
+
+/* Small Laptops (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .stats-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .stat-card {
+    padding: 16px 18px;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .stat-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 22px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
+  
+  .stat-label {
+    font-size: 12px;
+  }
+  
+  .chart-container {
+    height: 300px;
+    padding: 18px;
+  }
+}
+
+/* Tablets and below (max-width: 767px) */
+@media (max-width: 767px) {
+  .stats-cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .stat-card {
+    padding: 16px;
+  }
+  
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
+  .stat-value {
+    font-size: 22px;
+  }
+  
+  .stat-label {
+    font-size: 11px;
+  }
+  
+  .chart-container {
+    height: 250px;
+    padding: 16px;
+  }
+}
