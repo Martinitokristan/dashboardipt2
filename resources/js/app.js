@@ -1,71 +1,15 @@
-import "./bootstrap";
-import React, { useEffect, useState } from "react";
-import { createRoot } from "react-dom/client";
-import {
-    BrowserRouter as Router,
-    Routes,
-    Route,
-    Navigate,
-} from "react-router-dom";
+/**
+ * First we will load all of this project's JavaScript dependencies which
+ * includes React and other helpers. It's a great starting point while
+ * building robust, powerful web applications using React + Laravel.
+ */
 
-import Login from "./components/Login";
-import Dashboard from "./components/Dashboard";
-import Settings from "./components/Settings";
-import Sidebar from "./components/Sidebar";
-import Students from "./components/Students";
-import Faculty from "./components/Faculty";
-import Report from "./components/Report";
-import MyProfile from "./components/MyProfile";
-import Unauthorized from "./components/Unauthorized";
-import axios from "axios";
+require('./bootstrap');
 
-// ✅ Secure ProtectedRoute using Sanctum session
-function ProtectedRoute({ children }) {
-    const [authorized, setAuthorized] = useState(null);
+/**
+ * Next, we will create a fresh React component instance and attach it to
+ * the page. Then, you may begin adding components to this application
+ * or customize the JavaScript scaffolding to fit your unique needs.
+ */
 
-    useEffect(() => {
-        axios
-            .get("/api/user")
-            .then(() => setAuthorized(true))
-            .catch(() => setAuthorized(false));
-    }, []);
-
-    if (authorized === null) return null;
-    if (!authorized) return <Navigate to="/401" replace />;
-    return children;
-}
-
-function App() {
-    return (
-        <Router>
-            <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<Login />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/401" element={<Unauthorized />} />
-
-                {/* Protected routes */}
-                <Route
-                    element={
-                        <ProtectedRoute>
-                            <Sidebar />
-                        </ProtectedRoute>
-                    }
-                >
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/students" element={<Students />} />
-                    <Route path="/faculty" element={<Faculty />} />
-                    <Route path="/reports" element={<Report />} />
-                    <Route path="/profile" element={<MyProfile />} />
-                </Route>
-            </Routes>
-        </Router>
-    );
-}
-
-const appElement = document.getElementById("app");
-if (appElement) {
-    const root = createRoot(appElement);
-    root.render(<App />);
-}
+require('./components/Routes');
