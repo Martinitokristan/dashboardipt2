@@ -149,10 +149,6 @@ function Faculty() {
         }
     };
 
-    const handleArchiveNavigate = () => {
-        navigate("/archived?type=faculty");
-        localStorage.setItem("archiveType", "faculty");
-    };
 
     const onOpenEditForm = (facultyMember) => {
         setEditingId(facultyMember.faculty_id);
@@ -456,12 +452,6 @@ function Faculty() {
             </header>
 
             <div className="actions-row">
-                <button
-                    className="btn btn-primary"
-                    onClick={handleArchiveNavigate}
-                >
-                    View Archived Faculty
-                </button>
                 <div className="filters">
                     <div className="search">
                         <BsSearch className="icon" />
@@ -537,7 +527,7 @@ function Faculty() {
                                     <button
                                         className="btn btn-primary"
                                         onClick={() =>
-                                            handleDelete(f.faculty_id)
+                                            handleArchive(f.faculty_id)
                                         }
                                     >
                                         Archive

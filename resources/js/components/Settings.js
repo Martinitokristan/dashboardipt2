@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Edit } from "lucide-react";
+import { BsSearch } from 'react-icons/bs';
 import "../../sass/settings.scss";
 
 // Secure helper — ensure Sanctum cookie exists before requests
@@ -24,6 +25,14 @@ function Settings() {
     const [courses, setCourses] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [academicYears, setAcademicYears] = useState([]);
+    const [archivedItems, setArchivedItems] = useState([]);
+    const [archiveType, setArchiveType] = useState("all");
+    const [archiveFilters, setArchiveFilters] = useState({
+        search: "",
+        department_id: "",
+        course_id: "",
+        academic_year_id: "",
+    });
     const [showForm, setShowForm] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
@@ -54,6 +63,17 @@ function Settings() {
             } else if (active === "academic-years") {
                 const res = await axios.get("/api/admin/academic-years");
                 setAcademicYears(res.data.filter((a) => !a.archived_at));
+            } else if (active === "archive") {
+                // Load filter data for archive tab
+                const [depts, coursesData, years] = await Promise.all([
+                    axios.get("/api/admin/departments"),
+                    axios.get("/api/admin/courses"),
+                    axios.get("/api/admin/academic-years"),
+                ]);
+                setDepartments(depts.data);
+                setCourses(coursesData.data);
+                setAcademicYears(years.data);
+                await loadArchivedItems();
             }
             setError("");
         } catch (err) {
@@ -166,9 +186,6 @@ function Settings() {
         await refreshData();
     };
 
-    const handleRestoreNavigate = () => {
-        navigate(`/archived?type=${active}`);
-    };
 
     const handleEdit = (item) => {
         setIsEditing(true);
@@ -183,6 +200,76 @@ function Settings() {
         });
     };
 
+    // Archive functions
+    const loadArchivedItems = async () => {
+        try {
+            await ensureCsrf();
+            const params = new URLSearchParams();
+            if (archiveFilters.search) params.set("search", archiveFilters.search);
+            if (archiveFilters.department_id) params.set("department_id", archiveFilters.department_id);
+            if (archiveFilters.course_id) params.set("course_id", archiveFilters.course_id);
+            if (archiveFilters.academic_year_id) params.set("academic_year_id", archiveFilters.academic_year_id);
+            params.set("type", archiveType);
+
+            const res = await axios.get("/api/admin/archived?" + params.toString());
+            setArchivedItems(res.data.items || []);
+        } catch (err) {
+            console.error("Load archived error:", err);
+            setError("Failed to load archived items");
+        }
+    };
+
+    const handleRestore = async (item) => {
+        if (!confirm("Are you sure you want to restore this item?")) return;
+        try {
+            await ensureCsrf();
+            const typeMap = {
+                course: "courses",
+                department: "departments",
+                academic_year: "academic-years",
+                student: "students",
+                faculty: "faculty",
+            };
+            const apiType = typeMap[item._type] || item._type;
+            await axios.post(`/api/admin/${apiType}/${item._id}/restore`);
+            setModalMessage(`${item._type} has been successfully restored.`);
+            setModalState("success");
+            setShowModal(true);
+        } catch (error) {
+            setModalMessage(error.response?.data?.message || "Failed to restore item");
+            setModalState("error");
+            setShowModal(true);
+        }
+    };
+
+    const handlePermanentDelete = async (item) => {
+        if (!confirm("Are you sure you want to permanently delete this item? This action cannot be undone!")) return;
+        try {
+            await ensureCsrf();
+            const typeMap = {
+                course: "courses",
+                department: "departments",
+                academic_year: "academic-years",
+                student: "students",
+                faculty: "faculty",
+            };
+            const apiType = typeMap[item._type] || item._type;
+            await axios.delete(`/api/admin/${apiType}/${item._id}`);
+            setModalMessage(`${item._type} has been permanently deleted.`);
+            setModalState("success");
+            setShowModal(true);
+        } catch (error) {
+            setModalMessage(error.response?.data?.message || "Failed to delete item");
+            setModalState("error");
+            setShowModal(true);
+        }
+    };
+
+    useEffect(() => {
+        if (active === "archive") {
+            loadArchivedItems();
+        }
+    }, [archiveFilters]);
 
     return (
         <div className="settings-content">
@@ -239,35 +326,45 @@ function Settings() {
                     >
                         Academic Years
                     </button>
+                    <button
+                        className={`tab ${
+                            active === "archive" ? "active" : ""
+                        }`}
+                        onClick={() => {
+                            setActive("archive");
+                            localStorage.setItem(
+                                "settings_active_tab",
+                                "archive"
+                            );
+                        }}
+                    >
+                        Archive
+                    </button>
                 </div>
 
                 <div className="tab-content">
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            marginBottom: "20px",
-                        }}
-                    >
-                        <button
-                            className="btn btn-primary"
-                            onClick={handleRestoreNavigate}
+                    {active !== "archive" && (
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                alignItems: "center",
+                                marginBottom: "20px",
+                            }}
                         >
-                            View Archived
-                        </button>
-                        <button
-                            className="btn btn-primary"
-                            onClick={() => onOpenForm()}
-                        >
-                            Add{" "}
-                            {active === "courses"
-                                ? "Course"
-                                : active === "departments"
-                                ? "Department"
-                                : "Academic Year"}
-                        </button>
-                    </div>
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => onOpenForm()}
+                            >
+                                Add{" "}
+                                {active === "courses"
+                                    ? "Course"
+                                    : active === "departments"
+                                    ? "Department"
+                                    : "Academic Year"}
+                            </button>
+                        </div>
+                    )}
 
                     {/* === Courses Table === */}
                     {active === "courses" && (
@@ -390,6 +487,145 @@ function Settings() {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                    )}
+
+                    {/* === Archive Table === */}
+                    {active === "archive" && (
+                        <div>
+                            <div className="controls-bar" style={{ display: "flex", gap: "12px", marginBottom: "20px", alignItems: "flex-end", flexWrap: "wrap" }}>
+                                <div className="control-item" style={{ flex: "0 0 auto", minWidth: "150px" }}>
+                                    <select
+                                        value={archiveType}
+                                        onChange={(e) => {
+                                            setArchiveType(e.target.value);
+                                            setArchiveFilters({ search: "", department_id: "", course_id: "", academic_year_id: "" });
+                                        }}
+                                        style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "6px", width: "100%", height: "40px" }}
+                                    >
+                                        <option value="all">All Archive</option>
+                                        <option value="students">Students</option>
+                                        <option value="faculty">Faculty</option>
+                                        <option value="courses">Courses</option>
+                                        <option value="departments">Departments</option>
+                                        <option value="academic_years">Academic Years</option>
+                                    </select>
+                                </div>
+
+                                <div className="control-item" style={{ flex: "1 1 250px", minWidth: "200px" }}>
+                                    <div style={{ position: "relative" }}>
+                                        <BsSearch style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#666", pointerEvents: "none" }} />
+                                        <input
+                                            type="text"
+                                            placeholder={`Search archived ${archiveType === 'all' ? 'items' : archiveType}...`}
+                                            value={archiveFilters.search}
+                                            onChange={(e) => setArchiveFilters({ ...archiveFilters, search: e.target.value })}
+                                            style={{ width: "100%", padding: "8px 12px 8px 38px", border: "1px solid #ddd", borderRadius: "6px", height: "40px" }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {(archiveType === "students" || archiveType === "faculty" || archiveType === "courses") && (
+                                    <div className="control-item" style={{ flex: "0 0 auto", minWidth: "150px" }}>
+                                        <select
+                                            value={archiveFilters.department_id}
+                                            onChange={(e) => setArchiveFilters({ ...archiveFilters, department_id: e.target.value, course_id: "" })}
+                                            style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "6px", width: "100%", height: "40px" }}
+                                        >
+                                            <option value="">All Departments</option>
+                                            {departments.map((d) => (
+                                                <option key={d.department_id} value={d.department_id}>
+                                                    {d.department_name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+
+                                {archiveType === "students" && (
+                                    <div className="control-item" style={{ flex: "0 0 auto", minWidth: "150px" }}>
+                                        <select
+                                            value={archiveFilters.course_id}
+                                            onChange={(e) => setArchiveFilters({ ...archiveFilters, course_id: e.target.value })}
+                                            style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "6px", width: "100%", height: "40px" }}
+                                        >
+                                            <option value="">All Courses</option>
+                                            {courses
+                                                .filter((c) => !archiveFilters.department_id || c.department_id === parseInt(archiveFilters.department_id))
+                                                .map((c) => (
+                                                    <option key={c.course_id} value={c.course_id}>
+                                                        {c.course_name}
+                                                    </option>
+                                                ))}
+                                        </select>
+                                    </div>
+                                )}
+
+                                {archiveType === "students" && (
+                                    <div className="control-item" style={{ flex: "0 0 auto", minWidth: "150px" }}>
+                                        <select
+                                            value={archiveFilters.academic_year_id}
+                                            onChange={(e) => setArchiveFilters({ ...archiveFilters, academic_year_id: e.target.value })}
+                                            style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "6px", width: "100%", height: "40px" }}
+                                        >
+                                            <option value="">All Academic Years</option>
+                                            {academicYears.map((a) => (
+                                                <option key={a.academic_year_id} value={a.academic_year_id}>
+                                                    {a.school_year}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="table-wrapper">
+                                {archivedItems.length === 0 ? (
+                                    <p style={{ textAlign: "center", padding: "40px", color: "#666" }}>
+                                        No archived items found.
+                                    </p>
+                                ) : (
+                                    <table className="settings-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>Name</th>
+                                                <th>Details</th>
+                                                <th>Archived At</th>
+                                                <th style={{ textAlign: "center" }}>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {archivedItems.map((item, index) => (
+                                                <tr key={`${item._type}-${item._id || index}`}>
+                                                    <td style={{ textTransform: "capitalize" }}>{item._type?.replace("_", " ")}</td>
+                                                    <td>{item._label}</td>
+                                                    <td>{item._department || item._course || "-"}</td>
+                                                    <td>{item.archived_at ? new Date(item.archived_at).toLocaleDateString() : "-"}</td>
+                                                    <td style={{ textAlign: "center" }}>
+                                                        <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
+                                                            <button
+                                                                className="btn"
+                                                                style={{ backgroundColor: "#fbbf24", color: "#111827", border: "1px solid #fbbf24", padding: "8px 14px", borderRadius: "6px" }}
+                                                                onClick={() => handleRestore(item)}
+                                                            >
+                                                                Restore
+                                                            </button>
+                                                            <button
+                                                                className="btn"
+                                                                style={{ backgroundColor: "#dc2626", color: "white", border: "1px solid #dc2626", padding: "8px 14px", borderRadius: "6px" }}
+                                                                onClick={() => handlePermanentDelete(item)}
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                )}
+                            </div>
                         </div>
                     )}
 

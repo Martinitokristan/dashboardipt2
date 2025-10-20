@@ -316,7 +316,6 @@ function Students() {
                                 setForm({
                                     ...form,
                                     department_id: e.target.value,
-                                    course_id: "",
                                 })
                             }
                             required
@@ -340,16 +339,13 @@ function Students() {
                                 setForm({ ...form, course_id: e.target.value })
                             }
                             required
-                            disabled={!form.department_id}
                         >
                             <option value="">Select Course</option>
-                            {courses
-                                .filter((c) => !form.department_id || c.department_id === parseInt(form.department_id))
-                                .map((c) => (
-                                    <option key={c.course_id} value={c.course_id}>
-                                        {c.course_name}
-                                    </option>
-                                ))}
+                            {courses.map((c) => (
+                                <option key={c.course_id} value={c.course_id}>
+                                    {c.course_name}
+                                </option>
+                            ))}
                         </select>
 
                         <label className="form-label-new">First Name :</label>
@@ -531,17 +527,7 @@ function Students() {
                 </button>
             </header>
 
-            <div className="actions-row">
-                <button
-                    className="btn btn-primary"
-                    onClick={() => {
-                        localStorage.setItem("archiveType", "students");
-                        window.location.href = "/archived?type=students";
-                    }}
-                >
-                    View Archived Students
-                </button>
-
+            <div className="controls">
                 <div className="filters">
                     <div className="search">
                         <BsSearch className="icon" />
@@ -565,7 +551,6 @@ function Students() {
                             setFilters({
                                 ...filters,
                                 department_id: e.target.value,
-                                course_id: "",
                             })
                         }
                     >
@@ -591,13 +576,11 @@ function Students() {
                         }
                     >
                         <option value="">⚗ All Course</option>
-                        {courses
-                            .filter((c) => !filters.department_id || c.department_id === parseInt(filters.department_id))
-                            .map((c) => (
-                                <option key={c.course_id} value={c.course_id}>
-                                    {c.course_name}
-                                </option>
-                            ))}
+                        {courses.map((c) => (
+                            <option key={c.course_id} value={c.course_id}>
+                                {c.course_name}
+                            </option>
+                        ))}
                     </select>
 
                     <select

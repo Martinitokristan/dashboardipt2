@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
     BarChart,
     Bar,
@@ -15,6 +16,15 @@ import {
 import { GraduationCap, Users, Building, BookOpen } from "lucide-react";
 import "../../sass/dashboard.scss";
 
+// Secure helper — ensure Sanctum cookie exists before requests
+const ensureCsrf = async () => {
+    try {
+        await axios.get("/sanctum/csrf-cookie");
+    } catch (_) {
+        console.warn("Failed to initialize CSRF cookie");
+    }
+};
+
 function Dashboard() {
     const [stats, setStats] = useState({
         total_students: 0,
@@ -29,26 +39,15 @@ function Dashboard() {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await fetch("/api/dashboard", {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "token"
-                        )}`,
-                    },
-                });
-                if (response.status === 401 || response.status === 403) {
-                    window.location.href = "/login";
-                    return;
-                }
-                if (response.ok) {
-                    const data = await response.json();
-                    setStats(data);
-                } else {
-                    setError("Failed to load dashboard data");
-                }
+                await ensureCsrf(); // 🔒 Secure CSRF protection
+                const response = await axios.get("/api/dashboard");
+                setStats(response.data);
             } catch (error) {
                 setError("Error loading dashboard data");
                 console.error("Error:", error);
+                if (error.response?.status === 401 || error.response?.status === 403) {
+                    window.location.href = "/login";
+                }
             }
         };
         fetchStats();

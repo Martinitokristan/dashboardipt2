@@ -16,7 +16,6 @@ import Students from "./components/Students";
 import Faculty from "./components/Faculty";
 import Report from "./components/Report";
 import MyProfile from "./components/MyProfile";
-import ArchivedAll from "./components/ArchivedAll";
 import Unauthorized from "./components/Unauthorized";
 import axios from "axios";
 
@@ -58,7 +57,6 @@ function App() {
                     <Route path="/students" element={<Students />} />
                     <Route path="/faculty" element={<Faculty />} />
                     <Route path="/reports" element={<Report />} />
-                    <Route path="/archived" element={<ArchivedAll />} />
                     <Route path="/profile" element={<MyProfile />} />
                 </Route>
             </Routes>
