@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { Edit } from "lucide-react";
 import "../../sass/settings.scss";
 
 // Secure helper — ensure Sanctum cookie exists before requests
@@ -24,6 +25,8 @@ function Settings() {
     const [departments, setDepartments] = useState([]);
     const [academicYears, setAcademicYears] = useState([]);
     const [showForm, setShowForm] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
     const [form, setForm] = useState({
         course_name: "",
         department_name: "",
@@ -62,14 +65,16 @@ function Settings() {
         refreshData();
     }, [active]);
 
-    const onOpenForm = () => {
+    const onOpenForm = (item) => {
         setShowForm(true);
+        setIsEditing(!!item);
+        setSelectedItem(item);
         setForm({
-            course_name: "",
-            department_name: "",
-            department_head: "",
-            department_id: "",
-            school_year: "",
+            course_name: item?.course_name || "",
+            department_name: item?.department_name || "",
+            department_head: item?.department_head || "",
+            department_id: item?.department_id || "",
+            school_year: item?.school_year || "",
         });
         setError("");
     };
@@ -86,20 +91,31 @@ function Settings() {
                 if (!payload.department_id) {
                     throw new Error("Please select a department.");
                 }
-                await axios.post("/api/admin/courses", payload);
+                if (isEditing) {
+                    await axios.put(`/api/admin/courses/${selectedItem.course_id}`, payload);
+                } else {
+                    await axios.post("/api/admin/courses", payload);
+                }
                 await refreshData();
             } else if (active === "departments") {
                 const payload = {
                     department_name: form.department_name.trim(),
-                    department_head: form.department_head.trim() || null,
                 };
-                await axios.post("/api/admin/departments", payload);
+                if (isEditing) {
+                    await axios.put(`/api/admin/departments/${selectedItem.department_id}`, payload);
+                } else {
+                    await axios.post("/api/admin/departments", payload);
+                }
                 await refreshData();
             } else if (active === "academic-years") {
                 const payload = {
                     school_year: form.school_year.trim(),
                 };
-                await axios.post("/api/admin/academic-years", payload);
+                if (isEditing) {
+                    await axios.put(`/api/admin/academic-years/${selectedItem.academic_year_id}`, payload);
+                } else {
+                    await axios.post("/api/admin/academic-years", payload);
+                }
                 await refreshData();
             }
             setShowForm(false);
@@ -139,6 +155,20 @@ function Settings() {
     const handleRestoreNavigate = () => {
         navigate(`/archived?type=${active}`);
     };
+
+    const handleEdit = (item) => {
+        setIsEditing(true);
+        setSelectedItem(item);
+        setShowForm(true);
+        setForm({
+            course_name: item.course_name || "",
+            department_name: item.department_name || "",
+            department_head: item.department_head || "",
+            department_id: item.department_id || "",
+            school_year: item.school_year || "",
+        });
+    };
+
 
     return (
         <div className="settings-content">
@@ -214,7 +244,7 @@ function Settings() {
                         </button>
                         <button
                             className="btn btn-primary"
-                            onClick={onOpenForm}
+                            onClick={() => onOpenForm()}
                         >
                             Add{" "}
                             {active === "courses"
@@ -246,7 +276,13 @@ function Settings() {
                                             </td>
                                             <td>
                                                 <button
-                                                    className="btn btn-danger"
+                                                    className="btn btn-light"
+                                                    onClick={() => onOpenForm(c)}
+                                                >
+                                                    ✎ Edit
+                                                </button>
+                                                <button
+                                                    className="btn btn-danger btn-sm"
                                                     onClick={() =>
                                                         handleDelete(
                                                             c.course_id
@@ -270,7 +306,7 @@ function Settings() {
                                 <thead>
                                     <tr>
                                         <th>Name</th>
-                                        <th>Head</th>
+                                        <th>Department Head</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -281,7 +317,13 @@ function Settings() {
                                             <td>{d.department_head || "-"}</td>
                                             <td>
                                                 <button
-                                                    className="btn btn-danger"
+                                                    className="btn btn-light"
+                                                    onClick={() => onOpenForm(d)}
+                                                >
+                                                    ✎ Edit
+                                                </button>
+                                                <button
+                                                    className="btn btn-danger btn-sm"
                                                     onClick={() =>
                                                         handleDelete(
                                                             d.department_id
@@ -314,7 +356,13 @@ function Settings() {
                                             <td>{a.school_year}</td>
                                             <td>
                                                 <button
-                                                    className="btn btn-danger"
+                                                    className="btn btn-light"
+                                                    onClick={() => onOpenForm(a)}
+                                                >
+                                                    ✎ Edit
+                                                </button>
+                                                <button
+                                                    className="btn btn-danger btn-sm"
                                                     onClick={() =>
                                                         handleDelete(
                                                             a.academic_year_id
@@ -335,7 +383,7 @@ function Settings() {
                     {showForm && active === "courses" && (
                         <div className="modal-overlay">
                             <div className="modal-card">
-                                <h3>Add Course</h3>
+                                <h3>{isEditing ? 'Edit Course' : 'Add Course'}</h3>
                                 <form onSubmit={onSubmit}>
                                     <div style={{ display: "grid", gap: 14 }}>
                                         <div>
@@ -400,7 +448,7 @@ function Settings() {
                                             className="btn btn-primary"
                                             type="submit"
                                         >
-                                            Add Course
+                                            {isEditing ? 'Update Course' : 'Add Course'}
                                         </button>
                                     </div>
                                 </form>
@@ -411,13 +459,15 @@ function Settings() {
                     {showForm && active === "departments" && (
                         <div className="modal-overlay">
                             <div className="modal-card">
-                                <h3>Add Department</h3>
+                                <h3>{isEditing ? 'Edit Department' : 'Add Department'}</h3>
                                 <form onSubmit={onSubmit}>
                                     <div style={{ display: "grid", gap: 14 }}>
                                         <div>
                                             <label>Department Name</label>
                                             <input
                                                 className="form-input"
+                                                placeholder="Department Name"
+                                                name="department_name"
                                                 value={form.department_name}
                                                 onChange={(e) =>
                                                     setForm({
@@ -427,20 +477,6 @@ function Settings() {
                                                     })
                                                 }
                                                 required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label>Department Head</label>
-                                            <input
-                                                className="form-input"
-                                                value={form.department_head}
-                                                onChange={(e) =>
-                                                    setForm({
-                                                        ...form,
-                                                        department_head:
-                                                            e.target.value,
-                                                    })
-                                                }
                                             />
                                         </div>
                                     </div>
@@ -463,7 +499,7 @@ function Settings() {
                                             className="btn btn-primary"
                                             type="submit"
                                         >
-                                            Add Department
+                                            {isEditing ? 'Update Department' : 'Add Department'}
                                         </button>
                                     </div>
                                 </form>
@@ -474,7 +510,9 @@ function Settings() {
                     {showForm && active === "academic-years" && (
                         <div className="modal-overlay">
                             <div className="modal-card">
-                                <h3>Add Academic Year</h3>
+                                <h3>
+                                    {isEditing ? "Edit Academic Year" : "Add Academic Year"}
+                                </h3>
                                 <form onSubmit={onSubmit}>
                                     <div style={{ display: "grid", gap: 14 }}>
                                         <div>
@@ -512,7 +550,7 @@ function Settings() {
                                             className="btn btn-primary"
                                             type="submit"
                                         >
-                                            Add Academic Year
+                                            {isEditing ? "Save Changes" : "Add Academic Year"}
                                         </button>
                                     </div>
                                 </form>

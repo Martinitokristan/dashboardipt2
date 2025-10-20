@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\FacultyController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\DepartmentHeadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,6 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/faculty/{faculty}/archive', [FacultyController::class, 'archive']);
         Route::post('/faculty/{faculty}/restore', [FacultyController::class, 'restore']);
         Route::delete('/faculty/{faculty}', [FacultyController::class, 'destroy']);
+
 
         // Reports API Resource
         Route::apiResource('reports', ReportController::class)->only(['index']);

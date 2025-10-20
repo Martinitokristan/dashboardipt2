@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { BsSearch } from 'react-icons/bs';
 import "../../sass/students.scss";
 
 const getCsrfCookie = async () => {
@@ -155,7 +156,7 @@ function Students() {
             }
 
             if (response.status === 200 || response.status === 201) {
-                // ✅ Show success modal first
+                // Show success modal first
                 setModalContentState("success");
             } else {
                 setModalContentState("form");
@@ -195,7 +196,7 @@ function Students() {
         }
     };
 
-    // ✅ Refresh only after clicking "Done"
+    // Refresh only after clicking "Done"
     const closeModalAndReset = async () => {
         await refresh();
         setShowForm(false);
@@ -260,112 +261,21 @@ function Students() {
 
         return (
             <>
-                <h3 style={{ marginTop: 0, color: "#374151" }}>
-                    {editingId ? "Edit Student" : "Add Student"}
-                </h3>
+                <div className="modal-header-new">
+                    <h3 className="modal-title-new">
+                        {editingId ? "Edit Student" : "Add New Students"}
+                    </h3>
+                    <p className="modal-subtitle-new">
+                        {editingId
+                            ? "Update student details below"
+                            : "Enter students details to add them to the system"}
+                    </p>
+                </div>
                 <form onSubmit={handleSubmit}>
-                    <div
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 12,
-                        }}
-                    >
-                        <input
-                            className="form-input"
-                            placeholder="First Name"
-                            value={form.f_name}
-                            onChange={(e) =>
-                                setForm({ ...form, f_name: e.target.value })
-                            }
-                            required
-                        />
-                        <input
-                            className="form-input"
-                            placeholder="Middle Name"
-                            value={form.m_name}
-                            onChange={(e) =>
-                                setForm({ ...form, m_name: e.target.value })
-                            }
-                        />
-                        <input
-                            className="form-input"
-                            placeholder="Last Name"
-                            value={form.l_name}
-                            onChange={(e) =>
-                                setForm({ ...form, l_name: e.target.value })
-                            }
-                            required
-                        />
-                        <input
-                            className="form-input"
-                            placeholder="Suffix"
-                            value={form.suffix}
-                            onChange={(e) =>
-                                setForm({ ...form, suffix: e.target.value })
-                            }
-                        />
-                        <input
-                            className="form-input"
-                            placeholder="Date of Birth"
-                            value={form.date_of_birth}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    date_of_birth: e.target.value,
-                                })
-                            }
-                            type="date"
-                            required
-                        />
+                    <div className="form-grid-new">
+                        <label className="form-label-new">Department :</label>
                         <select
-                            className="form-input"
-                            value={form.sex}
-                            onChange={(e) =>
-                                setForm({ ...form, sex: e.target.value })
-                            }
-                            required
-                        >
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="other">Other</option>
-                        </select>
-                        <input
-                            className="form-input"
-                            placeholder="Phone Number"
-                            value={form.phone_number}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    phone_number: e.target.value,
-                                })
-                            }
-                            required
-                        />
-                        <input
-                            className="form-input"
-                            placeholder="Email Address"
-                            value={form.email_address}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    email_address: e.target.value,
-                                })
-                            }
-                            type="email"
-                            required
-                        />
-                        <input
-                            className="form-input"
-                            placeholder="Address"
-                            value={form.address}
-                            onChange={(e) =>
-                                setForm({ ...form, address: e.target.value })
-                            }
-                            required
-                        />
-                        <select
-                            className="form-input"
+                            className="form-input-new"
                             value={form.department_id}
                             onChange={(e) =>
                                 setForm({
@@ -385,8 +295,10 @@ function Students() {
                                 </option>
                             ))}
                         </select>
+
+                        <label className="form-label-new">Course :</label>
                         <select
-                            className="form-input"
+                            className="form-input-new"
                             value={form.course_id}
                             onChange={(e) =>
                                 setForm({ ...form, course_id: e.target.value })
@@ -400,28 +312,116 @@ function Students() {
                                 </option>
                             ))}
                         </select>
-                        <select
-                            className="form-input"
-                            value={form.academic_year_id}
+
+                        <label className="form-label-new">First Name :</label>
+                        <input
+                            className="form-input-new"
+                            placeholder="First Name"
+                            value={form.f_name}
+                            onChange={(e) =>
+                                setForm({ ...form, f_name: e.target.value })
+                            }
+                            required
+                        />
+
+                        <label className="form-label-new">MI.Name :</label>
+                        <input
+                            className="form-input-new"
+                            placeholder="Middle Name"
+                            value={form.m_name}
+                            onChange={(e) =>
+                                setForm({ ...form, m_name: e.target.value })
+                            }
+                        />
+
+                        <label className="form-label-new">Last Name :</label>
+                        <input
+                            className="form-input-new"
+                            placeholder="Last Name"
+                            value={form.l_name}
+                            onChange={(e) =>
+                                setForm({ ...form, l_name: e.target.value })
+                            }
+                            required
+                        />
+
+                        <label className="form-label-new">Suffix :</label>
+                        <input
+                            className="form-input-new"
+                            placeholder="Suffix"
+                            value={form.suffix}
+                            onChange={(e) =>
+                                setForm({ ...form, suffix: e.target.value })
+                            }
+                        />
+
+                        <label className="form-label-new">Date Birth :</label>
+                        <input
+                            className="form-input-new"
+                            value={form.date_of_birth}
                             onChange={(e) =>
                                 setForm({
                                     ...form,
-                                    academic_year_id: e.target.value,
+                                    date_of_birth: e.target.value,
                                 })
                             }
-                        >
-                            <option value="">Select Academic Year</option>
-                            {academicYears.map((a) => (
-                                <option
-                                    key={a.academic_year_id}
-                                    value={a.academic_year_id}
-                                >
-                                    {a.school_year}
-                                </option>
-                            ))}
-                        </select>
+                            type="date"
+                            required
+                        />
+
+                        <label className="form-label-new">Sex :</label>
                         <select
-                            className="form-input"
+                            className="form-input-new"
+                            value={form.sex}
+                            onChange={(e) =>
+                                setForm({ ...form, sex: e.target.value })
+                            }
+                            required
+                        >
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+
+                        <label className="form-label-new">Phone No. :</label>
+                        <input
+                            className="form-input-new"
+                            placeholder="09XXXXXXXXX"
+                            value={form.phone_number}
+                            onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, '');
+                                if (value.length <= 11) {
+                                    setForm({
+                                        ...form,
+                                        phone_number: value,
+                                    });
+                                }
+                            }}
+                            type="tel"
+                            pattern="09[0-9]{9}"
+                            maxLength="11"
+                            title="Please enter a valid Philippine mobile number (11 digits starting with 09)"
+                            required
+                        />
+
+                        <label className="form-label-new">Email :</label>
+                        <input
+                            className="form-input-new"
+                            placeholder="Email Address"
+                            value={form.email_address}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    email_address: e.target.value,
+                                })
+                            }
+                            type="email"
+                            required
+                        />
+
+                        <label className="form-label-new">Year Level :</label>
+                        <select
+                            className="form-input-new"
                             value={form.year_level}
                             onChange={(e) =>
                                 setForm({ ...form, year_level: e.target.value })
@@ -433,8 +433,10 @@ function Students() {
                             <option value="3rd">3rd Year</option>
                             <option value="4th">4th Year</option>
                         </select>
+
+                        <label className="form-label-new">Status :</label>
                         <select
-                            className="form-input"
+                            className="form-input-new"
                             value={form.status}
                             onChange={(e) =>
                                 setForm({ ...form, status: e.target.value })
@@ -445,27 +447,31 @@ function Students() {
                             <option value="graduated">Graduated</option>
                             <option value="dropped">Dropped</option>
                         </select>
+
+                        <label className="form-label-new full-width-label">Address :</label>
+                        <input
+                            className="form-input-new full-width-input"
+                            placeholder="Address"
+                            value={form.address}
+                            onChange={(e) =>
+                                setForm({ ...form, address: e.target.value })
+                            }
+                            required
+                        />
+
+                        {error && <div className="alert-error full-width-error">{error}</div>}
                     </div>
 
-                    {error && <div className="alert-error">{error}</div>}
-
-                    <div
-                        style={{
-                            marginTop: 20,
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            gap: 12,
-                        }}
-                    >
+                    <div className="modal-footer-new">
                         <button
-                            className="btn"
+                            className="btn btn-cancel-new"
                             type="button"
                             onClick={closeModalAndReset}
                         >
                             Cancel
                         </button>
-                        <button className="btn btn-primary" type="submit">
-                            {editingId ? "Update Student" : "Add Student"}
+                        <button className="btn btn-save-new" type="submit">
+                            {editingId ? "Save Changes" : "Save Profile"}
                         </button>
                     </div>
                 </form>
@@ -499,7 +505,7 @@ function Students() {
 
                 <div className="filters">
                     <div className="search">
-                        <span className="icon">🔎</span>
+                        <BsSearch className="icon" />
                         <input
                             className="search-input"
                             placeholder="Search here..."
@@ -606,7 +612,7 @@ function Students() {
                                         className={`badge ${
                                             s.status === "active"
                                                 ? "badge-success"
-                                                : "badge-warning"
+                                                : "badge-danger"
                                         }`}
                                     >
                                         {s.status}

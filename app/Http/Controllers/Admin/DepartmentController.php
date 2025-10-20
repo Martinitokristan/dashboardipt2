@@ -11,9 +11,34 @@ class DepartmentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Department::query();
-        $departments = $query->get();
-        return response()->json($departments);
+        try {
+            $query = Department::with(['departmentHead' => function ($q) {
+                $q->select('faculty_id', 'f_name', 'm_name', 'l_name', 'suffix');
+            }]);
+            
+            $departments = $query->get();
+            
+            // Format the department head name
+            $departments->each(function ($dept) {
+                if ($dept->departmentHead) {
+                    $dept->department_head = trim(implode(' ', array_filter([
+                        $dept->departmentHead->f_name,
+                        $dept->departmentHead->m_name,
+                        $dept->departmentHead->l_name,
+                        $dept->departmentHead->suffix ? ', ' . $dept->departmentHead->suffix : ''
+                    ])));
+                } else {
+                    $dept->department_head = '-';
+                }
+                // Remove the departmentHead relationship object to avoid React error
+                unset($dept->departmentHead);
+            });
+            
+            return response()->json($departments);
+        } catch (\Exception $e) {
+            \Log::error('Error loading departments: ', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['error' => 'Failed to load departments: ' . $e->getMessage()], 500);
+        }
     }
 
     public function store(Request $request)

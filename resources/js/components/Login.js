@@ -120,7 +120,10 @@ function Login() {
                     <div className="contact-info">
                         <p className="contact-label">CONTACT US:</p>
                         <p className="contact-detail">
-                            Tel Nos: +63 [085] 9826440
+                            Tel Nos: +63 9639126633
+                        </p>
+                        <p className="contact-email">
+                            Email: AKademi@edutech.com
                         </p>
                     </div>
                 </div>

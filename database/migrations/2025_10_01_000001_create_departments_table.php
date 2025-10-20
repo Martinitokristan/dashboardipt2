@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('departments', function (Blueprint $table) {
             $table->id('department_id');
             $table->string('department_name');
-            $table->string('department_head')->nullable();
+            $table->foreignId('department_head_id')->nullable()->constrained('faculty_profiles', 'faculty_id');
             $table->timestamps();
             $table->timestamp('archived_at')->nullable();
         });

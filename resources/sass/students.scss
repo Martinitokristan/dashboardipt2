@@ -5,9 +5,7 @@
 */
 
 .page {
-    padding: 20px;
-    background-color: #f6f7ff;
-    min-height: 100vh;
+    overflow: initial;
 }
 
 .page-header {
@@ -254,7 +252,8 @@
 .modal-card {
     position: relative;
     /* Increased width for two columns */
-    width: 650px;
+    width: 800px;
+    max-width: 90vw;
     background: #fff; /* Changed to white background for form based on image */
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -466,4 +465,118 @@
     max-width: 200px;
     font-weight: 600;
     font-size: 1rem;
+}
+
+/*
+====================================
+     NEW MODAL DESIGN STYLES
+====================================
+*/
+
+.modal-header-new {
+    background: linear-gradient(135deg, #b8b3e9 0%, #9d96d4 100%);
+    padding: 20px 30px;
+    border-radius: 12px 12px 0 0;
+    margin: -30px -30px 25px -30px;
+}
+
+.modal-title-new {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 5px 0;
+}
+
+.modal-subtitle-new {
+    font-size: 13px;
+    color: #374151;
+    margin: 0;
+}
+
+.form-grid-new {
+    display: grid;
+    grid-template-columns: 110px 1fr 110px 1fr;
+    gap: 15px 25px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.form-label-new {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1f2937;
+    text-align: left;
+    margin: 0;
+}
+
+.form-input-new {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #1f2937;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+.form-input-new:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.full-width-label {
+    grid-column: 1 / 2;
+}
+
+.full-width-input {
+    grid-column: 2 / 5;
+}
+
+.full-width-error {
+    grid-column: 1 / 5;
+    margin-top: -5px;
+}
+
+.modal-footer-new {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.btn-cancel-new {
+    padding: 10px 35px;
+    border: 2px solid #6366f1;
+    border-radius: 25px;
+    background: #fff;
+    color: #6366f1;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel-new:hover {
+    background: #f3f4f6;
+}
+
+.btn-save-new {
+    padding: 10px 35px;
+    border: 2px solid #6366f1;
+    border-radius: 25px;
+    background: #6366f1;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-save-new:hover {
+    background: #4f46e5;
+    border-color: #4f46e5;
 }

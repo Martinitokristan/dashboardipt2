@@ -10,6 +10,8 @@ use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Response;
 
 class AdminController extends Controller
 {
@@ -117,5 +119,50 @@ class AdminController extends Controller
     {
         auth()->user()->tokens()->delete();
         return response()->json(['message' => 'Logged out successfully.']);
+    }
+
+    public function departments(Request $request)
+    {
+        try {
+            $query = Department::with(['departmentHead' => function ($q) {
+                $q->select('faculty_id', 'f_name', 'm_name', 'l_name', 'suffix');
+            }]);
+
+            if ($request->has('onlyTrashed')) {
+                $query->onlyTrashed();
+            } elseif ($request->has('withTrashed')) {
+                $query->withTrashed();
+            }
+
+            if ($request->has('search')) {
+                $search = trim($request->search);
+                $query->where('department_name', 'like', "%{$search}%");
+            }
+
+            $departments = $query->orderBy('department_name', 'asc')->get();
+
+            // Format the department head name
+            $departments->each(function ($dept) {
+                Log::info('Department data', ['dept_id' => $dept->department_id, 'dept_name' => $dept->department_name, 'head_id' => $dept->department_head_id, 'has_head' => isset($dept->departmentHead)]);
+                if ($dept->departmentHead) {
+                    $name = trim(implode(' ', array_filter([
+                        $dept->departmentHead->f_name,
+                        $dept->departmentHead->m_name,
+                        $dept->departmentHead->l_name,
+                        $dept->departmentHead->suffix ? ', ' . $dept->departmentHead->suffix : ''
+                    ])));
+                    $dept->department_head = $name;
+                    Log::info('Department head name formatted', ['dept_id' => $dept->department_id, 'name' => $name]);
+                } else {
+                    $dept->department_head = '-';
+                    Log::info('No department head', ['dept_id' => $dept->department_id]);
+                }
+            });
+
+            return Response::json($departments);
+        } catch (\Exception $e) {
+            Log::error('Error loading departments: ', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return Response::json(['error' => 'Failed to load departments: ' . $e->getMessage()], 500);
+        }
     }
 }

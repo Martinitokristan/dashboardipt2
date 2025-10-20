@@ -17,7 +17,7 @@ class Department extends Model
 
     protected $fillable = [
         'department_name',
-        'department_head',
+        'department_head_id',
     ];
 
     protected $dates = [
@@ -32,5 +32,10 @@ class Department extends Model
     public function faculty()
     {
         return $this->hasMany(FacultyProfile::class, 'department_id');
+    }
+
+    public function departmentHead()
+    {
+        return $this->belongsTo(FacultyProfile::class, 'department_head_id', 'faculty_id');
     }
 }

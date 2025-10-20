@@ -12,6 +12,7 @@ import {
     Cell,
     Legend,
 } from "recharts";
+import { GraduationCap, Users, Building, BookOpen } from "lucide-react";
 import "../../sass/dashboard.scss";
 
 function Dashboard() {
@@ -70,25 +71,25 @@ function Dashboard() {
 
             <section className="stats-cards">
                 <div className="stat-card purple">
-                    <div className="stat-icon">👩‍🎓</div>
+                    <div className="stat-icon"><GraduationCap size={24} /></div>
                     <div className="stat-label">Students</div>
                     <div className="stat-value">{stats.total_students}</div>
                 </div>
 
                 <div className="stat-card orange">
-                    <div className="stat-icon">👨‍🏫</div>
+                    <div className="stat-icon"><Users size={24} /></div>
                     <div className="stat-label">Faculty</div>
                     <div className="stat-value">{stats.total_faculty}</div>
                 </div>
 
                 <div className="stat-card yellow">
-                    <div className="stat-icon">🏛️</div>
+                    <div className="stat-icon"><Building size={24} /></div>
                     <div className="stat-label">Department</div>
                     <div className="stat-value">{stats.total_departments}</div>
                 </div>
 
                 <div className="stat-card navy">
-                    <div className="stat-icon">📘</div>
+                    <div className="stat-icon"><BookOpen size={24} /></div>
                     <div className="stat-label">Courses</div>
                     <div className="stat-value">{stats.total_courses}</div>
                 </div>

@@ -28,6 +28,8 @@ class FacultyProfile extends Model
         'email_address',
         'address',
         'department_id',
+        'position',
+        'status'
     ];
 
     protected $dates = ['archived_at'];

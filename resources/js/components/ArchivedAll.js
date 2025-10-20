@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { BsSearch } from 'react-icons/bs';
 import "../../sass/archived.scss";
 
 function ArchivedAll() {
@@ -203,7 +204,7 @@ function ArchivedAll() {
                     <div className="control-item search-box-wrap">
                         <label htmlFor="search-input">Search</label>
                         <div className="search-input-group">
-                            <span className="search-icon">🔍</span>
+                            <BsSearch className="search-icon" />
                             <input
                                 id="search-input"
                                 className="search-input"

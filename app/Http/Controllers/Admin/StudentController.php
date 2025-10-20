@@ -83,10 +83,12 @@ class StudentController extends Controller
         try {
             $validated = $request->validate([
                 'f_name' => 'required|string|max:255',
+                'm_name' => 'nullable|string|max:255',
                 'l_name' => 'required|string|max:255',
+                'suffix' => 'nullable|string|max:50',
                 'date_of_birth' => 'required|date',
                 'sex' => 'required|in:male,female,other',
-                'phone_number' => 'required|string|max:20',
+                'phone_number' => 'required|regex:/^09[0-9]{9}$/|size:11',
                 'email_address' => 'required|email|unique:student_profiles,email_address',
                 'address' => 'required|string|max:1000',
                 'status' => 'required|in:active,inactive,graduated,dropped',
@@ -122,12 +124,12 @@ class StudentController extends Controller
 
         $validated = $request->validate([
             'f_name' => 'required|string|max:255',
-            'm_name' => 'nullable|string|max:255', // ✅ Added
+            'm_name' => 'nullable|string|max:255', // 
             'l_name' => 'required|string|max:255',
-            'suffix' => 'nullable|string|max:50', // ✅ Added
+            'suffix' => 'nullable|string|max:50', // 
             'date_of_birth' => 'required|date',
             'sex' => 'required|in:male,female,other',
-            'phone_number' => 'required|string|max:20',
+            'phone_number' => 'required|regex:/^09[0-9]{9}$/|size:11',
             'email_address' => 'required|email|unique:student_profiles,email_address,' . $id . ',student_id',
             'address' => 'required|string|max:1000',
             'status' => 'required|in:active,inactive,graduated,dropped',

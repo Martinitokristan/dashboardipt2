@@ -9,7 +9,7 @@ $bg-overlay: rgba(0, 0, 0, 0.5);
 $border-color: #e2e8f0;
 $error-color: #e53e3e;
 $shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-$shadow-md: 0 4px 6px -1px rgbzza(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 $shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 
 // Reset and Base Styles
@@ -20,21 +20,18 @@ $shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 body {
-    font-family: 'Nunito', sans-serif;
+    font-family: "Nunito", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-
-    // ✅ Fixed full-screen background            
-    background-image: url('/images/BG-login.jpg');
+    background-image: url("/images/BG-login.jpg");
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
-    background-attachment: fixed; // stays in place while scrolling
+    background-attachment: fixed;
     min-height: 100vh;
     position: relative;
     overflow-x: hidden;
 
-    // Optional overlay to make text readable
     &::before {
         content: "";
         position: fixed;
@@ -43,7 +40,7 @@ body {
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.4);
-        z-index: -1; // stays behind everything
+        z-index: -1;
     }
 }
 
@@ -56,7 +53,7 @@ body {
 
 // Header
 .header {
-    background-color: $bg-light;
+    background-color: #d9d9d9bf;
     padding: 1rem 2rem;
     box-shadow: $shadow-sm;
     position: relative;
@@ -70,11 +67,12 @@ body {
         align-items: center;
     }
 
+    // ✅ Logo aligned left with footer contact label
     .logo {
         font-size: 1.5rem;
         font-weight: 600;
         color: $text-dark;
-        margin: 0;
+        margin-left: -7rem; // moved closer to screen edge for perfect alignment
     }
 
     .btn-admin-login {
@@ -145,20 +143,24 @@ body {
 
 // Footer
 .footer {
-    background-color: #333333;
+    background-color: #d9d9d9bf;
     padding: 1.5rem 2rem;
     color: #ffffff;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
 
     .footer-container {
         max-width: 1200px;
-        margin: 0 auto;
+        width: 100%;
         display: flex;
-        justify-content: center;
+        justify-content: flex-start;
         align-items: center;
     }
 
     .contact-info {
-        text-align: center;
+        text-align: left;
+        margin-left: 2rem; // ensures footer text aligns visually with logo above
 
         .contact-label {
             font-weight: 600;
@@ -181,7 +183,7 @@ body {
     }
 }
 
-// Modal (kept unchanged)
+// Modal
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -201,12 +203,12 @@ body {
     border-radius: 12px;
     width: 100%;
     max-width: 400px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 10px 10px -5px rgba(0, 0, 0, 0.04);
     animation: modalSlideIn 0.3s ease-out;
     overflow: hidden;
 }
 
-// Keyframes for animation
 @keyframes modalSlideIn {
     from {
         opacity: 0;
@@ -219,7 +221,7 @@ body {
     }
 }
 
-// Login form (kept unchanged)
+// Login form
 .login-form {
     .form-group {
         margin-bottom: 1.25rem;
@@ -232,7 +234,7 @@ body {
             border-radius: 8px;
             font-size: 1rem;
             transition: all 0.2s ease;
-            font-family: 'Nunito', sans-serif;
+            font-family: "Nunito", sans-serif;
             background-color: #ffffff;
 
             &::placeholder {
@@ -314,6 +316,7 @@ body {
 
         .logo {
             font-size: 1.25rem;
+            margin-left: 0;
         }
 
         .btn-admin-login {
@@ -352,11 +355,9 @@ body {
             font-size: 1.25rem;
         }
     }
-    .login-footer { 
-        color: rgba(217, 217, 217, 0.75); 
-    } 
-    
-    .login-header { 
-        color: rgba(217, 217, 217, 0.75); 
+
+    .login-footer,
+    .login-header {
+        color: rgba(217, 217, 217, 0.75);
     }
 }
