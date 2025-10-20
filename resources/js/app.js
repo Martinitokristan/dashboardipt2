@@ -11,7 +11,7 @@ import {
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 import Settings from "./components/Settings";
-import Layout from "./components/Layout";
+import Sidebar from "./components/Sidebar";
 import Students from "./components/Students";
 import Faculty from "./components/Faculty";
 import Report from "./components/Report";
@@ -30,7 +30,7 @@ function ProtectedRoute({ children }) {
             .catch(() => setAuthorized(false));
     }, []);
 
-    if (authorized === null) return <div>Loading...</div>;
+    if (authorized === null) return null;
     if (!authorized) return <Navigate to="/401" replace />;
     return children;
 }
@@ -48,7 +48,7 @@ function App() {
                 <Route
                     element={
                         <ProtectedRoute>
-                            <Layout />
+                            <Sidebar />
                         </ProtectedRoute>
                     }
                 >

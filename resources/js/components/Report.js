@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../../sass/report.scss';
 
 function Report() {
+    const [initialLoading, setInitialLoading] = useState(true);
     const [reportType, setReportType] = useState('students');
     const [filters, setFilters] = useState({
         course_id: '',
@@ -45,8 +46,19 @@ function Report() {
             }
         } catch (error) {
             console.error('Error loading options:', error);
+        } finally {
+            setInitialLoading(false);
         }
     };
+
+    if (initialLoading) {
+        return (
+            <div className="page-loading">
+                <div className="spinner"></div>
+                <p>Loading reports...</p>
+            </div>
+        );
+    }
 
     const handleFilterChange = (field, value) => {
         setFilters(prev => ({

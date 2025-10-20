@@ -132,10 +132,19 @@ function Login() {
             {/* LOGIN MODAL */}
             {showModal && (
                 <div className="modal-overlay">
-                    <div className="modal-card">
-                        <div className="modal-close" onClick={closeModal}>
-                            <svg viewBox="0 0 24 24">
-                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                    <div className="modal-card login-modal-card">
+
+                        <div className="modal-header-row">
+                            <div className="modal-close" onClick={closeModal}>
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div className="graduation-cap-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/>
                             </svg>
                         </div>
 

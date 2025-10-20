@@ -54,10 +54,13 @@
     margin-right: 8px;
 }
 
+.students-page .filters,
 .filters {
     display: flex;
     gap: 15px;
     align-items: center;
+    margin-left: 50px;
+    margin-bottom: 25px;
 }
 
 .search {
@@ -78,7 +81,7 @@
     border: 1px solid #d1d5db;
     border-radius: 8px;
     font-size: 14px;
-    width: 250px;
+    width: 200px;
 }
 
 .filter {
@@ -88,6 +91,7 @@
     background-color: #fff;
     font-size: 14px;
     color: #1f2937;
+    min-width: 180px;
 }
 
 /*
@@ -495,8 +499,8 @@
 
 .form-grid-new {
     display: grid;
-    grid-template-columns: 110px 1fr 110px 1fr;
-    gap: 15px 25px;
+    grid-template-columns: 90px 1fr 90px 1fr;
+    gap: 15px 12px;
     align-items: center;
     margin-bottom: 20px;
 }
@@ -549,36 +553,36 @@
 }
 
 .btn-cancel-new {
-    padding: 10px 35px;
-    border: 2px solid #6366f1;
-    border-radius: 25px;
-    background: #fff;
-    color: #6366f1;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
+    padding: 10px 35px !important;
+    border: 2px solid #6366f1 !important;
+    border-radius: 25px !important;
+    background: #fff !important;
+    color: #6366f1 !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
 }
 
 .btn-cancel-new:hover {
-    background: #f3f4f6;
+    background: #f3f4f6 !important;
 }
 
 .btn-save-new {
-    padding: 10px 35px;
-    border: 2px solid #6366f1;
-    border-radius: 25px;
-    background: #6366f1;
-    color: #fff;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
+    padding: 10px 35px !important;
+    border: 2px solid #3b82f6 !important;
+    border-radius: 25px !important;
+    background: #3b82f6 !important;
+    color: white !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    font-size: 15px !important;
+    transition: all 0.2s !important;
 }
 
 .btn-save-new:hover {
-    background: #4f46e5;
-    border-color: #4f46e5;
+    background: #2563eb !important;
+    border-color: #2563eb !important;
 }
 
 /*

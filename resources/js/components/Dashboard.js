@@ -26,6 +26,7 @@ const ensureCsrf = async () => {
 };
 
 function Dashboard() {
+    const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         total_students: 0,
         total_faculty: 0,
@@ -48,10 +49,21 @@ function Dashboard() {
                 if (error.response?.status === 401 || error.response?.status === 403) {
                     window.location.href = "/login";
                 }
+            } finally {
+                setLoading(false);
             }
         };
         fetchStats();
     }, []);
+
+    if (loading) {
+        return (
+            <div className="page-loading">
+                <div className="spinner"></div>
+                <p>Loading Dashboard...</p>
+            </div>
+        );
+    }
 
     const COLORS = ["#4f46e5", "#f59e0b", "#10b981", "#ef4444", "#3b82f6"];
 
@@ -97,7 +109,7 @@ function Dashboard() {
             <div className="charts">
                 <div className="chart-card">
                     <h3>Students per Course</h3>
-                    <ResponsiveContainer width="100%" height={250}>
+                    <ResponsiveContainer width="100%" height={350}>
                         <BarChart data={stats.students_by_course}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="label" />
@@ -114,7 +126,7 @@ function Dashboard() {
 
                 <div className="chart-card">
                     <h3>Faculty per Department</h3>
-                    <ResponsiveContainer width="100%" height={250}>
+                    <ResponsiveContainer width="100%" height={350}>
                         <PieChart>
                             <Pie
                                 data={stats.faculty_by_department}

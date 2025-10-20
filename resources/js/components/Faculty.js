@@ -7,7 +7,7 @@ import "../../sass/faculty.scss";
 function Faculty() {
     const [faculty, setFaculty] = useState([]);
     const [departments, setDepartments] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [initialLoading, setInitialLoading] = useState(true);
     const [error, setError] = useState("");
     const [showForm, setShowForm] = useState(false);
     const [modalContentState, setModalContentState] = useState("form"); // form | loading | success | error
@@ -30,6 +30,38 @@ function Faculty() {
         position: "Dean",
         status: "active"
     });
+
+    const loadFaculty = async () => {
+        try {
+            const params = new URLSearchParams();
+            if (filters.search) params.set("search", filters.search);
+            if (filters.department_id)
+                params.set("department_id", filters.department_id);
+            const qs = params.toString();
+            const url = "/api/admin/faculty" + (qs ? "?" + qs : "");
+            const r = await axios.get(url);
+            setFaculty(r.data.filter((f) => !f.archived_at));
+        } catch (error) {
+            console.error("Failed to load faculty", error);
+            setError("Failed to load faculty");
+            if ([401, 403].includes(error.response?.status)) {
+                window.location.href = "/login";
+            }
+        }
+    };
+
+    const loadDepartments = async () => {
+        try {
+            const r = await axios.get("/api/admin/departments");
+            setDepartments(r.data);
+        } catch (error) {
+            console.error("Failed to load departments", error);
+            setError("Failed to load departments");
+            if ([401, 403].includes(error.response?.status)) {
+                window.location.href = "/login";
+            }
+        }
+    };
 
     const closeModalAndReset = async () => {
         setShowForm(false);
@@ -55,44 +87,28 @@ function Faculty() {
     };
 
     useEffect(() => {
-        loadDepartments();
-        loadFaculty();
+        const initialLoad = async () => {
+            await loadDepartments();
+            await loadFaculty();
+            setInitialLoading(false);
+        };
+        initialLoad();
+    }, []);
+
+    useEffect(() => {
+        if (!initialLoading) {
+            loadFaculty();
+        }
     }, [filters]);
 
-    const loadFaculty = async () => {
-        setLoading(true);
-        try {
-            const params = new URLSearchParams();
-            if (filters.search) params.set("search", filters.search);
-            if (filters.department_id)
-                params.set("department_id", filters.department_id);
-            const qs = params.toString();
-            const url = "/api/admin/faculty" + (qs ? "?" + qs : "");
-            const r = await axios.get(url);
-            setFaculty(r.data.filter((f) => !f.archived_at));
-        } catch (error) {
-            console.error("Failed to load faculty", error);
-            setError("Failed to load faculty");
-            if ([401, 403].includes(error.response?.status)) {
-                window.location.href = "/login";
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const loadDepartments = async () => {
-        try {
-            const r = await axios.get("/api/admin/departments");
-            setDepartments(r.data);
-        } catch (error) {
-            console.error("Failed to load departments", error);
-            setError("Failed to load departments");
-            if ([401, 403].includes(error.response?.status)) {
-                window.location.href = "/login";
-            }
-        }
-    };
+    if (initialLoading) {
+        return (
+            <div className="page-loading">
+                <div className="spinner"></div>
+                <p>Loading Faculty...</p>
+            </div>
+        );
+    }
 
     const handleFilterChange = (field, value) => {
         setFilters((prev) => ({ ...prev, [field]: value }));
@@ -263,7 +279,7 @@ function Faculty() {
                 </div>
                 <form onSubmit={handleSubmit}>
                     <div className="form-grid-new">
-                        <label className="form-label-new">Department :</label>
+                        <label className="form-label-new">Department</label>
                         <select
                             className="form-input-new"
                             name="department_id"
@@ -282,7 +298,7 @@ function Faculty() {
                             ))}
                         </select>
 
-                        <label className="form-label-new">Position :</label>
+                        <label className="form-label-new">Position</label>
                         <select
                             className="form-input-new"
                             name="position"
@@ -296,7 +312,7 @@ function Faculty() {
                             <option value="Department Head">Department Head</option>
                         </select>
 
-                        <label className="form-label-new">First Name :</label>
+                        <label className="form-label-new">First Name</label>
                         <input
                             className="form-input-new"
                             placeholder="First Name"
@@ -306,7 +322,7 @@ function Faculty() {
                             required
                         />
 
-                        <label className="form-label-new">MI.Name :</label>
+                        <label className="form-label-new">MI.Name</label>
                         <input
                             className="form-input-new"
                             placeholder="Middle Name"
@@ -315,7 +331,7 @@ function Faculty() {
                             onChange={handleInputChange}
                         />
 
-                        <label className="form-label-new">Last Name :</label>
+                        <label className="form-label-new">Last Name</label>
                         <input
                             className="form-input-new"
                             placeholder="Last Name"
@@ -325,7 +341,7 @@ function Faculty() {
                             required
                         />
 
-                        <label className="form-label-new">Suffix :</label>
+                        <label className="form-label-new">Suffix</label>
                         <input
                             className="form-input-new"
                             placeholder="Suffix"
@@ -334,7 +350,7 @@ function Faculty() {
                             onChange={handleInputChange}
                         />
 
-                        <label className="form-label-new">Date Birth :</label>
+                        <label className="form-label-new">Date Birth</label>
                         <input
                             className="form-input-new"
                             type="date"
@@ -344,7 +360,7 @@ function Faculty() {
                             required
                         />
 
-                        <label className="form-label-new">Sex :</label>
+                        <label className="form-label-new">Sex</label>
                         <select
                             className="form-input-new"
                             name="sex"
@@ -357,7 +373,7 @@ function Faculty() {
                             <option value="other">Other</option>
                         </select>
 
-                        <label className="form-label-new">Phone No. :</label>
+                        <label className="form-label-new">Phone No.</label>
                         <input
                             className="form-input-new"
                             placeholder="09XXXXXXXXX"
@@ -381,18 +397,7 @@ function Faculty() {
                             required
                         />
 
-                        <label className="form-label-new">Email :</label>
-                        <input
-                            className="form-input-new"
-                            placeholder="Email Address"
-                            name="email_address"
-                            value={formData.email_address}
-                            onChange={handleInputChange}
-                            type="email"
-                            required
-                        />
-
-                        <label className="form-label-new">Status :</label>
+                        <label className="form-label-new">Status</label>
                         <select
                             className="form-input-new"
                             name="status"
@@ -404,7 +409,18 @@ function Faculty() {
                             <option value="inactive">Inactive</option>
                         </select>
 
-                        <label className="form-label-new full-width-label">Address :</label>
+                        <label className="form-label-new">Email</label>
+                        <input
+                            className="form-input-new"
+                            placeholder="Email Address"
+                            name="email_address"
+                            value={formData.email_address}
+                            onChange={handleInputChange}
+                            type="email"
+                            required
+                        />
+
+                        <label className="form-label-new full-width-label">Address</label>
                         <input
                             className="form-input-new full-width-input"
                             placeholder="Address"
@@ -489,7 +505,7 @@ function Faculty() {
                 <table className="faculty-table">
                     <thead>
                         <tr>
-                            <th>Name</th>
+                            <th>Faculty Name</th>
                             <th>Department</th>
                             <th>Position</th>
                             <th>Status</th>
@@ -525,7 +541,7 @@ function Faculty() {
                                         ✎ Edit
                                     </button>
                                     <button
-                                        className="btn btn-primary"
+                                        className="btn btn-success"
                                         onClick={() =>
                                             handleArchive(f.faculty_id)
                                         }

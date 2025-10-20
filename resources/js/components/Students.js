@@ -14,6 +14,8 @@ const getCsrfCookie = async () => {
 
 function Students() {
     const navigate = useNavigate();
+    const [initialLoading, setInitialLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
     const [courses, setCourses] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [academicYears, setAcademicYears] = useState([]);
@@ -46,27 +48,6 @@ function Students() {
         year_level: "1st",
     });
 
-    useEffect(() => {
-        Promise.all([
-            axios.get("/api/admin/courses").catch(() => ({ data: [] })),
-            axios.get("/api/admin/departments").catch(() => ({ data: [] })),
-            axios.get("/api/admin/academic-years").catch(() => ({ data: [] })),
-        ])
-            .then(([coursesRes, deptsRes, yearsRes]) => {
-                setCourses(coursesRes.data || []);
-                setDepartments(deptsRes.data || []);
-                setAcademicYears(yearsRes.data || []);
-                refresh();
-            })
-            .catch((err) => {
-                console.error("Initial load error:", err);
-            });
-    }, []);
-
-    useEffect(() => {
-        refresh();
-    }, [filters]);
-
     const refresh = async () => {
         try {
             const params = new URLSearchParams();
@@ -86,8 +67,43 @@ function Students() {
         } catch (e) {
             console.error("API Error:", e);
             setError("Failed to load students");
+        } finally {
+            setLoading(false);
         }
     };
+
+    useEffect(() => {
+        Promise.all([
+            axios.get("/api/admin/courses").catch(() => ({ data: [] })),
+            axios.get("/api/admin/departments").catch(() => ({ data: [] })),
+            axios.get("/api/admin/academic-years").catch(() => ({ data: [] })),
+        ])
+            .then(([coursesRes, deptsRes, yearsRes]) => {
+                setCourses(coursesRes.data || []);
+                setDepartments(deptsRes.data || []);
+                setAcademicYears(yearsRes.data || []);
+                refresh();
+            })
+            .catch((err) => {
+                console.error("Initial load error:", err);
+            })
+            .finally(() => {
+                setInitialLoading(false);
+            });
+    }, []);
+
+    useEffect(() => {
+        refresh();
+    }, [filters]);
+
+    if (initialLoading) {
+        return (
+            <div className="page-loading">
+                <div className="spinner"></div>
+                <p>Loading Students...</p>
+            </div>
+        );
+    }
 
     const onOpenForm = () => {
         setEditingId(null);
@@ -308,7 +324,7 @@ function Students() {
                 </div>
                 <form onSubmit={handleSubmit}>
                     <div className="form-grid-new">
-                        <label className="form-label-new">Department :</label>
+                        <label className="form-label-new">Department</label>
                         <select
                             className="form-input-new"
                             value={form.department_id}
@@ -331,7 +347,7 @@ function Students() {
                             ))}
                         </select>
 
-                        <label className="form-label-new">Course :</label>
+                        <label className="form-label-new">Course</label>
                         <select
                             className="form-input-new"
                             value={form.course_id}
@@ -348,7 +364,7 @@ function Students() {
                             ))}
                         </select>
 
-                        <label className="form-label-new">First Name :</label>
+                        <label className="form-label-new">First Name</label>
                         <input
                             className="form-input-new"
                             placeholder="First Name"
@@ -359,7 +375,7 @@ function Students() {
                             required
                         />
 
-                        <label className="form-label-new">MI.Name :</label>
+                        <label className="form-label-new">MI.Name</label>
                         <input
                             className="form-input-new"
                             placeholder="Middle Name"
@@ -369,7 +385,7 @@ function Students() {
                             }
                         />
 
-                        <label className="form-label-new">Last Name :</label>
+                        <label className="form-label-new">Last Name</label>
                         <input
                             className="form-input-new"
                             placeholder="Last Name"
@@ -380,7 +396,7 @@ function Students() {
                             required
                         />
 
-                        <label className="form-label-new">Suffix :</label>
+                        <label className="form-label-new">Suffix</label>
                         <input
                             className="form-input-new"
                             placeholder="Suffix"
@@ -390,7 +406,7 @@ function Students() {
                             }
                         />
 
-                        <label className="form-label-new">Date Birth :</label>
+                        <label className="form-label-new">Date Birth</label>
                         <input
                             className="form-input-new"
                             value={form.date_of_birth}
@@ -404,7 +420,7 @@ function Students() {
                             required
                         />
 
-                        <label className="form-label-new">Sex :</label>
+                        <label className="form-label-new">Sex</label>
                         <select
                             className="form-input-new"
                             value={form.sex}
@@ -418,7 +434,7 @@ function Students() {
                             <option value="other">Other</option>
                         </select>
 
-                        <label className="form-label-new">Phone No. :</label>
+                        <label className="form-label-new">Phone No.</label>
                         <input
                             className="form-input-new"
                             placeholder="09XXXXXXXXX"
@@ -439,7 +455,7 @@ function Students() {
                             required
                         />
 
-                        <label className="form-label-new">Email :</label>
+                        <label className="form-label-new">Email</label>
                         <input
                             className="form-input-new"
                             placeholder="Email Address"
@@ -454,7 +470,7 @@ function Students() {
                             required
                         />
 
-                        <label className="form-label-new">Year Level :</label>
+                        <label className="form-label-new">Year Level</label>
                         <select
                             className="form-input-new"
                             value={form.year_level}
@@ -469,7 +485,7 @@ function Students() {
                             <option value="4th">4th Year</option>
                         </select>
 
-                        <label className="form-label-new">Status :</label>
+                        <label className="form-label-new">Status</label>
                         <select
                             className="form-input-new"
                             value={form.status}
@@ -483,7 +499,7 @@ function Students() {
                             <option value="dropped">Dropped</option>
                         </select>
 
-                        <label className="form-label-new full-width-label">Address :</label>
+                        <label className="form-label-new full-width-label">Address</label>
                         <input
                             className="form-input-new full-width-input"
                             placeholder="Address"
@@ -547,40 +563,71 @@ function Students() {
                     <select
                         className="filter"
                         value={filters.department_id}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                            const deptId = e.target.value;
                             setFilters({
                                 ...filters,
-                                department_id: e.target.value,
-                            })
-                        }
+                                department_id: deptId,
+                                course_id: "", // Reset course when department changes
+                            });
+                        }}
                     >
                         <option value="">⚗ All Department</option>
-                        {departments.map((d) => (
-                            <option
-                                key={d.department_id}
-                                value={d.department_id}
-                            >
-                                {d.department_name}
-                            </option>
-                        ))}
+                        {departments
+                            .filter((d) => {
+                                // If a course is selected, only show its department
+                                if (filters.course_id) {
+                                    const selectedCourse = courses.find(
+                                        (c) => c.course_id == filters.course_id
+                                    );
+                                    return selectedCourse
+                                        ? d.department_id == selectedCourse.department_id
+                                        : true;
+                                }
+                                return true;
+                            })
+                            .map((d) => (
+                                <option
+                                    key={d.department_id}
+                                    value={d.department_id}
+                                >
+                                    {d.department_name}
+                                </option>
+                            ))}
                     </select>
 
                     <select
                         className="filter"
                         value={filters.course_id}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                            const courseId = e.target.value;
+                            // Find the selected course's department
+                            const selectedCourse = courses.find(
+                                (c) => c.course_id == courseId
+                            );
                             setFilters({
                                 ...filters,
-                                course_id: e.target.value,
-                            })
-                        }
+                                course_id: courseId,
+                                department_id: courseId && selectedCourse
+                                    ? selectedCourse.department_id
+                                    : filters.department_id, // Auto-select department if course is selected
+                            });
+                        }}
                     >
                         <option value="">⚗ All Course</option>
-                        {courses.map((c) => (
-                            <option key={c.course_id} value={c.course_id}>
-                                {c.course_name}
-                            </option>
-                        ))}
+                        {courses
+                            .filter((c) => {
+                                // If a department is selected, only show courses under that department
+                                if (filters.department_id) {
+                                    return c.department_id == filters.department_id;
+                                }
+                                return true;
+                            })
+                            .map((c) => (
+                                <option key={c.course_id} value={c.course_id}>
+                                    {c.course_name}
+                                </option>
+                            ))}
                     </select>
 
                     <select
@@ -661,7 +708,7 @@ function Students() {
                                         </button>
                                     ) : (
                                         <button
-                                            className="btn btn-primary"
+                                            className="btn btn-success"
                                             onClick={() =>
                                                 handleArchive(s.student_id)
                                             }

@@ -20,7 +20,10 @@ class CourseController extends Controller
     {
         $validated = $request->validate([
             'course_name' => 'required|string|max:255|unique:courses,course_name',
-            'department_id' => 'required|exists:departments,department_id',
+            'department_id' => [
+                'required',
+                Rule::exists('departments', 'department_id')->whereNull('archived_at'),
+            ],
         ]);
 
         $course = Course::create([
@@ -50,7 +53,10 @@ class CourseController extends Controller
                 Rule::unique('courses', 'course_name')->ignore($course->course_id, 'course_id'),
             ],
             'course_status' => 'in:active,inactive',
-            'department_id' => 'required|exists:departments,department_id',
+            'department_id' => [
+                'required',
+                Rule::exists('departments', 'department_id')->whereNull('archived_at'),
+            ],
         ]);
 
         $course->update($validated);
@@ -63,6 +69,12 @@ class CourseController extends Controller
         if ($course->trashed()) {
             return response()->json(['message' => 'Already archived'], 200);
         }
+        
+        // Set all students in this course to inactive
+        \App\Models\StudentProfile::where('course_id', $id)
+            ->whereNull('archived_at')
+            ->update(['status' => 'inactive']);
+        
         $course->delete(); // Uses SoftDeletes with archived_at
         return response()->json(['message' => 'Course archived successfully']);
     }
@@ -73,6 +85,12 @@ class CourseController extends Controller
         if (!$course->trashed()) {
             return response()->json(['message' => 'Not archived'], 200);
         }
+        
+        // Set all students in this course back to active
+        \App\Models\StudentProfile::where('course_id', $id)
+            ->whereNull('archived_at')
+            ->update(['status' => 'active']);
+        
         $course->restore();
         return response()->json($course->fresh());
     }

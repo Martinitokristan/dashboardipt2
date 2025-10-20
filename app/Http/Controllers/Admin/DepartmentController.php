@@ -82,6 +82,22 @@ class DepartmentController extends Controller
         if ($department->trashed()) {
             return response()->json(['message' => 'Already archived'], 200);
         }
+        
+        // Set all faculty members in this department to inactive
+        \App\Models\FacultyProfile::where('department_id', $id)
+            ->whereNull('archived_at')
+            ->update(['status' => 'inactive']);
+        
+        // Set all students in this department to inactive
+        \App\Models\StudentProfile::where('department_id', $id)
+            ->whereNull('archived_at')
+            ->update(['status' => 'inactive']);
+        
+        // Archive all courses in this department
+        \App\Models\Course::where('department_id', $id)
+            ->whereNull('archived_at')
+            ->delete();
+        
         $department->delete(); // Uses SoftDeletes with archived_at
         return response()->json(['message' => 'Department archived successfully']);
     }
@@ -92,6 +108,36 @@ class DepartmentController extends Controller
         if (!$department->trashed()) {
             return response()->json(['message' => 'Not archived'], 200);
         }
+        
+        // Get all course IDs that will be restored
+        $courseIds = \App\Models\Course::onlyTrashed()
+            ->where('department_id', $id)
+            ->pluck('course_id');
+        
+        // Restore all courses in this department
+        \App\Models\Course::onlyTrashed()
+            ->where('department_id', $id)
+            ->restore();
+        
+        // Set all faculty members in this department back to active
+        \App\Models\FacultyProfile::where('department_id', $id)
+            ->whereNull('archived_at')
+            ->update(['status' => 'active']);
+        
+        // Set all students in this department back to active
+        // This includes students in the restored courses
+        \App\Models\StudentProfile::where('department_id', $id)
+            ->whereNull('archived_at')
+            ->update(['status' => 'active']);
+        
+        // Also reactivate students who are in the restored courses
+        // (in case they were made inactive when the course was archived)
+        if ($courseIds->isNotEmpty()) {
+            \App\Models\StudentProfile::whereIn('course_id', $courseIds)
+                ->whereNull('archived_at')
+                ->update(['status' => 'active']);
+        }
+        
         $department->restore();
         return response()->json($department->fresh());
     }

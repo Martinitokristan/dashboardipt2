@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import "../../sass/layout.scss";
 
-function Layout() {
+function Sidebar() {
     return (
         <div className="app-layout">
             {/* Sidebar */}
@@ -91,4 +91,4 @@ function Layout() {
     );
 }
 
-export default Layout;
+export default Sidebar;

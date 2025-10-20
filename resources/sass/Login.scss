@@ -184,7 +184,7 @@ body {
 }
 
 // Modal
-.modal-overlay {
+.modal-overlay.login-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -198,15 +198,17 @@ body {
     padding: 1rem;
 }
 
-.modal-card {
+.modal-card.login-modal-card {
     background-color: #ffffff;
-    border-radius: 12px;
+    border-radius: 18px;
     width: 100%;
-    max-width: 400px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-        0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    max-width: 520px;
+    min-width: 420px;
+    border: 1px solid #dbe3ff;
+    box-shadow: 0 30px 40px -18px rgba(50, 50, 93, 0.28);
     animation: modalSlideIn 0.3s ease-out;
     overflow: hidden;
+    padding: 1.85rem 2.5rem 2.4rem;
 }
 
 @keyframes modalSlideIn {
@@ -221,37 +223,99 @@ body {
     }
 }
 
+.modal-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.modal-header-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #3f51b5;
+    margin: 0;
+}
+
+.modal-close {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+        width: 18px;
+        height: 18px;
+        fill: #6b7280;
+        transition: fill 0.2s;
+    }
+
+    &:hover svg {
+        fill: #374151;
+    }
+}
+
+.graduation-cap-icon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+
+    svg {
+        width: 40px;
+        height: 40px;
+        color: #3f51b5;
+    }
+}
+
+.modal-title {
+    text-align: center;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #3f51b5;
+    margin-bottom: 1.25rem;
+}
+
 // Login form
 .login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+
     .form-group {
-        margin-bottom: 1.25rem;
-        text-align: left;
+        width: 100%;
+        margin: 0;
+        display: flex;
+        justify-content: center;
 
         .form-input {
             width: 100%;
-            padding: 0.75rem 1rem;
+            max-width: none;
+            padding: 0.75rem 1.05rem;
             border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 12px;
+            font-size: 1.05rem;
             transition: all 0.2s ease;
             font-family: "Nunito", sans-serif;
             background-color: #ffffff;
 
             &::placeholder {
-                color: #9ca3af;
+                color: #9aa5b1;
             }
 
             &:focus {
                 outline: none;
                 border-color: #6366f1;
-                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+                box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
             }
 
             &.input-error {
                 border-color: #ef4444;
 
                 &:focus {
-                    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+                    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
                 }
             }
         }
@@ -259,49 +323,54 @@ body {
         .error-message {
             display: block;
             color: #ef4444;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            margin-top: 0.4rem;
+            text-align: center;
+            width: 100%;
         }
     }
 
     .alert-error {
         background-color: #fef2f2;
         color: #dc2626;
-        padding: 0.75rem 1rem;
-        border-radius: 6px;
-        margin-bottom: 1.25rem;
-        font-size: 0.875rem;
-        text-align: left;
+        padding: 0.85rem 1.25rem;
+        border-radius: 12px;
+        margin: 0.85rem 0;
+        font-size: 0.9rem;
+        text-align: center;
         border: 1px solid #fecaca;
+        width: 100%;
     }
 
     .btn-submit {
-        width: 100%;
-        background-color: #6366f1;
-        color: #ffffff;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    width: auto; /* Instead of 100%, allow button to fit content */
+    align-self: center;
+    background-color: #6366f1;
+    color: #ffffff;
+    border: none;
+    padding: 1rem 4rem; /* smaller padding */
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 6px 18px -6px rgba(79, 70, 229, 0.45);
 
-        &:hover:not(:disabled) {
-            background-color: #4f46e5;
-            box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.15);
-        }
-
-        &:active:not(:disabled) {
-            transform: translateY(1px);
-        }
-
-        &:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+    &:hover:not(:disabled) {
+        background-color: #4f46e5;
+        box-shadow: 0 5px 14px -4px rgba(79, 70, 229, 0.45);
     }
+
+    &:active:not(:disabled) {
+        transform: translateY(1px);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
 }
 
 // Responsive Design

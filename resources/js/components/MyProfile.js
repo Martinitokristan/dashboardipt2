@@ -22,11 +22,71 @@ function MyProfile() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     const [isEditing, setIsEditing] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [modalMessage, setModalMessage] = useState("");
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [loggingOut, setLoggingOut] = useState(false);
 
     // password-related transient fields (kept separate so we don't accidentally persist them)
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [newPasswordConfirmation, setNewPasswordConfirmation] = useState("");
+    const [passwordValidation, setPasswordValidation] = useState({
+        isValid: true,
+        message: "",
+        strength: ""
+    });
+
+    // Password validation function
+    const validatePassword = (password) => {
+        if (!password) {
+            return { isValid: true, message: "", strength: "" };
+        }
+
+        const hasMinLength = password.length >= 8;
+        const hasNumber = /\d/.test(password);
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasLowerCase = /[a-z]/.test(password);
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+        let strength = "";
+        let strengthScore = 0;
+
+        if (hasMinLength) strengthScore++;
+        if (hasNumber) strengthScore++;
+        if (hasUpperCase) strengthScore++;
+        if (hasLowerCase) strengthScore++;
+        if (hasSpecialChar) strengthScore++;
+
+        if (strengthScore <= 2) strength = "Weak";
+        else if (strengthScore === 3) strength = "Medium";
+        else if (strengthScore >= 4) strength = "Strong";
+
+        // Validation messages
+        if (!hasMinLength) {
+            return {
+                isValid: false,
+                message: "Password must be at least 8 characters",
+                strength: ""
+            };
+        }
+        if (!hasNumber) {
+            return {
+                isValid: false,
+                message: "Password must contain at least one number",
+                strength
+            };
+        }
+
+        return { isValid: true, message: "", strength };
+    };
+
+    // Handle password change with validation
+    const handlePasswordChange = (value) => {
+        setNewPassword(value);
+        const validation = validatePassword(value);
+        setPasswordValidation(validation);
+    };
 
     useEffect(() => {
         loadProfile();
@@ -151,8 +211,10 @@ function MyProfile() {
                 setCurrentPassword("");
                 setNewPassword("");
                 setNewPasswordConfirmation("");
-                setError("Profile updated successfully!");
+                setError("");
                 setIsEditing(false);
+                setModalMessage("Profile updated successfully!");
+                setShowModal(true);
             } else {
                 setError("Failed to update profile");
             }
@@ -200,7 +262,13 @@ function MyProfile() {
         setNewPasswordConfirmation("");
     };
 
-    const handleLogout = async () => {
+    const handleLogoutClick = () => {
+        setShowLogoutModal(true);
+    };
+
+    const confirmLogout = async () => {
+        setShowLogoutModal(false);
+        setLoggingOut(true);
         try {
             await ensureCsrf();
             await axios.post("/logout", {}, { withCredentials: true });
@@ -232,7 +300,12 @@ function MyProfile() {
     };
 
     if (loading) {
-        return <div className="loading">Loading profile...</div>;
+        return (
+            <div className="profile-loading">
+                <div className="spinner"></div>
+                <p>Loading Profile...</p>
+            </div>
+        );
     }
 
     return (
@@ -247,7 +320,7 @@ function MyProfile() {
                 </div>
                 <button
                     className="btn btn-danger log-out-top"
-                    onClick={handleLogout}
+                    onClick={handleLogoutClick}
                 >
                     <i className="fas fa-sign-out-alt"></i> Log out
                 </button>
@@ -355,15 +428,25 @@ function MyProfile() {
                                     <label htmlFor="new_password">
                                         New Password
                                     </label>
+                                    {newPassword && !passwordValidation.isValid && (
+                                        <div className="password-validation-error">
+                                            ⚠ {passwordValidation.message}
+                                        </div>
+                                    )}
+                                    {newPassword && passwordValidation.isValid && passwordValidation.strength && (
+                                        <div className={`password-strength-indicator ${passwordValidation.strength.toLowerCase()}`}>
+                                            ✓ Password Strength: {passwordValidation.strength}
+                                        </div>
+                                    )}
                                     <input
                                         id="new_password"
                                         type="password"
                                         name="new_password"
                                         value={newPassword}
                                         onChange={(e) =>
-                                            setNewPassword(e.target.value)
+                                            handlePasswordChange(e.target.value)
                                         }
-                                        className="form-input"
+                                        className={`form-input ${newPassword && !passwordValidation.isValid ? 'invalid-input' : ''}`}
                                         placeholder="Enter new password (min 8 chars)"
                                     />
                                 </div>
@@ -372,6 +455,11 @@ function MyProfile() {
                                     <label htmlFor="new_password_confirmation">
                                         Confirm New Password
                                     </label>
+                                    {newPasswordConfirmation && newPassword && (
+                                        <div className={`password-match-indicator ${newPasswordConfirmation === newPassword ? 'match' : 'no-match'}`}>
+                                            {newPasswordConfirmation === newPassword ? "✓ Passwords match" : "⚠ Passwords do not match"}
+                                        </div>
+                                    )}
                                     <input
                                         id="new_password_confirmation"
                                         type="password"
@@ -382,7 +470,7 @@ function MyProfile() {
                                                 e.target.value
                                             )
                                         }
-                                        className="form-input"
+                                        className={`form-input ${newPasswordConfirmation && newPassword && newPasswordConfirmation !== newPassword ? 'invalid-input' : ''}`}
                                         placeholder="Confirm new password"
                                     />
                                 </div>
@@ -434,7 +522,7 @@ function MyProfile() {
                     <div className="action-title">Account Action</div>
                     <div
                         className="logout-box"
-                        onClick={handleLogout}
+                        onClick={handleLogoutClick}
                         style={{ cursor: "pointer" }}
                     >
                         Log out from Account <br />
@@ -447,12 +535,90 @@ function MyProfile() {
             </div>
 
             {error && (
-                <div
-                    className={`alert ${
-                        error.includes("successfully") ? "success" : "error"
-                    }`}
-                >
+                <div className="alert error">
                     {error}
+                </div>
+            )}
+
+            {/* Logout Confirmation Modal */}
+            {showLogoutModal && (
+                <div className="modal-overlay" onClick={() => setShowLogoutModal(false)}>
+                    <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "400px" }}>
+                        <div className="success-content">
+                            <h4 className="success-title">Confirm Logout</h4>
+                            <p className="success-subtitle">
+                                Are you sure you want to log out from your account?
+                            </p>
+                            <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "20px" }}>
+                                <button
+                                    className="btn"
+                                    onClick={() => setShowLogoutModal(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="btn btn-danger"
+                                    onClick={confirmLogout}
+                                >
+                                    Yes, Log out
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Logging Out Modal */}
+            {loggingOut && (
+                <div className="modal-overlay">
+                    <div className="modal-card" style={{ maxWidth: "400px" }}>
+                        <div className="loading-overlay">
+                            <div className="spinner-border large-spinner" role="status">
+                                <span className="sr-only">Loading...</span>
+                            </div>
+                            <p
+                                style={{
+                                    marginTop: 15,
+                                    color: "#4f46e5",
+                                    fontWeight: 500,
+                                    fontSize: "16px",
+                                }}
+                            >
+                                Logging out...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Success Modal */}
+            {showModal && (
+                <div className="modal-overlay" onClick={() => setShowModal(false)}>
+                    <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+                        <div className="success-content">
+                            <div className="success-icon-wrapper">
+                                <svg
+                                    className="success-icon-svg"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 52 52"
+                                >
+                                    <path
+                                        className="success-check-path"
+                                        fill="none"
+                                        d="M14.1 27.2l7.1 7.2 16.7-16.8"
+                                    />
+                                </svg>
+                            </div>
+                            <h4 className="success-title">Success!</h4>
+                            <p className="success-subtitle">{modalMessage}</p>
+                            <button
+                                className="btn btn-primary btn-close-message"
+                                onClick={() => setShowModal(false)}
+                            >
+                                Done
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

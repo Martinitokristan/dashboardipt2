@@ -15,6 +15,7 @@ const ensureCsrf = async () => {
 };
 
 function Settings() {
+    const [initialLoading, setInitialLoading] = useState(true);
     const [active, setActive] = useState(() => {
         try {
             return localStorage.getItem("settings_active_tab") || "courses";
@@ -85,7 +86,17 @@ function Settings() {
     };
 
     useEffect(() => {
-        refreshData();
+        const initialLoad = async () => {
+            await refreshData();
+            setInitialLoading(false);
+        };
+        initialLoad();
+    }, []);
+
+    useEffect(() => {
+        if (!initialLoading) {
+            refreshData();
+        }
     }, [active]);
 
     const onOpenForm = (item) => {
@@ -271,6 +282,15 @@ function Settings() {
         }
     }, [archiveFilters]);
 
+    if (initialLoading) {
+        return (
+            <div className="page-loading">
+                <div className="spinner"></div>
+                <p>Loading Settings...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="settings-content">
             <header className="page-header">
@@ -434,7 +454,7 @@ function Settings() {
                                                     ✎ Edit
                                                 </button>
                                                 <button
-                                                    className="btn btn-danger btn-sm"
+                                                    className="btn btn-success btn-sm"
                                                     onClick={() =>
                                                         handleDelete(
                                                             d.department_id
@@ -473,7 +493,7 @@ function Settings() {
                                                     ✎ Edit
                                                 </button>
                                                 <button
-                                                    className="btn btn-danger btn-sm"
+                                                    className="btn btn-success btn-sm"
                                                     onClick={() =>
                                                         handleDelete(
                                                             a.academic_year_id
