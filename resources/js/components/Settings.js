@@ -413,7 +413,7 @@ function Settings() {
                                                     ✎ Edit
                                                 </button>
                                                 <button
-                                                    className="btn btn-danger btn-sm"
+                                                    className="btn btn-success btn-sm"
                                                     onClick={() =>
                                                         handleDelete(
                                                             c.course_id
@@ -532,7 +532,7 @@ function Settings() {
                                     </select>
                                 </div>
 
-                                <div className="control-item" style={{ flex: "1 1 250px", minWidth: "200px" }}>
+                                <div className="control-item" style={{ flex: "0 0 auto", width: "320px" }}>
                                     <div style={{ position: "relative" }}>
                                         <BsSearch style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#666", pointerEvents: "none" }} />
                                         <input
