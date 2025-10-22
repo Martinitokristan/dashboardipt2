@@ -64,6 +64,8 @@ class ReportController extends Controller
 
     public function generateStudentReport(Request $request)
     {
+        \Log::info('Request data:', $request->all());
+
         $validated = $request->validate([
             'course_id' => ['nullable', 'integer', 'exists:courses,course_id'],
             'department_id' => ['nullable', 'integer', 'exists:departments,department_id'],
@@ -163,6 +165,7 @@ class ReportController extends Controller
             ->with(['department'])
             ->whereNull('archived_at');
 
+        // Only filter if department_id is provided
         if (!empty($validated['department_id'])) {
             $query->where('department_id', $validated['department_id']);
         }
@@ -174,12 +177,13 @@ class ReportController extends Controller
         $faculty = $query->orderBy('l_name')->orderBy('f_name')->get();
 
         $filters = [
-            'department' => $validated['department_id'] ? Department::find($validated['department_id']) : null,
+            'department' => !empty($validated['department_id']) ? Department::find($validated['department_id']) : null,
             'status' => $validated['status'] ?? null,
         ];
 
         if (($validated['export'] ?? null) === 'google_sheets') {
             try {
+                // Export all faculty if no department_id, or filtered if provided
                 $sheetUrl = $this->sheets->exportFacultyReport($faculty, $validated);
 
                 return response()->json([
@@ -207,7 +211,7 @@ class ReportController extends Controller
                 'phone_number' => $member->phone_number,
                 'position' => $member->position,
                 'status' => $member->status,
-                'department_name' => optional($member->department)->department_name,
+                'department_name' => optional($member->department)->department_name ?? '',
             ];
         })->values();
 
