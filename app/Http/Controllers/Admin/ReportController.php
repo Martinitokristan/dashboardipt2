@@ -254,24 +254,32 @@ class ReportController extends Controller
     {
         $type = $request->input('type');
 
-        if ($type === 'student') {
-            // Export ALL students
-            $students = \App\Models\StudentProfile::query()
-                ->with(['course', 'department', 'academicYear'])
-                ->whereNull('archived_at')
-                ->get();
-            $tabName = 'Students';
-            app(GoogleSheetsExportService::class)->exportStudentReport($students);
-        }
-
         if ($type === 'faculty') {
-            // Export ALL faculty
+            $departmentId = $request->input('department_id');
             $faculty = \App\Models\FacultyProfile::query()
                 ->with(['department'])
-                ->whereNull('archived_at')
-                ->get();
-            $tabName = 'Faculty';
-            app(GoogleSheetsExportService::class)->exportFacultyReport($faculty);
+                ->whereNull('archived_at');
+            if ($departmentId) {
+                $faculty->where('department_id', $departmentId);
+            }
+            $faculty = $faculty->get();
+            $departmentName = $faculty->first()->department->department_name ?? 'FACULTY_REPORT';
+            $tabName = strtoupper($departmentName) . ' FACULTY';
+            app(GoogleSheetsExportService::class)->exportFacultyReportToTab($faculty, $tabName);
+        }
+
+        if ($type === 'student') {
+            $courseId = $request->input('course_id');
+            $students = \App\Models\StudentProfile::query()
+                ->with(['course', 'department'])
+                ->whereNull('archived_at');
+            if ($courseId) {
+                $students->where('course_id', $courseId);
+            }
+            $students = $students->get();
+            $courseName = $students->first()->course->course_name ?? 'STUDENT_REPORT';
+            $tabName = strtoupper($courseName) . ' STUDENT';
+            app(GoogleSheetsExportService::class)->exportStudentReportToTab($students, $tabName);
         }
 
         return response()->json(['success' => true]);

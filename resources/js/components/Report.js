@@ -267,67 +267,101 @@ function Report() {
 
     return (
         <div className="report-page">
-            <h2>Report Generator</h2>
-            <div className="report-config">
-                <div>
-                    <label>Report Type:</label>
-                    <select
-                        value={reportType}
-                        onChange={(e) => setReportType(e.target.value)}
+            {/* NEW: Container for title and export buttons */}
+            <div className="header-container">
+                <h2 className="page-title">Report Generator</h2>
+
+                <div className="export-all-actions">
+                    <button
+                        className="btn"
+                        onClick={handleExportAllStudents}
+                        disabled={exporting}
                     >
-                        <option value={REPORT_TYPES.student}>Student</option>
-                        <option value={REPORT_TYPES.faculty}>Faculty</option>
-                    </select>
+                        Export Student Data
+                    </button>
+                    <button
+                        className="btn"
+                        onClick={handleExportAllFaculty}
+                        disabled={exporting}
+                    >
+                        Export Faculty Data
+                    </button>
                 </div>
-                {reportType === REPORT_TYPES.student && (
-                    <div>
-                        <label>Course:</label>
-                        <select
-                            value={selectedCourse}
-                            onChange={(e) => setSelectedCourse(e.target.value)}
-                        >
-                            <option value="">All Courses</option>
-                            {courses.map((course) => (
-                                <option
-                                    key={course.course_id}
-                                    value={course.course_id}
-                                >
-                                    {course.course_name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                )}
-                {reportType === REPORT_TYPES.faculty && (
-                    <div>
-                        <label>Department:</label>
-                        <select
-                            value={selectedDepartment}
-                            onChange={(e) =>
-                                setSelectedDepartment(e.target.value)
-                            }
-                        >
-                            <option value="">All Departments</option>
-                            {departments.map((dept) => (
-                                <option
-                                    key={dept.department_id}
-                                    value={dept.department_id}
-                                >
-                                    {dept.department_name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                )}
-                <button
-                    className="btn btn-primary"
-                    onClick={handleGenerateReport}
-                    disabled={loading}
-                >
-                    {loading ? "Generating..." : "Generate Report"}
-                </button>
             </div>
 
+            <div className="config-card">
+                <div className="config-title">Report Configuration</div>
+                <div className="config-grid">
+                    <div className="field">
+                        <label>Report Type:</label>
+                        <select
+                            value={reportType}
+                            onChange={(e) => setReportType(e.target.value)}
+                        >
+                            <option value={REPORT_TYPES.student}>
+                                Student Report
+                            </option>
+                            <option value={REPORT_TYPES.faculty}>
+                                Faculty Report
+                            </option>
+                        </select>
+                    </div>
+
+                    {reportType === REPORT_TYPES.student && (
+                        <div className="field">
+                            <label>Filter by Course:</label>
+                            <select
+                                value={selectedCourse}
+                                onChange={(e) =>
+                                    setSelectedCourse(e.target.value)
+                                }
+                            >
+                                <option value="">All Courses</option>
+                                {courses.map((course) => (
+                                    <option
+                                        key={course.course_id}
+                                        value={course.course_id}
+                                    >
+                                        {course.course_name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+                    {reportType === REPORT_TYPES.faculty && (
+                        <div className="field">
+                            <label>Filter by Department:</label>
+                            <select
+                                value={selectedDepartment}
+                                onChange={(e) =>
+                                    setSelectedDepartment(e.target.value)
+                                }
+                            >
+                                <option value="">All Departments</option>
+                                {departments.map((dept) => (
+                                    <option
+                                        key={dept.department_id}
+                                        value={dept.department_id}
+                                    >
+                                        {dept.department_name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
+                    <button
+                        className="btn btn-primary"
+                        onClick={handleGenerateReport}
+                        disabled={loading}
+                        style={{ alignSelf: "flex-end", height: "36px" }}
+                    >
+                        {loading ? "Generating..." : "Generate Report"}
+                    </button>
+                </div>
+            </div>
+
+            {/* Notification area */}
             {notification && (
                 <div className={`notification ${notification.type}`}>
                     {notification.message}
@@ -336,35 +370,54 @@ function Report() {
 
             {loading && <div className="loading">Generating report...</div>}
 
-            {!loading && tableRows.length > 0 && (
-                <div className="report-results">
-                    <table className="report-table">
-                        <thead>
-                            <tr>
-                                {tableColumns.map((col) => (
-                                    <th key={col.key}>{col.label}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {tableRows.map((row, idx) => (
-                                <tr key={idx}>
+            {/* Report Preview / Table Display */}
+            <div className="report-preview">
+                <div className="report-meta">
+                    Report Preview
+                    {tableRows.length > 0 &&
+                        ` (showing ${tableRows.length} ${reportType}s)`}
+                </div>
+
+                {!loading && tableRows.length > 0 && (
+                    <div className="report-results">
+                        <table className="report-table">
+                            <thead>
+                                <tr>
                                     {tableColumns.map((col) => (
-                                        <td key={col.key}>{row[col.key]}</td>
+                                        <th key={col.key}>{col.label}</th>
                                     ))}
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+                            </thead>
+                            <tbody>
+                                {tableRows.map((row, idx) => (
+                                    <tr key={idx}>
+                                        {tableColumns.map((col) => (
+                                            <td key={col.key}>
+                                                {row[col.key]}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
 
-            {!loading && tableRows.length === 0 && (
-                <div>No data found for the selected filter.</div>
-            )}
+                {!loading && tableRows.length === 0 && (
+                    <div>
+                        {tableColumns.length > 0
+                            ? "No data found for the selected filter."
+                            : "Click 'Generate Report' to see the data."}
+                    </div>
+                )}
+            </div>
 
+            {/* Table Export Actions (PDF / Sheets for current data) */}
             {!loading && tableRows.length > 0 && (
-                <div className="export-actions">
+                <div
+                    className="export-actions"
+                    style={{ marginTop: "16px", display: "flex", gap: "10px" }}
+                >
                     <button
                         className="btn"
                         onClick={handleDownloadPdf}
@@ -382,23 +435,7 @@ function Report() {
                 </div>
             )}
 
-            {/* Always-visible export buttons */}
-            <div className="export-all-actions">
-                <button
-                    className="btn"
-                    onClick={handleExportAllStudents}
-                    disabled={exporting}
-                >
-                    Export Student Data
-                </button>
-                <button
-                    className="btn"
-                    onClick={handleExportAllFaculty}
-                    disabled={exporting}
-                >
-                    Export Faculty Data
-                </button>
-            </div>
+            {/* Removed the old export-all-actions div from the bottom */}
         </div>
     );
 }

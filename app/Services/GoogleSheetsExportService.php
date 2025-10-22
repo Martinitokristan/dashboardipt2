@@ -126,12 +126,19 @@ class GoogleSheetsExportService
         $params = ['valueInputOption' => 'RAW'];
 
         try {
-            $this->service->spreadsheets_values->update(
+            // Before sending to Google Sheets
+            \Log::info('Exporting faculty data:', ['data' => $values]);
+
+            $response = $this->service->spreadsheets_values->update(
                 $this->spreadsheetId,
                 'Faculty!A1',
                 $body,
                 $params
             );
+
+            // After sending to Google Sheets
+            \Log::info('Google Sheets API response:', ['response' => $response]);
+
             // Auto resize columns
             $this->autoResizeColumns('Faculty', count($values[0]));
             Log::info('✅ Faculty report successfully exported to Google Sheets.');
@@ -143,54 +150,43 @@ class GoogleSheetsExportService
 
     public function exportStudentReportToTab($students, $sheetTabName)
     {
-        $values = [
-            ['Student ID', 'Name', 'Email', 'Course', 'Department', 'Status'],
-        ];
+        $header = ['Student ID', 'Name', 'Email', 'Course', 'Department', 'Status'];
+        $values = [$header];
 
-        if (is_array($students) || $students instanceof \Traversable) {
-            foreach ($students as $student) {
-                $values[] = [
-                    $student->student_id,
-                    trim("{$student->f_name} {$student->m_name} {$student->l_name} {$student->suffix}"),
-                    $student->email_address,
-                    optional($student->course)->course_name,
-                    optional($student->department)->department_name,
-                    $student->status,
-                ];
-            }
-        } else {
-            \Log::warning('No students to export', ['students' => $students]);
+        foreach ($students as $student) {
+            $values[] = [
+                $student->student_id ?? '',
+                trim("{$student->f_name} {$student->m_name} {$student->l_name} {$student->suffix}"),
+                $student->email_address ?? '',
+                optional($student->course)->course_name ?? '',
+                optional($student->department)->department_name ?? '',
+                $student->status ?? '',
+            ];
         }
 
         $spreadsheetId = $this->spreadsheetId;
         $service = $this->service;
 
-        // 1. Check if the sheet/tab exists
+        // Check if tab exists and create/clear as needed
         $spreadsheet = $service->spreadsheets->get($spreadsheetId);
-        $sheetId = null;
+        $sheetExists = false;
         foreach ($spreadsheet->getSheets() as $sheet) {
             if ($sheet->getProperties()->getTitle() === $sheetTabName) {
-                $sheetId = $sheet->getProperties()->getSheetId();
+                $sheetExists = true;
                 break;
             }
         }
 
-        // 2. If not, create the sheet/tab
-        if (!$sheetId) {
+        if (!$sheetExists) {
             $addSheetRequest = new \Google\Service\Sheets\Request([
-                'addSheet' => [
-                    'properties' => [
-                        'title' => $sheetTabName,
-                    ],
-                ],
+                'addSheet' => ['properties' => ['title' => $sheetTabName]],
             ]);
             $batchUpdateRequest = new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
                 'requests' => [$addSheetRequest],
             ]);
-            $response = $service->spreadsheets->batchUpdate($spreadsheetId, $batchUpdateRequest);
-            $sheetId = $response->getReplies()[0]->getAddSheet()->getProperties()->getSheetId();
+            $service->spreadsheets->batchUpdate($spreadsheetId, $batchUpdateRequest);
+            sleep(1);
         } else {
-            // 3. If exists, clear the sheet/tab
             $service->spreadsheets_values->clear(
                 $spreadsheetId,
                 $sheetTabName,
@@ -198,7 +194,6 @@ class GoogleSheetsExportService
             );
         }
 
-        // 4. Write data to the tab
         $body = new \Google\Service\Sheets\ValueRange(['values' => $values]);
         $params = ['valueInputOption' => 'RAW'];
         $service->spreadsheets_values->update(
@@ -209,50 +204,45 @@ class GoogleSheetsExportService
         );
     }
 
-    public function exportFacultyReportToTab($faculty, $sheetTabName)
+    public function exportFacultyReportToTab($faculties, $sheetTabName)
     {
-        $values = [
-            ['Faculty ID', 'Name', 'Email', 'Department', 'Status'],
-        ];
-        foreach ($faculty as $member) {
+        $header = ['Faculty ID', 'Name', 'Email', 'Phone', 'Department', 'Position'];
+        $values = [$header];
+
+        foreach ($faculties as $faculty) {
             $values[] = [
-                $member->faculty_id,
-                trim("{$member->f_name} {$member->m_name} {$member->l_name} {$member->suffix}"),
-                $member->email_address,
-                optional($member->department)->department_name,
-                $member->status,
+                $faculty->faculty_id ?? '',
+                trim("{$faculty->f_name} {$faculty->m_name} {$faculty->l_name} {$faculty->suffix}"),
+                $faculty->email_address ?? '',
+                $faculty->phone_number ?? '',
+                optional($faculty->department)->department_name ?? '',
+                $faculty->position ?? '',
             ];
         }
 
         $spreadsheetId = $this->spreadsheetId;
         $service = $this->service;
 
-        // 1. Check if the sheet/tab exists
+        // Check if tab exists and create/clear as needed
         $spreadsheet = $service->spreadsheets->get($spreadsheetId);
-        $sheetId = null;
+        $sheetExists = false;
         foreach ($spreadsheet->getSheets() as $sheet) {
             if ($sheet->getProperties()->getTitle() === $sheetTabName) {
-                $sheetId = $sheet->getProperties()->getSheetId();
+                $sheetExists = true;
                 break;
             }
         }
 
-        // 2. If not, create the sheet/tab
-        if (!$sheetId) {
+        if (!$sheetExists) {
             $addSheetRequest = new \Google\Service\Sheets\Request([
-                'addSheet' => [
-                    'properties' => [
-                        'title' => $sheetTabName,
-                    ],
-                ],
+                'addSheet' => ['properties' => ['title' => $sheetTabName]],
             ]);
             $batchUpdateRequest = new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
                 'requests' => [$addSheetRequest],
             ]);
-            $response = $service->spreadsheets->batchUpdate($spreadsheetId, $batchUpdateRequest);
-            $sheetId = $response->getReplies()[0]->getAddSheet()->getProperties()->getSheetId();
+            $service->spreadsheets->batchUpdate($spreadsheetId, $batchUpdateRequest);
+            sleep(1);
         } else {
-            // 3. If exists, clear the sheet/tab
             $service->spreadsheets_values->clear(
                 $spreadsheetId,
                 $sheetTabName,
@@ -260,7 +250,6 @@ class GoogleSheetsExportService
             );
         }
 
-        // 4. Write data to the tab
         $body = new \Google\Service\Sheets\ValueRange(['values' => $values]);
         $params = ['valueInputOption' => 'RAW'];
         $service->spreadsheets_values->update(

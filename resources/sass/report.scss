@@ -1,19 +1,111 @@
 /* resources/sass/report.scss */
-.page { overflow: initial; }
-.page-header { padding:16px 0; }
-.page-title { margin:0; }
-.page-subtitle { margin:4px 0 12px; color:#6b7280; }
 
-.config-card { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:16px; margin-bottom:16px; }
-.config-title { font-weight:600; margin-bottom:12px; }
-.config-grid { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; margin-bottom:12px; }
-.field label { display:block; font-size:12px; color:#6b7280; margin-bottom:6px; }
-select { width:100%; height:36px; border:1px solid #e5e7eb; border-radius:8px; padding:0 10px; background:#fff; }
-.btn { border:1px solid #e5e7eb; background:#f8fafc; border-radius:8px; padding:8px 14px; }
-.btn-primary { background:#4f46e5; color:#fff; border-color:#4f46e5; }
+// New rule for header alignment: positions the title and export-all buttons on opposite sides.
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
 
-.report-preview { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:16px; }
-.report-meta { font-weight:600; color:#374151; margin-bottom:12px; }
-.preview-grid { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; }
-.preview-box { background:#d9d9d7; height:160px; border-radius:6px; }
-.preview-wide { grid-column: 1 / span 3; background:#d9d9d7; height:160px; border-radius:6px; }
+.export-all-actions {
+    // Adds a small gap between the two export-all buttons
+    .btn {
+        margin-left: 10px;
+    }
+}
+
+.page {
+    overflow: initial;
+}
+.page-header {
+    padding: 16px 0;
+}
+.page-title {
+    margin: 0;
+} // Keep the title margin clean
+.page-subtitle {
+    margin: 4px 0 12px;
+    color: #6b7280;
+}
+
+.config-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+.config-title {
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+// Updated: Added align-items: flex-end to ensure the button aligns with the select boxes
+.config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 12px;
+    align-items: flex-end;
+}
+
+.field label {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 6px;
+}
+select {
+    width: 100%;
+    height: 36px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0 10px;
+    background: #fff;
+}
+
+.btn {
+    border: 1px solid #e5e7eb;
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 8px 14px;
+    // Ensure the Generate button matches the height of the select boxes in the grid
+    height: 36px;
+    display: inline-flex; // For icon alignment if used
+    align-items: center; // For icon alignment if used
+    justify-content: center;
+}
+.btn-primary {
+    background: #4f46e5;
+    color: #fff;
+    border-color: #4f46e5;
+}
+
+.report-preview {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+}
+.report-meta {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 12px;
+}
+.preview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+}
+.preview-box {
+    background: #d9d9d7;
+    height: 160px;
+    border-radius: 6px;
+}
+.preview-wide {
+    grid-column: 1 / span 3;
+    background: #d9d9d7;
+    height: 160px;
+    border-radius: 6px;
+}
