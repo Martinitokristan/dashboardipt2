@@ -245,6 +245,55 @@ function Report() {
         }
     };
 
+    // Import Students (Google Sheets)
+    const handleImportStudents = async () => {
+        setLoading(true);
+        try {
+            await axios.post("/api/admin/reports/import-students");
+            setModalState("success");
+            setModalMessage("Imported students from Google Sheets!");
+            // Optionally, refresh the report/table
+            handleGenerateReport();
+        } catch {
+            setModalState("error");
+            setModalMessage("Failed to import students.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Import Faculty (Google Sheets)
+    const handleImportFaculty = async () => {
+        setLoading(true);
+        try {
+            await ensureCsrf();
+            const { data } = await axios.post(
+                "/api/admin/reports/import-faculty"
+            );
+            if (data.success) {
+                setReportType(REPORT_TYPES.faculty);
+                setSelectedDepartment("");
+                setModalState("success");
+                setModalMessage("Imported faculty from Google Sheets!");
+                handleGenerateReport();
+            } else {
+                setModalState("error");
+                // Show error details if present
+                setModalMessage(
+                    data.message +
+                        (data.errors && data.errors.length
+                            ? "\n" + data.errors.join("\n")
+                            : "")
+                );
+            }
+        } catch {
+            setModalState("error");
+            setModalMessage("Failed to import faculty from Google Sheets.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Modal content for success/error/loading
     const renderModalContent = () => {
         if (modalState === "loading") {
@@ -413,6 +462,19 @@ function Report() {
                         disabled={reportType !== "faculty"}
                     >
                         Export Faculty Data
+                    </button>
+                    <button
+                        className="btn btn-primary"
+                        onClick={handleImportStudents}
+                    >
+                        Import Students from Google Sheets
+                    </button>
+                    <button
+                        className="btn btn-secondary"
+                        onClick={handleImportFaculty}
+                        style={{ marginLeft: 10 }}
+                    >
+                        Import Faculty from Google Sheets
                     </button>
                 </div>
             </div>

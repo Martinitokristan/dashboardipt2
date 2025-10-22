@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { BsSearch } from 'react-icons/bs';
+import { BsSearch } from "react-icons/bs";
 import "../../sass/students.scss";
 
 const getCsrfCookie = async () => {
@@ -182,7 +182,11 @@ function Students() {
         } catch (err) {
             console.error("Save error:", err);
             setModalContentState("error");
-            setModalMessage(err.response?.data?.error || err.response?.data?.message || "Failed to save student");
+            setModalMessage(
+                err.response?.data?.error ||
+                    err.response?.data?.message ||
+                    "Failed to save student"
+            );
         }
     };
 
@@ -198,7 +202,9 @@ function Students() {
             setShowForm(true);
         } catch (err) {
             console.error("Archive error:", err);
-            setModalMessage(err.response?.data?.error || "Failed to archive student");
+            setModalMessage(
+                err.response?.data?.error || "Failed to archive student"
+            );
             setModalContentState("error");
             setShowForm(true);
         }
@@ -266,9 +272,10 @@ function Students() {
                     </div>
                     <h4 className="success-title">Success!</h4>
                     <p className="success-subtitle">
-                        {modalMessage || (editingId
-                            ? "Student record has been updated."
-                            : "New student has been successfully added.")}
+                        {modalMessage ||
+                            (editingId
+                                ? "Student record has been updated."
+                                : "New student has been successfully added.")}
                     </p>
                     <button
                         className="btn btn-primary btn-close-message"
@@ -440,7 +447,7 @@ function Students() {
                             placeholder="09XXXXXXXXX"
                             value={form.phone_number}
                             onChange={(e) => {
-                                const value = e.target.value.replace(/\D/g, '');
+                                const value = e.target.value.replace(/\D/g, "");
                                 if (value.length <= 11) {
                                     setForm({
                                         ...form,
@@ -499,7 +506,9 @@ function Students() {
                             <option value="dropped">Dropped</option>
                         </select>
 
-                        <label className="form-label-new full-width-label">Address</label>
+                        <label className="form-label-new full-width-label">
+                            Address
+                        </label>
                         <input
                             className="form-input-new full-width-input"
                             placeholder="Address"
@@ -510,7 +519,11 @@ function Students() {
                             required
                         />
 
-                        {error && <div className="alert-error full-width-error">{error}</div>}
+                        {error && (
+                            <div className="alert-error full-width-error">
+                                {error}
+                            </div>
+                        )}
                     </div>
 
                     <div className="modal-footer-new">
@@ -581,7 +594,8 @@ function Students() {
                                         (c) => c.course_id == filters.course_id
                                     );
                                     return selectedCourse
-                                        ? d.department_id == selectedCourse.department_id
+                                        ? d.department_id ==
+                                              selectedCourse.department_id
                                         : true;
                                 }
                                 return true;
@@ -608,9 +622,10 @@ function Students() {
                             setFilters({
                                 ...filters,
                                 course_id: courseId,
-                                department_id: courseId && selectedCourse
-                                    ? selectedCourse.department_id
-                                    : filters.department_id, // Auto-select department if course is selected
+                                department_id:
+                                    courseId && selectedCourse
+                                        ? selectedCourse.department_id
+                                        : filters.department_id, // Auto-select department if course is selected
                             });
                         }}
                     >
@@ -619,7 +634,9 @@ function Students() {
                             .filter((c) => {
                                 // If a department is selected, only show courses under that department
                                 if (filters.department_id) {
-                                    return c.department_id == filters.department_id;
+                                    return (
+                                        c.department_id == filters.department_id
+                                    );
                                 }
                                 return true;
                             })
@@ -678,7 +695,13 @@ function Students() {
                                 </td>
                                 <td>{s.department?.department_name || "-"}</td>
                                 <td>{s.course?.course_name || "-"}</td>
-                                <td>{s.year_level || "-"}</td>
+                                <td>
+                                    {typeof s.year_level === "object" &&
+                                    s.year_level !== null
+                                        ? s.year_level.name ||
+                                          s.year_level.label
+                                        : s.year_level || "-"}
+                                </td>
                                 <td>
                                     <span
                                         className={`badge ${

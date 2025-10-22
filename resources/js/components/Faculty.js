@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { BsSearch } from 'react-icons/bs';
+import { BsSearch } from "react-icons/bs";
 import "../../sass/faculty.scss";
 
 function Faculty() {
@@ -28,7 +28,7 @@ function Faculty() {
         address: "",
         department_id: "",
         position: "Dean",
-        status: "active"
+        status: "active",
     });
 
     const loadFaculty = async () => {
@@ -80,7 +80,7 @@ function Faculty() {
             address: "",
             department_id: "",
             position: "Dean",
-            status: "active"
+            status: "active",
         });
         // Reload table after closing success modal
         await loadFaculty();
@@ -124,7 +124,10 @@ function Faculty() {
         setModalContentState("loading");
         setError("");
         try {
-            const payload = { ...formData, department_id: formData.department_id || null };
+            const payload = {
+                ...formData,
+                department_id: formData.department_id || null,
+            };
             let response;
             if (editingId) {
                 response = await axios.put(
@@ -140,7 +143,11 @@ function Faculty() {
         } catch (error) {
             console.error("Save error:", error);
             setModalContentState("error");
-            setModalMessage(error.response?.data?.error || error.response?.data?.message || "Failed to save faculty");
+            setModalMessage(
+                error.response?.data?.error ||
+                    error.response?.data?.message ||
+                    "Failed to save faculty"
+            );
             if ([401, 403].includes(error.response?.status)) {
                 window.location.href = "/login";
             }
@@ -156,7 +163,9 @@ function Faculty() {
             setShowForm(true);
         } catch (error) {
             console.error("Archive error:", error);
-            setModalMessage(error.response?.data?.message || "Failed to archive faculty");
+            setModalMessage(
+                error.response?.data?.message || "Failed to archive faculty"
+            );
             setModalContentState("error");
             setShowForm(true);
             if ([401, 403].includes(error.response?.status)) {
@@ -164,7 +173,6 @@ function Faculty() {
             }
         }
     };
-
 
     const onOpenEditForm = (facultyMember) => {
         setEditingId(facultyMember.faculty_id);
@@ -180,7 +188,7 @@ function Faculty() {
             address: facultyMember.address,
             department_id: facultyMember.department_id || "",
             position: facultyMember.position || "Dean",
-            status: facultyMember.status || "active"
+            status: facultyMember.status || "active",
         });
         setShowForm(true);
         setModalContentState("form");
@@ -212,18 +220,25 @@ function Faculty() {
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 52 52"
                         >
+                            {/* White check icon inside the existing circle */}
                             <path
                                 className="success-check-path"
                                 fill="none"
-                                d="M14.1 27.2l7.1 7.2 16.7-16.8"
+                                stroke="#ffffff"
+                                strokeWidth="4"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M16 26l7 7 13-13"
                             />
                         </svg>
                     </div>
+
                     <h4 className="success-title">Success!</h4>
                     <p className="success-subtitle">
-                        {modalMessage || (editingId
-                            ? "Faculty record has been updated."
-                            : "New faculty has been successfully added.")}
+                        {modalMessage ||
+                            (editingId
+                                ? "Faculty record has been updated."
+                                : "New faculty has been successfully added.")}
                     </p>
                     <button
                         className="btn btn-primary btn-close-message"
@@ -309,7 +324,9 @@ function Faculty() {
                             <option value="Dean">Dean</option>
                             <option value="Instructor">Instructor</option>
                             <option value="Part-time">Part-time</option>
-                            <option value="Department Head">Department Head</option>
+                            <option value="Department Head">
+                                Department Head
+                            </option>
                         </select>
 
                         <label className="form-label-new">First Name</label>
@@ -380,13 +397,13 @@ function Faculty() {
                             name="phone_number"
                             value={formData.phone_number}
                             onChange={(e) => {
-                                const value = e.target.value.replace(/\D/g, '');
+                                const value = e.target.value.replace(/\D/g, "");
                                 if (value.length <= 11) {
                                     handleInputChange({
                                         target: {
-                                            name: 'phone_number',
-                                            value: value
-                                        }
+                                            name: "phone_number",
+                                            value: value,
+                                        },
                                     });
                                 }
                             }}
@@ -420,7 +437,9 @@ function Faculty() {
                             required
                         />
 
-                        <label className="form-label-new full-width-label">Address</label>
+                        <label className="form-label-new full-width-label">
+                            Address
+                        </label>
                         <input
                             className="form-input-new full-width-input"
                             placeholder="Address"
@@ -431,7 +450,9 @@ function Faculty() {
                         />
 
                         {error && (
-                            <div className="alert-error full-width-error">{error}</div>
+                            <div className="alert-error full-width-error">
+                                {error}
+                            </div>
                         )}
                     </div>
 

@@ -138,8 +138,12 @@ class ReportController extends Controller
 
     public function importStudentReport()
     {
-        $spreadsheetId = config('services.google.sheets_id');
+        $spreadsheetId = env('GOOGLE_SHEETS_SPREADSHEET_ID');
+        if (!$spreadsheetId) {
+            return response()->json(['error' => 'Spreadsheet ID is required'], 400);
+        }
         $this->sheets->importStudentsFromSheet($spreadsheetId);
+        return response()->json(['success' => true]);
     }
 
     public function generateFacultyReport(Request $request)
@@ -215,31 +219,25 @@ class ReportController extends Controller
         ]);
     }
 
-    public function importFacultyReport(): JsonResponse
+    public function importFacultyReport(): \Illuminate\Http\JsonResponse
     {
-        DB::beginTransaction();
-
         try {
             $summary = $this->sheets->importFacultyFromSheet();
-            DB::commit();
 
+            // If there are errors, include them in the response
             return response()->json([
-                'success' => $summary['success'],
+                'success' => (bool) ($summary['success'] ?? false),
                 'message' => $summary['message'] ?? null,
-                'summary' => [
-                    'imported' => $summary['imported'] ?? 0,
-                    'updated' => $summary['updated'] ?? 0,
-                    'deleted' => $summary['deleted'] ?? 0,
-                    'errors' => $summary['errors'] ?? [],
-                ],
-            ], ($summary['success'] ?? false) ? 200 : 422);
+                'errors' => $summary['errors'] ?? [],
+                'imported' => $summary['imported'] ?? 0,
+                'updated' => $summary['updated'] ?? 0,
+            ], 200);
         } catch (\Throwable $e) {
-            DB::rollBack();
             report($e);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to import faculty data from Google Sheets.',
+                'message' => 'Failed to import faculty. ' . $e->getMessage(),
             ], 500);
         }
     }

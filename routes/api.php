@@ -86,3 +86,5 @@ Route::get('/report/options', [ReportController::class, 'getOptions']);
 Route::post('/admin/reports/students', [ReportController::class, 'generateStudentReport']);
 Route::post('/admin/reports/faculty', [ReportController::class, 'generateFacultyReport']);
 Route::post('/export-to-sheets', [ReportController::class, 'exportToSheets']);
+Route::post('/admin/reports/import-students', [\App\Http\Controllers\Admin\ReportController::class, 'importStudentReport']);
+Route::post('/admin/reports/import-faculty', [\App\Http\Controllers\Admin\ReportController::class, 'importFacultyReport']);

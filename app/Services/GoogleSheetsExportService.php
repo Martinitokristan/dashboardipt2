@@ -552,4 +552,103 @@ class GoogleSheetsExportService
     {
         return $this->spreadsheetId;
     }
+
+    public function importStudentsFromSheet($spreadsheetId)
+    {
+        if (!$spreadsheetId) {
+            throw new \Exception("Spreadsheet ID is required");
+        }
+
+        $service = $this->service; // Google Sheets API client
+        $range = 'Students!A2:Q'; // Adjust range as needed
+
+        $response = $service->spreadsheets_values->get($spreadsheetId, $range);
+        $rows = $response->getValues();
+
+        foreach ($rows as $row) {
+            // Map columns to fields
+            $studentData = [
+                'student_id' => $row[0] ?? null,
+                'f_name' => $row[1] ?? '',
+                'm_name' => $row[2] ?? '',
+                'l_name' => $row[3] ?? '',
+                'suffix' => $row[4] ?? '',
+                'date_of_birth' => $row[5] ?? null,
+                'sex' => $row[6] ?? '',
+                'phone_number' => $row[7] ?? '',
+                'email_address' => $row[8] ?? '',
+                'address' => $row[9] ?? '',
+                'status' => $row[10] ?? '',
+                'department_id' => ($row[11] ?? null) !== '' ? $row[11] : null,
+                'course_id' => ($row[12] ?? null) !== '' ? $row[12] : null,
+                'academic_year_id' => ($row[13] ?? null) !== '' ? $row[13] : null,
+                'year_level' => ($row[14] ?? null) !== '' ? $row[14] : null,
+                'created_at' => $row[15] ?? null,
+                'updated_at' => $row[16] ?? null,
+                'archived_at' => $row[17] ?? null,
+            ];
+
+            // Import: update if exists, else create
+            \App\Models\StudentProfile::updateOrCreate(
+                ['student_id' => $studentData['student_id']],
+                $studentData
+            );
+        }
+    }
+    public function importFacultyFromSheet()
+    {
+        $spreadsheetId = $this->spreadsheetId;
+        $service = $this->service;
+        $range = 'Faculty!A2:P'; // Adjust range as needed
+
+        $response = $service->spreadsheets_values->get($spreadsheetId, $range);
+        $rows = $response->getValues();
+
+        $imported = 0;
+        $updated = 0;
+        $errors = [];
+
+        foreach ($rows as $row) {
+            $facultyData = [
+                'faculty_id' => $row[0] ?? null,
+                'f_name' => $row[1] ?? '',
+                'm_name' => $row[2] ?? '',
+                'l_name' => $row[3] ?? '',
+                'suffix' => $row[4] ?? '',
+                'date_of_birth' => $row[5] ?? null,
+                'sex' => $row[6] ?? '',
+                'phone_number' => $row[7] ?? '',
+                'email_address' => $row[8] ?? '',
+                'address' => $row[9] ?? '',
+                'position' => $row[10] ?? '',
+                'status' => $row[11] ?? '',
+                'department_id' => ($row[12] ?? null) !== '' ? $row[12] : null,
+                'created_at' => $row[13] ?? null,
+                'updated_at' => $row[14] ?? null,
+                'archived_at' => $row[15] ?? null,
+            ];
+
+            try {
+                $result = \App\Models\FacultyProfile::updateOrCreate(
+                    ['faculty_id' => $facultyData['faculty_id']],
+                    $facultyData
+                );
+                if ($result->wasRecentlyCreated) {
+                    $imported++;
+                } else {
+                    $updated++;
+                }
+            } catch (\Exception $e) {
+                $errors[] = $e->getMessage();
+            }
+        }
+
+        return [
+            'success' => empty($errors),
+            'imported' => $imported,
+            'updated' => $updated,
+            'errors' => $errors,
+            'message' => empty($errors) ? 'Faculty import completed.' : 'Some errors occurred.',
+        ];
+    }
 }
