@@ -10,7 +10,7 @@ class GoogleSheetsExportService
 {
     protected $client;
     protected $service; // <-- Use only this
-    protected $spreadsheetId;
+    public $spreadsheetId;
     protected $sheetName;
 
     public function __construct()
@@ -29,7 +29,7 @@ class GoogleSheetsExportService
         $this->service = new Sheets($this->client); // <-- Only this
 
         // ✅ Your Google Sheet ID
-        $this->spreadsheetId = '1oLHO0EYS5iC_-AEQ2LbN8-edfdRTE2PqdIWWOcZCU7g';
+        $this->spreadsheetId = '1bO17Ko1gRFoUEXfjkuGWtw4pWLlLxpAfl4tEChGB6Ac';
 
         // ✅ Use the correct sheet tab name (“Students”)
         $this->sheetName = 'Students';
@@ -114,9 +114,9 @@ class GoogleSheetsExportService
                 $faculty->position ?? '',
                 $faculty->status ?? '',
                 $faculty->department_id ?? '',
-                $faculty->created_at ? date('Y-m-d H:i:s', strtotime($faculty->created_at)) : '',
-                $faculty->updated_at ? date('Y-m-d H:i:s', strtotime($faculty->updated_at)) : '',
-                $faculty->archived_at ? date('Y-m-d H:i:s', strtotime($faculty->archived_at)) : '',
+                $faculty->created_at ? date('Y-m-d', strtotime($faculty->created_at)) : '',
+                $faculty->updated_at ? date('Y-m-d', strtotime($faculty->updated_at)) : '',
+                $faculty->archived_at ? date('Y-m-d', strtotime($faculty->archived_at)) : '',
             ];
         }
 
@@ -196,12 +196,15 @@ class GoogleSheetsExportService
 
         $body = new \Google\Service\Sheets\ValueRange(['values' => $values]);
         $params = ['valueInputOption' => 'RAW'];
-        $service->spreadsheets_values->update(
-            $spreadsheetId,
+        $this->service->spreadsheets_values->update(
+            $this->spreadsheetId,
             $sheetTabName . '!A1',
             $body,
             $params
         );
+
+        // Auto resize columns after export
+        $this->autoResizeColumns($sheetTabName, count($header));
     }
 
     public function exportFacultyReportToTab($faculties, $sheetTabName)
@@ -252,12 +255,15 @@ class GoogleSheetsExportService
 
         $body = new \Google\Service\Sheets\ValueRange(['values' => $values]);
         $params = ['valueInputOption' => 'RAW'];
-        $service->spreadsheets_values->update(
-            $spreadsheetId,
+        $this->service->spreadsheets_values->update(
+            $this->spreadsheetId,
             $sheetTabName . '!A1',
             $body,
             $params
         );
+
+        // Auto resize columns after export
+        $this->autoResizeColumns($sheetTabName, count($header));
     }
 
     /**
@@ -316,5 +322,234 @@ class GoogleSheetsExportService
         }
 
         return response()->json(['success' => true]);
+    }
+
+    public function exportStudentsByCourseToTabs($students)
+    {
+        $spreadsheetId = $this->spreadsheetId;
+        $service = $this->service;
+
+        // Group students by course
+        $grouped = [];
+        foreach ($students as $student) {
+            $courseName = $student->course_name ?? 'Unknown Course';
+            $grouped[$courseName][] = $student;
+        }
+
+        foreach ($grouped as $courseName => $courseStudents) {
+            $header = ['Student ID', 'Name', 'Email', 'Course', 'Department', 'Status'];
+            $values = [$header];
+            foreach ($courseStudents as $student) {
+                $values[] = [
+                    $student->student_id ?? '',
+                    trim("{$student->f_name} {$student->m_name} {$student->l_name} {$student->suffix}"),
+                    $student->email_address ?? '',
+                    $student->course_name ?? '',
+                    $student->department_name ?? '',
+                    $student->status ?? '',
+                ];
+            }
+
+            // Check if tab exists, create or clear
+            $spreadsheet = $service->spreadsheets->get($spreadsheetId);
+            $sheetExists = false;
+            foreach ($spreadsheet->getSheets() as $sheet) {
+                if ($sheet->getProperties()->getTitle() === $courseName) {
+                    $sheetExists = true;
+                    break;
+                }
+            }
+            if (!$sheetExists) {
+                $addSheetRequest = new \Google\Service\Sheets\Request([
+                    'addSheet' => ['properties' => ['title' => $courseName]],
+                ]);
+                $batchUpdateRequest = new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
+                    'requests' => [$addSheetRequest],
+                ]);
+                $service->spreadsheets->batchUpdate($spreadsheetId, $batchUpdateRequest);
+                sleep(1);
+            } else {
+                $service->spreadsheets_values->clear(
+                    $spreadsheetId,
+                    $courseName,
+                    new \Google\Service\Sheets\ClearValuesRequest()
+                );
+            }
+
+            $body = new \Google\Service\Sheets\ValueRange(['values' => $values]);
+            $params = ['valueInputOption' => 'RAW'];
+            $service->spreadsheets_values->update(
+                $spreadsheetId,
+                $courseName . '!A1',
+                $body,
+                $params
+            );
+            $this->autoResizeColumns($courseName, count($header)); // <-- Add this
+        }
+    }
+
+    public function exportFacultyByDepartmentToTabs($faculties)
+    {
+        $spreadsheetId = $this->spreadsheetId;
+        $service = $this->service;
+
+        // Group faculty by department
+        $grouped = [];
+        foreach ($faculties as $faculty) {
+            $deptName = $faculty->department_name ?? 'Unknown Department';
+            $grouped[$deptName][] = $faculty;
+        }
+
+        foreach ($grouped as $deptName => $deptMembers) {
+            $header = ['Faculty ID', 'Name', 'Email', 'Phone', 'Department', 'Position'];
+            $values = [$header];
+            foreach ($deptMembers as $faculty) {
+                $values[] = [
+                    $faculty->faculty_id ?? '',
+                    trim("{$faculty->f_name} {$faculty->m_name} {$faculty->l_name} {$faculty->suffix}"),
+                    $faculty->email_address ?? '',
+                    $faculty->phone_number ?? '',
+                    $faculty->department_name ?? '',
+                    $faculty->position ?? '',
+                ];
+            }
+
+            // Check if tab exists, create or clear
+            $spreadsheet = $service->spreadsheets->get($spreadsheetId);
+            $sheetExists = false;
+            foreach ($spreadsheet->getSheets() as $sheet) {
+                if ($sheet->getProperties()->getTitle() === $deptName) {
+                    $sheetExists = true;
+                    break;
+                }
+            }
+            if (!$sheetExists) {
+                $addSheetRequest = new \Google\Service\Sheets\Request([
+                    'addSheet' => ['properties' => ['title' => $deptName]],
+                ]);
+                $batchUpdateRequest = new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
+                    'requests' => [$addSheetRequest],
+                ]);
+                $service->spreadsheets->batchUpdate($spreadsheetId, $batchUpdateRequest);
+                sleep(1);
+            } else {
+                $service->spreadsheets_values->clear(
+                    $spreadsheetId,
+                    $deptName,
+                    new \Google\Service\Sheets\ClearValuesRequest()
+                );
+            }
+
+            $body = new \Google\Service\Sheets\ValueRange(['values' => $values]);
+            $params = ['valueInputOption' => 'RAW'];
+            $service->spreadsheets_values->update(
+                $spreadsheetId,
+                $deptName . '!A1',
+                $body,
+                $params
+            );
+            $this->autoResizeColumns($deptName, count($header)); // <-- Add this
+        }
+    }
+
+    public function getExistingCourseIds($sheetName = 'Students')
+    {
+        $range = $sheetName . '!A2:Z'; // Assuming course_id is in a column
+        $response = $this->service->spreadsheets_values->get($this->spreadsheetId, $range);
+        $values = $response->getValues();
+
+        $courseIds = [];
+        foreach ($values as $row) {
+            // Adjust index if course_id is not in column A
+            $courseIds[] = $row[3] ?? null; // Example: column D (index 3) is course_id
+        }
+        return array_filter($courseIds);
+    }
+    public function getExistingDepartmentIds($sheetName = 'Faculty')
+    {
+        $range = $sheetName . '!A2:Z';
+        $response = $this->service->spreadsheets_values->get($this->spreadsheetId, $range);
+        $values = $response->getValues();
+
+        $departmentIds = [];
+        foreach ($values as $row) {
+            $departmentIds[] = $row[6] ?? null; // Adjust index for department_id column
+        }
+        return array_filter($departmentIds);
+    }
+
+    public function appendStudentsToSheet($students, $sheetName = 'Students')
+    {
+        $values = [];
+        foreach ($students as $student) {
+            $values[] = [
+                $student->student_id ?? '',
+                $student->f_name ?? '',
+                $student->m_name ?? '',
+                $student->l_name ?? '',
+                $student->suffix ?? '',
+                $student->date_of_birth ?? '',
+                $student->sex ?? '',
+                $student->phone_number ?? '',
+                $student->email_address ?? '',
+                $student->address ?? '',
+                $student->status ?? '',
+                $student->department_id ?? '',
+                $student->course_id ?? '',
+                $student->academic_year_id ?? '',
+                $student->year_level ?? '',
+                $student->created_at ? date('Y-m-d', strtotime($student->created_at)) : '',
+                $student->updated_at ? date('Y-m-d', strtotime($student->updated_at)) : '',
+                $student->archived_at ? date('Y-m-d', strtotime($student->archived_at)) : '',
+            ];
+        }
+
+        $body = new \Google\Service\Sheets\ValueRange(['values' => $values]);
+        $params = ['valueInputOption' => 'RAW', 'insertDataOption' => 'INSERT_ROWS'];
+        $this->service->spreadsheets_values->append(
+            $this->spreadsheetId,
+            $sheetName . '!A1',
+            $body,
+            $params
+        );
+    }
+
+    public function appendFacultyToSheet($faculty, $sheetName = 'Faculty')
+    {
+        $values = [];
+        foreach ($faculty as $member) {
+            $values[] = [
+                $member->faculty_id ?? '',
+                $member->f_name ?? '',
+                $member->m_name ?? '',
+                $member->l_name ?? '',
+                $member->suffix ?? '',
+                $member->date_of_birth ?? '',
+                $member->sex ?? '',
+                $member->phone_number ?? '',
+                $member->email_address ?? '',
+                $member->address ?? '',
+                $member->position ?? '',
+                $member->status ?? '',
+                $member->department_id ?? '',
+                $member->created_at ? date('Y-m-d', strtotime($member->created_at)) : '',
+                $member->updated_at ? date('Y-m-d', strtotime($member->updated_at)) : '',
+                $member->archived_at ? date('Y-m-d', strtotime($member->archived_at)) : '',
+            ];
+        }
+
+        $body = new \Google\Service\Sheets\ValueRange(['values' => $values]);
+        $params = ['valueInputOption' => 'RAW', 'insertDataOption' => 'INSERT_ROWS'];
+        $this->service->spreadsheets_values->append(
+            $this->spreadsheetId,
+            $sheetName . '!A1',
+            $body,
+            $params
+        );
+    }
+
+    public function getSpreadsheetId()
+    {
+        return $this->spreadsheetId;
     }
 }

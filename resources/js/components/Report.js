@@ -201,57 +201,45 @@ function Report() {
         }
     };
 
-    // Export Student Data (New Function)
+    // Export Student Data (Google Sheets)
     const handleExportStudentData = async () => {
         setExporting(true);
         setModalState("loading");
         try {
-            const { data } = await axios.post("/api/admin/reports/students", {
+            await axios.post("/api/admin/reports/students", {
                 course_id: selectedCourse || undefined,
-                export: "csv",
+                export: "google_sheets",
             });
-            // Create a blob and download the file
-            const blob = new Blob([data], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.setAttribute("download", "student_data.csv");
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
             setModalState("success");
-            setModalMessage("Student data exported successfully!");
-        } catch {
+            setModalMessage(
+                "Student data exported to Google Sheets successfully!"
+            );
+        } catch (err) {
+            console.error("Export Student Data Error:", err); // <-- log error
             setModalState("error");
-            setModalMessage("Failed to export student data.");
+            setModalMessage("Failed to export student data to Google Sheets.");
         } finally {
             setExporting(false);
         }
     };
 
-    // Export Faculty Data (New Function)
+    // Export Faculty Data (Google Sheets)
     const handleExportFacultyData = async () => {
         setExporting(true);
         setModalState("loading");
         try {
-            const { data } = await axios.post("/api/admin/reports/faculty", {
+            await axios.post("/api/admin/reports/faculty", {
                 department_id: selectedDepartment || undefined,
-                export: "csv",
+                export: "google_sheets",
             });
-            // Create a blob and download the file
-            const blob = new Blob([data], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.setAttribute("download", "faculty_data.csv");
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
             setModalState("success");
-            setModalMessage("Faculty data exported successfully!");
-        } catch {
+            setModalMessage(
+                "Faculty data exported to Google Sheets successfully!"
+            );
+        } catch (err) {
+            console.error("Export Faculty Data Error:", err); // <-- log error
             setModalState("error");
-            setModalMessage("Failed to export faculty data.");
+            setModalMessage("Failed to export faculty data to Google Sheets.");
         } finally {
             setExporting(false);
         }

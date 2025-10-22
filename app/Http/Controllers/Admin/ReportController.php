@@ -68,32 +68,21 @@ class ReportController extends Controller
 
         $validated = $request->validate([
             'course_id' => ['nullable', 'integer', 'exists:courses,course_id'],
-            'department_id' => ['nullable', 'integer', 'exists:departments,department_id'],
-            'academic_year_id' => ['nullable', 'integer', 'exists:academic_years,academic_year_id'],
-            'status' => ['nullable', Rule::in(self::STUDENT_STATUSES)],
-            'export' => ['nullable', Rule::in(['google_sheets', 'json'])],
+            'export' => ['required', 'string'],
+            // ...other rules
         ]);
 
         $query = StudentProfile::query()
             ->with(['course', 'department', 'academicYear'])
             ->whereNull('archived_at');
 
+        // Only filter if course_id is present
         if (!empty($validated['course_id'])) {
             $query->where('course_id', $validated['course_id']);
         }
 
-        if (!empty($validated['department_id'] ?? null)) {
-            $query->where('department_id', $validated['department_id']);
-        }
-        if (!empty($validated['academic_year_id'] ?? null)) {
-            $query->where('academic_year_id', $validated['academic_year_id']);
-        }
-
-        if (!empty($validated['status'])) {
-            $query->where('status', $validated['status']);
-        }
-
-        $students = $query->orderBy('l_name')->orderBy('f_name')->get();
+        // For students
+        $students = $query->orderBy('student_id', 'asc')->get();
 
         $filters = [
             'course' => !empty($validated['course_id'] ?? null) ? Course::find($validated['course_id']) : null,
@@ -104,11 +93,11 @@ class ReportController extends Controller
 
         if (($validated['export'] ?? null) === 'google_sheets') {
             try {
-                $googleSheetUrl = $this->sheets->exportStudentReport($students, $validated);
+                $this->sheets->exportStudentReport($students);
 
                 return response()->json([
                     'success' => true,
-                    'google_sheet_url' => $googleSheetUrl,
+                    'google_sheet_url' => 'https://docs.google.com/spreadsheets/d/' . $this->sheets->getSpreadsheetId(), // <-- use getter
                 ]);
             } catch (\Throwable $e) {
                 report($e);
@@ -174,7 +163,8 @@ class ReportController extends Controller
             $query->where('status', $validated['status']);
         }
 
-        $faculty = $query->orderBy('l_name')->orderBy('f_name')->get();
+        // For faculty
+        $faculty = $query->orderBy('faculty_id', 'asc')->get();
 
         $filters = [
             'department' => !empty($validated['department_id']) ? Department::find($validated['department_id']) : null,
@@ -284,6 +274,38 @@ class ReportController extends Controller
             $courseName = $students->first()->course->course_name ?? 'STUDENT_REPORT';
             $tabName = strtoupper($courseName) . ' STUDENT';
             app(GoogleSheetsExportService::class)->exportStudentReportToTab($students, $tabName);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function exportStudentData(Request $request)
+    {
+        $students = StudentProfile::query()->whereNull('archived_at')->get();
+        $existingCourseIds = $this->sheets->getExistingCourseIds('Students');
+
+        $newStudents = $students->filter(function ($student) use ($existingCourseIds) {
+            return !in_array($student->course_id, $existingCourseIds);
+        });
+
+        if ($newStudents->isNotEmpty()) {
+            $this->sheets->appendStudentsToSheet($newStudents, 'Students');
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function exportFacultyData(Request $request)
+    {
+        $faculty = FacultyProfile::query()->whereNull('archived_at')->get();
+        $existingDepartmentIds = $this->sheets->getExistingDepartmentIds('Faculty');
+
+        $newFaculty = $faculty->filter(function ($member) use ($existingDepartmentIds) {
+            return !in_array($member->department_id, $existingDepartmentIds);
+        });
+
+        if ($newFaculty->isNotEmpty()) {
+            $this->sheets->appendFacultyToSheet($newFaculty, 'Faculty');
         }
 
         return response()->json(['success' => true]);
