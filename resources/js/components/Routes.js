@@ -16,7 +16,6 @@ import Faculty from "./Faculty";
 import Report from "./Report";
 import MyProfile from "./MyProfile";
 import Unauthorized from "./Unauthorized";
-
 import axios from "axios";
 
 // ✅ Secure ProtectedRoute using Sanctum session

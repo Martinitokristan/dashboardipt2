@@ -30,4 +30,20 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'google' => [
+        'sheets' => [
+            'credentials' => env('GOOGLE_SHEETS_CREDENTIALS', storage_path('app/google/service-account.json')),
+            'spreadsheet_id' => env('GOOGLE_SHEETS_SPREADSHEET_ID'),
+            'share_with' => array_filter(explode(',', env('GOOGLE_SHEETS_SHARE_WITH', ''))),
+            'report_exports' => [
+                'spreadsheet_id' => env('GOOGLE_SHEETS_REPORT_EXPORT_SPREADSHEET_ID'),
+                'share_with' => array_filter(explode(',', env('GOOGLE_SHEETS_REPORT_EXPORT_SHARE_WITH', ''))),
+            ],
+        ],
+    ],
+
 ];
+
+if (empty($spreadsheetId)) {
+    throw new \Exception('spreadsheetId is required');
+}

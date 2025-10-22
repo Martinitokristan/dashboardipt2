@@ -9,6 +9,14 @@ class Department extends Model
 {
     use SoftDeletes;
 
+    /**
+     * Scope a query to only include active departments.
+     */
+    public function scopeActive($query)
+    {
+        return $query->whereNull('archived_at');
+    }
+
     protected $primaryKey = 'department_id';
     public $incrementing = true;
     protected $keyType = 'int';

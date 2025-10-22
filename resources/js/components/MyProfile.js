@@ -34,7 +34,7 @@ function MyProfile() {
     const [passwordValidation, setPasswordValidation] = useState({
         isValid: true,
         message: "",
-        strength: ""
+        strength: "",
     });
 
     // Password validation function
@@ -67,14 +67,14 @@ function MyProfile() {
             return {
                 isValid: false,
                 message: "Password must be at least 8 characters",
-                strength: ""
+                strength: "",
             };
         }
         if (!hasNumber) {
             return {
                 isValid: false,
                 message: "Password must contain at least one number",
-                strength
+                strength,
             };
         }
 
@@ -428,16 +428,22 @@ function MyProfile() {
                                     <label htmlFor="new_password">
                                         New Password
                                     </label>
-                                    {newPassword && !passwordValidation.isValid && (
-                                        <div className="password-validation-error">
-                                             {passwordValidation.message}
-                                        </div>
-                                    )}
-                                    {newPassword && passwordValidation.isValid && passwordValidation.strength && (
-                                        <div className={`password-strength-indicator ${passwordValidation.strength.toLowerCase()}`}>
-                                             Password Strength: {passwordValidation.strength}
-                                        </div>
-                                    )}
+                                    {newPassword &&
+                                        !passwordValidation.isValid && (
+                                            <div className="password-validation-error">
+                                                {passwordValidation.message}
+                                            </div>
+                                        )}
+                                    {newPassword &&
+                                        passwordValidation.isValid &&
+                                        passwordValidation.strength && (
+                                            <div
+                                                className={`password-strength-indicator ${passwordValidation.strength.toLowerCase()}`}
+                                            >
+                                                Password Strength:{" "}
+                                                {passwordValidation.strength}
+                                            </div>
+                                        )}
                                     <input
                                         id="new_password"
                                         type="password"
@@ -446,7 +452,12 @@ function MyProfile() {
                                         onChange={(e) =>
                                             handlePasswordChange(e.target.value)
                                         }
-                                        className={`form-input ${newPassword && !passwordValidation.isValid ? 'invalid-input' : ''}`}
+                                        className={`form-input ${
+                                            newPassword &&
+                                            !passwordValidation.isValid
+                                                ? "invalid-input"
+                                                : ""
+                                        }`}
                                         placeholder="Enter new password (min 8 chars)"
                                     />
                                 </div>
@@ -456,8 +467,18 @@ function MyProfile() {
                                         Confirm New Password
                                     </label>
                                     {newPasswordConfirmation && newPassword && (
-                                        <div className={`password-match-indicator ${newPasswordConfirmation === newPassword ? 'match' : 'no-match'}`}>
-                                            {newPasswordConfirmation === newPassword ? " Passwords match" : " Passwords do not match"}
+                                        <div
+                                            className={`password-match-indicator ${
+                                                newPasswordConfirmation ===
+                                                newPassword
+                                                    ? "match"
+                                                    : "no-match"
+                                            }`}
+                                        >
+                                            {newPasswordConfirmation ===
+                                            newPassword
+                                                ? " Passwords match"
+                                                : " Passwords do not match"}
                                         </div>
                                     )}
                                     <input
@@ -470,7 +491,14 @@ function MyProfile() {
                                                 e.target.value
                                             )
                                         }
-                                        className={`form-input ${newPasswordConfirmation && newPassword && newPasswordConfirmation !== newPassword ? 'invalid-input' : ''}`}
+                                        className={`form-input ${
+                                            newPasswordConfirmation &&
+                                            newPassword &&
+                                            newPasswordConfirmation !==
+                                                newPassword
+                                                ? "invalid-input"
+                                                : ""
+                                        }`}
                                         placeholder="Confirm new password"
                                     />
                                 </div>
@@ -534,22 +562,33 @@ function MyProfile() {
                 </div>
             </div>
 
-            {error && (
-                <div className="alert error">
-                    {error}
-                </div>
-            )}
+            {error && <div className="alert error">{error}</div>}
 
             {/* Logout Confirmation Modal */}
             {showLogoutModal && (
-                <div className="modal-overlay" onClick={() => setShowLogoutModal(false)}>
-                    <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "400px" }}>
+                <div
+                    className="modal-overlay"
+                    onClick={() => setShowLogoutModal(false)}
+                >
+                    <div
+                        className="modal-card"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ maxWidth: "400px" }}
+                    >
                         <div className="success-content">
                             <h4 className="success-title">Confirm Logout</h4>
                             <p className="success-subtitle">
-                                Are you sure you want to log out from your account?
+                                Are you sure you want to log out from your
+                                account?
                             </p>
-                            <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "20px" }}>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    gap: "10px",
+                                    justifyContent: "center",
+                                    marginTop: "20px",
+                                }}
+                            >
                                 <button
                                     className="btn"
                                     onClick={() => setShowLogoutModal(false)}
@@ -573,7 +612,10 @@ function MyProfile() {
                 <div className="modal-overlay">
                     <div className="modal-card" style={{ maxWidth: "400px" }}>
                         <div className="loading-overlay">
-                            <div className="spinner-border large-spinner" role="status">
+                            <div
+                                className="spinner-border large-spinner"
+                                role="status"
+                            >
                                 <span className="sr-only">Loading...</span>
                             </div>
                             <p
@@ -593,8 +635,14 @@ function MyProfile() {
 
             {/* Success Modal */}
             {showModal && (
-                <div className="modal-overlay" onClick={() => setShowModal(false)}>
-                    <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+                <div
+                    className="modal-overlay"
+                    onClick={() => setShowModal(false)}
+                >
+                    <div
+                        className="modal-card"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <div className="success-content">
                             <div className="success-icon-wrapper">
                                 <svg

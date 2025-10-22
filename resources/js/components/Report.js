@@ -1,389 +1,404 @@
-import React, { useState, useEffect } from 'react';
-import '../../sass/report.scss';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { FiFileText, FiCloud } from "react-icons/fi";
+
+// Secure helper — ensure Sanctum cookie exists before requests
+const ensureCsrf = async () => {
+    try {
+        await axios.get("/sanctum/csrf-cookie");
+    } catch (_) {
+        console.warn("Failed to initialize CSRF cookie");
+    }
+};
+
+const REPORT_TYPES = {
+    student: "student",
+    faculty: "faculty",
+};
+
+const STUDENT_COLUMNS = [
+    { key: "student_id", label: "Student ID" },
+    { key: "name", label: "Name" },
+    { key: "email_address", label: "Email" },
+    { key: "course", label: "Course" },
+    { key: "department", label: "Department" },
+    { key: "status", label: "Status" },
+];
+
+const FACULTY_COLUMNS = [
+    { key: "faculty_id", label: "Faculty ID" },
+    { key: "name", label: "Name" },
+    { key: "email_address", label: "Email" },
+    { key: "phone_number", label: "Phone" },
+    { key: "department", label: "Department" },
+    { key: "position", label: "Position" },
+];
 
 function Report() {
-    const [initialLoading, setInitialLoading] = useState(true);
-    const [reportType, setReportType] = useState('students');
-    const [filters, setFilters] = useState({
-        course_id: '',
-        department_id: '',
-        academic_year_id: '',
-        status: ''
-    });
-    const [options, setOptions] = useState({
-        courses: [],
-        departments: [],
-        academic_years: []
-    });
-    const [reportData, setReportData] = useState(null);
+    const [reportType, setReportType] = useState(REPORT_TYPES.student);
+    const [courses, setCourses] = useState([]);
+    const [departments, setDepartments] = useState([]);
+    const [selectedCourse, setSelectedCourse] = useState("");
+    const [selectedDepartment, setSelectedDepartment] = useState("");
+    const [tableColumns, setTableColumns] = useState([]);
+    const [tableRows, setTableRows] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState('');
-    const [showModal, setShowModal] = useState(false);
-    const [modalFilters, setModalFilters] = useState({
-        course_id: '',
-        department_id: '',
-        academic_year_id: '',
-        status: ''
-    });
+    const [notification, setNotification] = useState(null);
+    const [exporting, setExporting] = useState(false);
+    const [importing, setImporting] = useState(false);
 
-    // Load filter options on component mount
+    // Fetch filter options on mount
     useEffect(() => {
-        loadOptions();
+        async function fetchFilters() {
+            try {
+                const [coursesRes, departmentsRes] = await Promise.all([
+                    axios.get("/api/courses"),
+                    axios.get("/api/departments"),
+                ]);
+                setCourses(
+                    Array.isArray(coursesRes.data) ? coursesRes.data : []
+                );
+                setDepartments(
+                    Array.isArray(departmentsRes.data)
+                        ? departmentsRes.data
+                        : []
+                );
+            } catch {
+                setNotification({
+                    type: "error",
+                    message: "Failed to load filter options.",
+                });
+            }
+        }
+        fetchFilters();
     }, []);
 
-    const loadOptions = async () => {
-        try {
-            const response = await fetch('/api/admin/reports', {
-                headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                setOptions(data);
-            }
-        } catch (error) {
-            console.error('Error loading options:', error);
-        } finally {
-            setInitialLoading(false);
-        }
+    // Reset filters and table when report type changes
+    useEffect(() => {
+        setTableColumns([]);
+        setTableRows([]);
+        setSelectedCourse("");
+        setSelectedDepartment("");
+    }, [reportType]);
+
+    // Notification helper
+    const showNotification = (type, message) => {
+        setNotification({ type, message });
+        setTimeout(() => setNotification(null), 3500);
     };
 
-    if (initialLoading) {
-        return (
-            <div className="page-loading">
-                <div className="spinner"></div>
-                <p>Loading reports...</p>
-            </div>
-        );
-    }
-
-    const handleFilterChange = (field, value) => {
-        setFilters(prev => ({
-            ...prev,
-            [field]: value
+    // Build table rows
+    const buildStudentRows = (data) =>
+        data.map((student) => ({
+            student_id: student.student_id,
+            name: [
+                student.f_name,
+                student.m_name,
+                student.l_name,
+                student.suffix,
+            ]
+                .filter(Boolean)
+                .join(" "),
+            email_address: student.email_address || "",
+            course: student.course_name || "",
+            department: student.department_name || "",
+            status: student.status || "",
         }));
-    };
 
-    const openModal = () => {
-        setModalFilters({
-            course_id: '',
-            department_id: '',
-            academic_year_id: '',
-            status: ''
-        });
-        setShowModal(true);
-    };
+    const buildFacultyRows = (data) =>
+        data.map((member) => ({
+            faculty_id: member.faculty_id,
+            name: [member.f_name, member.m_name, member.l_name, member.suffix]
+                .filter(Boolean)
+                .join(" "),
+            email_address: member.email_address || "",
+            phone_number: member.phone_number || "",
+            department: member.department_name || "",
+            position: member.position || "",
+        }));
 
-    const handleModalFilterChange = (field, value) => {
-        setModalFilters(prev => {
-            const next = { ...prev, [field]: value };
-            // If department changes, reset course and filter courses to that department
-            if (field === 'department_id') {
-                next.course_id = '';
-            }
-            return next;
-        });
-    };
-
-    const generateReport = async () => {
+    // Generate Report
+    const handleGenerateReport = async () => {
         setLoading(true);
-        setMessage('');
-        setReportData(null);
-        setShowModal(false);
-
+        setTableRows([]);
+        setNotification(null);
         try {
-            const endpoint = reportType === 'students' ? '/api/admin/reports/students' : '/api/admin/reports/faculty';
-            
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify(modalFilters)
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setReportData(data);
-                setMessage('Report generated successfully!');
+            await ensureCsrf(); // 🔒 Secure CSRF protection
+            if (reportType === REPORT_TYPES.student) {
+                const { data } = await axios.post(
+                    "/api/admin/reports/students",
+                    {
+                        course_id: selectedCourse || undefined,
+                        export: "json",
+                    }
+                );
+                setTableColumns(STUDENT_COLUMNS);
+                setTableRows(
+                    buildStudentRows(
+                        Array.isArray(data.students) ? data.students : []
+                    )
+                );
             } else {
-                const error = await response.json();
-                setMessage('Error: ' + (error.message || 'Failed to generate report'));
+                const { data } = await axios.post(
+                    "/api/admin/reports/faculty",
+                    {
+                        department_id: selectedDepartment || undefined,
+                        export: "json",
+                    }
+                );
+                setTableColumns(FACULTY_COLUMNS);
+                setTableRows(
+                    buildFacultyRows(
+                        Array.isArray(data.faculty) ? data.faculty : []
+                    )
+                );
             }
-        } catch (error) {
-            console.error('Error generating report:', error);
-            setMessage('Error generating report');
+            showNotification("success", "Report generated successfully");
+        } catch {
+            showNotification("error", "Failed to generate report.");
         } finally {
             setLoading(false);
         }
     };
 
-    const exportReport = async (format = 'json') => {
+    // Download PDF
+    const handleDownloadPdf = async () => {
+        if (!tableRows.length) return;
+        setExporting(true);
         try {
-            const endpoint = reportType === 'students' ? '/api/admin/reports/students' : '/api/admin/reports/faculty';
-            
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ ...modalFilters, export: format })
+            const [{ jsPDF }, autoTable] = await Promise.all([
+                import("jspdf"),
+                import("jspdf-autotable"),
+            ]);
+            const doc = new jsPDF();
+            autoTable.default(doc, {
+                head: [tableColumns.map((col) => col.label)],
+                body: tableRows.map((row) =>
+                    tableColumns.map((col) => row[col.key])
+                ),
             });
+            doc.save(`${reportType}_report.pdf`);
+            showNotification("success", "PDF downloaded successfully");
+        } catch {
+            showNotification("error", "Failed to generate PDF.");
+        } finally {
+            setExporting(false);
+        }
+    };
 
-            if (response.ok) {
-                if (format === 'pdf') {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${reportType}-report.pdf`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                } else {
-                    const data = await response.json();
-                    const jsonStr = JSON.stringify(data, null, 2);
-                    const blob = new Blob([jsonStr], { type: 'application/json' });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${reportType}-report.json`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                }
-            }
-        } catch (error) {
-            console.error('Error exporting report:', error);
+    // Export to Google Sheets
+    const handleExportSheets = async () => {
+        if (!tableRows.length) return;
+        setExporting(true);
+        try {
+            await axios.post("/api/export-to-sheets", {
+                type: reportType,
+                course_id: selectedCourse, // for students
+                department_id: selectedDepartment, // for faculty
+            });
+            showNotification(
+                "success",
+                "Data exported to Google Sheets successfully"
+            );
+        } catch {
+            showNotification("error", "Failed to export to Google Sheets.");
+        } finally {
+            setExporting(false);
+        }
+    };
+
+    // Import from Google Sheets
+    const handleImportSheets = async () => {
+        setImporting(true);
+        try {
+            const url =
+                reportType === REPORT_TYPES.student
+                    ? "/api/admin/reports/students/import"
+                    : "/api/admin/reports/faculty/import";
+            const { data } = await axios.post(url);
+            showNotification(
+                "success",
+                data.message || "Imported successfully"
+            );
+            // Optionally, refresh the report after import
+            handleGenerateReport();
+        } catch (err) {
+            showNotification(
+                "error",
+                err.response?.data?.message ||
+                    "Failed to import from Google Sheets."
+            );
+        } finally {
+            setImporting(false);
+        }
+    };
+
+    // Export all students (no filter)
+    const handleExportAllStudents = async () => {
+        setExporting(true);
+        try {
+            await axios.post("/api/export-to-sheets", { type: "student" });
+            showNotification(
+                "success",
+                "All student data exported to Google Sheets!"
+            );
+        } catch {
+            showNotification("error", "Failed to export student data.");
+        } finally {
+            setExporting(false);
+        }
+    };
+
+    // Export all faculty (no filter)
+    const handleExportAllFaculty = async () => {
+        setExporting(true);
+        try {
+            await axios.post("/api/export-to-sheets", { type: "faculty" });
+            showNotification(
+                "success",
+                "All faculty data exported to Google Sheets!"
+            );
+        } catch {
+            showNotification("error", "Failed to export faculty data.");
+        } finally {
+            setExporting(false);
         }
     };
 
     return (
-        <div className="page">
-            <header className="page-header">
-                <h1 className="page-title">Report</h1>
-                <p className="page-subtitle">Generate and manage reports</p>
-            </header>
-
-            <section className="config-card">
-                <div className="config-title">⚗ Report Configuration</div>
-                <div className="config-grid">
-                    <div className="field">
-                        <label>Report Type</label>
-                        <select 
-                            value={reportType} 
-                            onChange={(e) => setReportType(e.target.value)}
+        <div className="report-page">
+            <h2>Report Generator</h2>
+            <div className="report-config">
+                <div>
+                    <label>Report Type:</label>
+                    <select
+                        value={reportType}
+                        onChange={(e) => setReportType(e.target.value)}
+                    >
+                        <option value={REPORT_TYPES.student}>Student</option>
+                        <option value={REPORT_TYPES.faculty}>Faculty</option>
+                    </select>
+                </div>
+                {reportType === REPORT_TYPES.student && (
+                    <div>
+                        <label>Course:</label>
+                        <select
+                            value={selectedCourse}
+                            onChange={(e) => setSelectedCourse(e.target.value)}
                         >
-                            <option value="students">Student Report</option>
-                            <option value="faculty">Faculty Report</option>
+                            <option value="">All Courses</option>
+                            {courses.map((course) => (
+                                <option
+                                    key={course.course_id}
+                                    value={course.course_id}
+                                >
+                                    {course.course_name}
+                                </option>
+                            ))}
                         </select>
                     </div>
-                </div>
-                <div className="config-actions">
-                    <button 
-                        className="btn btn-primary" 
-                        onClick={openModal}
-                        disabled={loading}
-                    >
-                        {loading ? 'Generating...' : 'Generate Report'}
-                    </button>
-                    {reportData && (
-                        <>
-                            <button 
-                                className="btn btn-secondary" 
-                                onClick={() => exportReport('json')}
-                            >
-                                Export JSON
-                            </button>
-                            <button 
-                                className="btn btn-secondary" 
-                                onClick={() => exportReport('pdf')}
-                            >
-                                Export PDF
-                            </button>
-                        </>
-                    )}
-                </div>
-                {message && (
-                    <div className={`message ${message.includes('Error') ? 'error' : 'success'}`}>
-                        {message}
+                )}
+                {reportType === REPORT_TYPES.faculty && (
+                    <div>
+                        <label>Department:</label>
+                        <select
+                            value={selectedDepartment}
+                            onChange={(e) =>
+                                setSelectedDepartment(e.target.value)
+                            }
+                        >
+                            <option value="">All Departments</option>
+                            {departments.map((dept) => (
+                                <option
+                                    key={dept.department_id}
+                                    value={dept.department_id}
+                                >
+                                    {dept.department_name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                 )}
-            </section>
+                <button
+                    className="btn btn-primary"
+                    onClick={handleGenerateReport}
+                    disabled={loading}
+                >
+                    {loading ? "Generating..." : "Generate Report"}
+                </button>
+            </div>
 
-            {/* Report Generation Modal */}
-            {showModal && (
-                <div className="modal-overlay">
-                    <div className="modal">
-                        <div className="modal-header">
-                            <h3>Generate {reportType === 'students' ? 'Student' : 'Faculty'} Report</h3>
-                            <button 
-                                className="btn-close"
-                                onClick={() => setShowModal(false)}
-                            >
-                                ×
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            <div className="form-row">
-                                {reportType === 'students' ? (
-                                    <>
-                                        <div className="form-group">
-                                            <label>Filter by Course</label>
-                                            <select 
-                                                value={modalFilters.course_id} 
-                                                onChange={(e) => handleModalFilterChange('course_id', e.target.value)}
-                                            >
-                                                <option value="">All Courses</option>
-                                                {options.courses.map(course => (
-                                                    <option key={course.course_id} value={course.course_id}>
-                                                        {course.course_name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Filter by Academic Year</label>
-                                            <select 
-                                                value={modalFilters.academic_year_id} 
-                                                onChange={(e) => handleModalFilterChange('academic_year_id', e.target.value)}
-                                            >
-                                                <option value="">All Academic Years</option>
-                                                {options.academic_years.map(year => (
-                                                    <option key={year.academic_year_id} value={year.academic_year_id}>
-                                                        {year.school_year}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <div className="form-group">
-                                            <label>Filter by Department</label>
-                                            <select 
-                                                value={modalFilters.department_id} 
-                                                onChange={(e) => handleModalFilterChange('department_id', e.target.value)}
-                                            >
-                                                <option value="">All Departments</option>
-                                                {options.departments.map(dept => (
-                                                    <option key={dept.department_id} value={dept.department_id}>
-                                                        {dept.department_name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </>
-                                )}
-
-                                <div className="form-group">
-                                    <label>Filter by Status</label>
-                                    <select 
-                                        value={modalFilters.status} 
-                                        onChange={(e) => handleModalFilterChange('status', e.target.value)}
-                                    >
-                                        <option value="">All Status</option>
-                                        <option value="active">Active</option>
-                                        <option value="inactive">Inactive</option>
-                                        <option value="graduated">Graduated</option>
-                                        <option value="dropped">Dropped</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="modal-footer">
-                            <button 
-                                type="button" 
-                                className="btn btn-secondary" 
-                                onClick={() => setShowModal(false)}
-                            >
-                                Cancel
-                            </button>
-                            <button 
-                                type="button" 
-                                className="btn btn-primary" 
-                                onClick={generateReport}
-                                disabled={loading}
-                            >
-                                {loading ? 'Generating...' : 'Generate Report'}
-                            </button>
-                        </div>
-                    </div>
+            {notification && (
+                <div className={`notification ${notification.type}`}>
+                    {notification.message}
                 </div>
             )}
 
-            {reportData && (
-                <section className="report-preview">
-                    <div className="report-meta">
-                        <div>{reportType === 'students' ? 'Student Report' : 'Faculty Report'}</div>
-                        <div>Generated on {new Date().toLocaleDateString()}</div>
-                        <div>Total Records: {reportData[reportType]?.length || 0}</div>
-                    </div>
-                    
-                    <div className="report-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    {reportType === 'students' ? (
-                                        <>
-                                            <th>Name</th>
-                                            <th>Email</th>
-                                            <th>Course</th>
-                                            <th>Department</th>
-                                            <th>Status</th>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <th>Name</th>
-                                            <th>Email</th>
-                                            <th>Position</th>
-                                            <th>Department</th>
-                                            <th>Phone</th>
-                                        </>
-                                    )}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {reportData[reportType]?.slice(0, 10).map((item, index) => (
-                                    <tr key={index}>
-                                        {reportType === 'students' ? (
-                                            <>
-                                                <td>{item.f_name} {item.l_name}</td>
-                                                <td>{item.email_address}</td>
-                                                <td>{item.course?.course_name || 'N/A'}</td>
-                                                <td>{item.department?.department_name || 'N/A'}</td>
-                                                <td>{item.status || 'N/A'}</td>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <td>{item.f_name} {item.l_name}</td>
-                                                <td>{item.email_address}</td>
-                                                <td>{item.position}</td>
-                                                <td>{item.department?.department_name || 'N/A'}</td>
-                                                <td>{item.phone_number}</td>
-                                            </>
-                                        )}
-                                    </tr>
+            {loading && <div className="loading">Generating report...</div>}
+
+            {!loading && tableRows.length > 0 && (
+                <div className="report-results">
+                    <table className="report-table">
+                        <thead>
+                            <tr>
+                                {tableColumns.map((col) => (
+                                    <th key={col.key}>{col.label}</th>
                                 ))}
-                            </tbody>
-                        </table>
-                        {reportData[reportType]?.length > 10 && (
-                            <div className="table-note">
-                                Showing first 10 records. Export to see all {reportData[reportType].length} records.
-                            </div>
-                        )}
-                    </div>
-                </section>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {tableRows.map((row, idx) => (
+                                <tr key={idx}>
+                                    {tableColumns.map((col) => (
+                                        <td key={col.key}>{row[col.key]}</td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             )}
+
+            {!loading && tableRows.length === 0 && (
+                <div>No data found for the selected filter.</div>
+            )}
+
+            {!loading && tableRows.length > 0 && (
+                <div className="export-actions">
+                    <button
+                        className="btn"
+                        onClick={handleDownloadPdf}
+                        disabled={exporting}
+                    >
+                        <FiFileText /> Download PDF
+                    </button>
+                    <button
+                        className="btn"
+                        onClick={handleExportSheets}
+                        disabled={exporting}
+                    >
+                        <FiCloud /> Export to Google Sheets
+                    </button>
+                </div>
+            )}
+
+            {/* Always-visible export buttons */}
+            <div className="export-all-actions">
+                <button
+                    className="btn"
+                    onClick={handleExportAllStudents}
+                    disabled={exporting}
+                >
+                    Export Student Data
+                </button>
+                <button
+                    className="btn"
+                    onClick={handleExportAllFaculty}
+                    disabled={exporting}
+                >
+                    Export Faculty Data
+                </button>
+            </div>
         </div>
     );
 }

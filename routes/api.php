@@ -65,13 +65,24 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/faculty/{faculty}/restore', [FacultyController::class, 'restore']);
         Route::delete('/faculty/{faculty}', [FacultyController::class, 'destroy']);
 
+        // Reports
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/options', [ReportController::class, 'getOptions'])->name('options');
 
-        // Reports API Resource
-        Route::apiResource('reports', ReportController::class)->only(['index']);
-        Route::post('/reports/students', [ReportController::class, 'generateStudentReport']);
-        Route::post('/reports/faculty', [ReportController::class, 'generateFacultyReport']);
+            Route::post('/students', [ReportController::class, 'generateStudentReport'])->name('students.generate');
+            Route::post('/students/import', [ReportController::class, 'importStudentReport'])->name('students.import');
+            Route::post('/faculty', [ReportController::class, 'generateFacultyReport'])->name('faculty.generate');
+            Route::post('/faculty/import', [ReportController::class, 'importFacultyReport'])->name('faculty.import');
+        });
 
         // Archived items
         Route::get('/archived', [ArchiveController::class, 'index']);
     });
 });
+
+Route::get('/courses', [CourseController::class, 'index']);
+Route::get('/departments', [DepartmentController::class, 'index']);
+Route::get('/report/options', [ReportController::class, 'getOptions']);
+Route::post('/admin/reports/students', [ReportController::class, 'generateStudentReport']);
+Route::post('/admin/reports/faculty', [ReportController::class, 'generateFacultyReport']);
+Route::post('/export-to-sheets', [ReportController::class, 'exportToSheets']);
