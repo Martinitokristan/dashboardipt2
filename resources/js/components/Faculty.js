@@ -489,11 +489,39 @@ function Faculty() {
             </header>
 
             <div className="actions-row">
-                <div className="filters">
-                    <div className="search">
-                        <BsSearch className="icon" />
+                <div
+                    className="filters"
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "24px",
+                    }}
+                >
+                    <div
+                        className="search"
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            width: "260px",
+                            background: "#fff",
+                            borderRadius: "10px",
+                            border: "1px solid #e5e7eb",
+                            padding: "0 12px",
+                        }}
+                    >
+                        <BsSearch
+                            className="icon"
+                            style={{ marginRight: 8, fontSize: 18 }}
+                        />
                         <input
                             className="search-input"
+                            style={{
+                                border: "none",
+                                outline: "none",
+                                width: "100%",
+                                fontSize: "1rem",
+                                background: "transparent",
+                            }}
                             placeholder="Search by name or email..."
                             value={filters.search}
                             onChange={(e) =>
@@ -508,6 +536,7 @@ function Faculty() {
                         onChange={(e) =>
                             handleFilterChange("department_id", e.target.value)
                         }
+                        style={{ minWidth: 180 }}
                     >
                         <option value="">All Departments</option>
                         {departments.map((dept) => (

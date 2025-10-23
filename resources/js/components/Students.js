@@ -557,11 +557,39 @@ function Students() {
             </header>
 
             <div className="controls">
-                <div className="filters">
-                    <div className="search">
-                        <BsSearch className="icon" />
+                <div
+                    className="filters"
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "24px",
+                    }}
+                >
+                    <div
+                        className="search"
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            width: "260px", // match input width
+                            background: "#fff",
+                            borderRadius: "10px",
+                            border: "1px solid #e5e7eb",
+                            padding: "0 12px",
+                        }}
+                    >
+                        <BsSearch
+                            className="icon"
+                            style={{ marginRight: 8, fontSize: 18 }}
+                        />
                         <input
                             className="search-input"
+                            style={{
+                                border: "none",
+                                outline: "none",
+                                width: "100%",
+                                fontSize: "1rem",
+                                background: "transparent",
+                            }}
                             placeholder="Search here..."
                             value={filters.search}
                             onChange={(e) =>
@@ -581,9 +609,10 @@ function Students() {
                             setFilters({
                                 ...filters,
                                 department_id: deptId,
-                                course_id: "", // Reset course when department changes
+                                course_id: "",
                             });
                         }}
+                        style={{ minWidth: 180 }}
                     >
                         <option value="">⚗ All Department</option>
                         {departments
@@ -628,6 +657,7 @@ function Students() {
                                         : filters.department_id, // Auto-select department if course is selected
                             });
                         }}
+                        style={{ minWidth: 180 }}
                     >
                         <option value="">⚗ All Course</option>
                         {courses
@@ -656,6 +686,7 @@ function Students() {
                                 academic_year_id: e.target.value,
                             })
                         }
+                        style={{ minWidth: 180 }}
                     >
                         <option value="">⚗ All Academic Year</option>
                         {academicYears.map((a) => (

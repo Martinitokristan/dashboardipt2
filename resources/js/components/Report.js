@@ -380,12 +380,28 @@ function Report() {
                 </p>
             </header>
 
-            <div className="controls">
-                <div className="filters">
+            <div
+                className="controls"
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center", // <-- align vertically
+                    marginBottom: 8,
+                }}
+            >
+                {/* Filters and Generate Report */}
+                <div
+                    style={{
+                        display: "flex",
+                        gap: "10px",
+                        alignItems: "center",
+                    }}
+                >
                     <select
                         className="filter"
                         value={reportType}
                         onChange={(e) => setReportType(e.target.value)}
+                        style={{ height: 48 }}
                     >
                         <option value={REPORT_TYPES.student}>
                             Student Report
@@ -394,12 +410,12 @@ function Report() {
                             Faculty Report
                         </option>
                     </select>
-
                     {reportType === REPORT_TYPES.student && (
                         <select
                             className="filter"
                             value={selectedCourse}
                             onChange={(e) => setSelectedCourse(e.target.value)}
+                            style={{ height: 48 }}
                         >
                             <option value="">All Courses</option>
                             {courses.map((course) => (
@@ -419,6 +435,7 @@ function Report() {
                             onChange={(e) =>
                                 setSelectedDepartment(e.target.value)
                             }
+                            style={{ height: 48 }}
                         >
                             <option value="">All Departments</option>
                             {departments.map((dept) => (
@@ -431,12 +448,10 @@ function Report() {
                             ))}
                         </select>
                     )}
-
                     <button
-                        className="btn btn-primary"
+                        className="btn btn-primary uniform-btn"
                         onClick={handleGenerateReport}
                         disabled={loading}
-                        style={{ marginLeft: 10 }}
                     >
                         {loading ? (
                             <span>
@@ -446,35 +461,44 @@ function Report() {
                             "Generate Report"
                         )}
                     </button>
+                </div>
 
+                {/* Import/Export buttons */}
+                <div
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(2, 1fr)",
+                        gridTemplateRows: "repeat(2, 1fr)",
+                        gap: "16px",
+                    }}
+                >
                     <button
-                        className="btn btn-primary"
-                        style={{ marginLeft: 10 }}
+                        className="btn btn-primary uniform-btn"
+                        onClick={handleImportStudents}
+                        disabled={reportType !== "student"}
+                    >
+                        Import Students
+                    </button>
+                    <button
+                        className="btn btn-primary uniform-btn"
                         onClick={handleExportStudentData}
                         disabled={reportType !== "student"}
                     >
                         Export Student Data
                     </button>
                     <button
-                        className="btn btn-primary"
-                        style={{ marginLeft: 10 }}
+                        className="btn btn-primary uniform-btn"
+                        onClick={handleImportFaculty}
+                        disabled={reportType !== "faculty"}
+                    >
+                        Import Faculty
+                    </button>
+                    <button
+                        className="btn btn-primary uniform-btn"
                         onClick={handleExportFacultyData}
                         disabled={reportType !== "faculty"}
                     >
                         Export Faculty Data
-                    </button>
-                    <button
-                        className="btn btn-primary"
-                        onClick={handleImportStudents}
-                    >
-                        Import Students from Google Sheets
-                    </button>
-                    <button
-                        className="btn btn-secondary"
-                        onClick={handleImportFaculty}
-                        style={{ marginLeft: 10 }}
-                    >
-                        Import Faculty from Google Sheets
                     </button>
                 </div>
             </div>

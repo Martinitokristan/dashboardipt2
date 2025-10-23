@@ -566,7 +566,38 @@ class GoogleSheetsExportService
         $rows = $response->getValues();
 
         foreach ($rows as $row) {
-            // Map columns to fields
+            // Accept either ID or name for department, course, academic year
+            $department = null;
+            $course = null;
+            $academicYear = null;
+
+            // Department
+            if (!empty($row[11])) {
+                if (is_numeric($row[11])) {
+                    $department = \App\Models\Department::find($row[11]);
+                } else {
+                    $department = \App\Models\Department::where('department_name', $row[11])->first();
+                }
+            }
+
+            // Course
+            if (!empty($row[12])) {
+                if (is_numeric($row[12])) {
+                    $course = \App\Models\Course::find($row[12]);
+                } else {
+                    $course = \App\Models\Course::where('course_name', $row[12])->first();
+                }
+            }
+
+            // Academic Year
+            if (!empty($row[13])) {
+                if (is_numeric($row[13])) {
+                    $academicYear = \App\Models\AcademicYear::find($row[13]);
+                } else {
+                    $academicYear = \App\Models\AcademicYear::where('school_year', $row[13])->first();
+                }
+            }
+
             $studentData = [
                 'student_id' => $row[0] ?? null,
                 'f_name' => $row[1] ?? '',
@@ -579,16 +610,15 @@ class GoogleSheetsExportService
                 'email_address' => $row[8] ?? '',
                 'address' => $row[9] ?? '',
                 'status' => $row[10] ?? '',
-                'department_id' => ($row[11] ?? null) !== '' ? $row[11] : null,
-                'course_id' => ($row[12] ?? null) !== '' ? $row[12] : null,
-                'academic_year_id' => ($row[13] ?? null) !== '' ? $row[13] : null,
-                'year_level' => ($row[14] ?? null) !== '' ? $row[14] : null,
-                'created_at' => $row[15] ?? null,
-                'updated_at' => $row[16] ?? null,
-                'archived_at' => $row[17] ?? null,
+                'department_id' => $department ? $department->department_id : null,
+                'course_id' => $course ? $course->course_id : null,
+                'academic_year_id' => $academicYear ? $academicYear->academic_year_id : null,
+                'year_level' => isset($row[14]) ? $row[14] : null,
+                'created_at' => isset($row[15]) ? $row[15] : null,
+                'updated_at' => isset($row[16]) ? $row[16] : null,
+                'archived_at' => isset($row[17]) ? $row[17] : null,
             ];
 
-            // Import: update if exists, else create
             \App\Models\StudentProfile::updateOrCreate(
                 ['student_id' => $studentData['student_id']],
                 $studentData
@@ -609,23 +639,33 @@ class GoogleSheetsExportService
         $errors = [];
 
         foreach ($rows as $row) {
+            // Accept either ID or name for department
+            $department = null;
+            if (!empty($row[12])) {
+                if (is_numeric($row[12])) {
+                    $department = \App\Models\Department::find($row[12]);
+                } else {
+                    $department = \App\Models\Department::where('department_name', $row[12])->first();
+                }
+            }
+
             $facultyData = [
-                'faculty_id' => $row[0] ?? null,
-                'f_name' => $row[1] ?? '',
-                'm_name' => $row[2] ?? '',
-                'l_name' => $row[3] ?? '',
-                'suffix' => $row[4] ?? '',
-                'date_of_birth' => $row[5] ?? null,
-                'sex' => $row[6] ?? '',
-                'phone_number' => $row[7] ?? '',
-                'email_address' => $row[8] ?? '',
-                'address' => $row[9] ?? '',
-                'position' => $row[10] ?? '',
-                'status' => $row[11] ?? '',
-                'department_id' => ($row[12] ?? null) !== '' ? $row[12] : null,
-                'created_at' => $row[13] ?? null,
-                'updated_at' => $row[14] ?? null,
-                'archived_at' => $row[15] ?? null,
+                'faculty_id'    => isset($row[0])  ? $row[0]  : null,
+                'f_name'        => isset($row[1])  ? $row[1]  : '',
+                'm_name'        => isset($row[2])  ? $row[2]  : '',
+                'l_name'        => isset($row[3])  ? $row[3]  : '',
+                'suffix'        => isset($row[4])  ? $row[4]  : '',
+                'date_of_birth' => isset($row[5])  ? $row[5]  : null,
+                'sex'           => isset($row[6])  ? $row[6]  : '',
+                'phone_number'  => isset($row[7])  ? $row[7]  : '',
+                'email_address' => isset($row[8])  ? $row[8]  : '',
+                'address'       => isset($row[9])  ? $row[9]  : '',
+                'position'      => isset($row[10]) ? $row[10] : '',
+                'status'        => isset($row[11]) ? $row[11] : '',
+                'department_id' => $department ? $department->department_id : null,
+                'created_at'    => isset($row[13]) ? $row[13] : null,
+                'updated_at'    => isset($row[14]) ? $row[14] : null,
+                'archived_at'   => isset($row[15]) ? $row[15] : null,
             ];
 
             try {
