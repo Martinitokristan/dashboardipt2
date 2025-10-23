@@ -9,7 +9,8 @@ return new class extends Migration
 	public function up()
 	{
 		Schema::table('departments', function (Blueprint $table) {
-			$table->text('description')->nullable()->after('department_head');
+			$table->text('description')->nullable()->after('department_head_id');
+
 		});
 	}
 
