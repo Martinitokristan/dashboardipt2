@@ -121,6 +121,7 @@ class ReportController extends Controller
                 'course_name' => optional($student->course)->course_name,
                 'department_name' => optional($student->department)->department_name,
                 'academic_year' => optional($student->academicYear)->school_year,
+                'year_level' => $student->year_level, // <-- ADD THIS LINE
             ];
         })->values();
 

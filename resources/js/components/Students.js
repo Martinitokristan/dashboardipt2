@@ -261,12 +261,17 @@ function Students() {
                         <svg
                             className="success-icon-svg"
                             xmlns="http://www.w3.org/2000/svg"
+                            width="52"
+                            height="52"
                             viewBox="0 0 52 52"
                         >
                             <path
-                                className="success-check-path"
                                 fill="none"
-                                d="M14.1 27.2l7.1 7.2 16.7-16.8"
+                                stroke="#ffffff"
+                                strokeWidth="8"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M16 28 L24 36 L40 20"
                             />
                         </svg>
                     </div>
@@ -294,12 +299,17 @@ function Students() {
                         <svg
                             className="error-icon-svg"
                             xmlns="http://www.w3.org/2000/svg"
+                            width="52"
+                            height="52"
                             viewBox="0 0 52 52"
                         >
                             <path
-                                className="error-x-path"
                                 fill="none"
-                                d="M16 16 36 36 M36 16 16 36"
+                                stroke="#ffffff"
+                                strokeWidth="5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M16 16 L36 36 M36 16 L16 36"
                             />
                         </svg>
                     </div>
@@ -504,6 +514,29 @@ function Students() {
                             <option value="inactive">Inactive</option>
                             <option value="graduated">Graduated</option>
                             <option value="dropped">Dropped</option>
+                        </select>
+
+                        <label className="form-label-new">Academic Year</label>
+                        <select
+                            className="form-input-new"
+                            value={form.academic_year_id}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    academic_year_id: e.target.value,
+                                })
+                            }
+                            required
+                        >
+                            <option value="">Select Academic Year</option>
+                            {academicYears.map((a) => (
+                                <option
+                                    key={a.academic_year_id}
+                                    value={a.academic_year_id}
+                                >
+                                    {a.school_year}
+                                </option>
+                            ))}
                         </select>
 
                         <label className="form-label-new full-width-label">

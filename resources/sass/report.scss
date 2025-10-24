@@ -53,6 +53,75 @@
     margin-right: 8px;
 }
 
+.report-config-card {
+    background: #f5f7ff;
+    border: 1px solid #d7dbff;
+    border-radius: 18px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 12px 32px rgba(99, 102, 241, 0.08);
+}
+
+.config-header {
+    margin-bottom: 18px;
+}
+
+.config-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.config-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.config-grid {
+    width: 100%;
+    max-width: 620px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 260px));
+    gap: 16px;
+    justify-content: flex-start;
+}
+
+.config-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.config-field label {
+    font-weight: 500;
+    color: #374151;
+}
+
+.config-field .filter {
+    width: 100%;
+    max-width: 240px;
+}
+
+.report-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    justify-content: flex-start;
+}
+
+.report-export-row {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    justify-content: flex-start;
+    margin-left: 25px;
+}
+
 .students-page .filters,
 .filters {
     display: flex;
@@ -583,6 +652,8 @@
     background: #2563eb !important;
     border-color: #2563eb !important;
 }
+
+
 
 /*
 ====================================

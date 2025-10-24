@@ -218,17 +218,17 @@ function Faculty() {
                         <svg
                             className="success-icon-svg"
                             xmlns="http://www.w3.org/2000/svg"
+                            width="52"
+                            height="52"
                             viewBox="0 0 52 52"
                         >
-                            {/* White check icon inside the existing circle */}
                             <path
-                                className="success-check-path"
                                 fill="none"
                                 stroke="#ffffff"
-                                strokeWidth="4"
+                                strokeWidth="8"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
-                                d="M16 26l7 7 13-13"
+                                d="M16 28 L24 36 L40 20"
                             />
                         </svg>
                     </div>

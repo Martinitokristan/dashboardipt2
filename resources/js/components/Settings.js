@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Edit } from "lucide-react";
-import { BsSearch } from 'react-icons/bs';
+import { BsSearch } from "react-icons/bs";
 import "../../sass/settings.scss";
 
 // Secure helper — ensure Sanctum cookie exists before requests
@@ -126,7 +126,10 @@ function Settings() {
                     throw new Error("Please select a department.");
                 }
                 if (isEditing) {
-                    await axios.put(`/api/admin/courses/${selectedItem.course_id}`, payload);
+                    await axios.put(
+                        `/api/admin/courses/${selectedItem.course_id}`,
+                        payload
+                    );
                 } else {
                     await axios.post("/api/admin/courses", payload);
                 }
@@ -136,7 +139,10 @@ function Settings() {
                     department_name: form.department_name.trim(),
                 };
                 if (isEditing) {
-                    await axios.put(`/api/admin/departments/${selectedItem.department_id}`, payload);
+                    await axios.put(
+                        `/api/admin/departments/${selectedItem.department_id}`,
+                        payload
+                    );
                 } else {
                     await axios.post("/api/admin/departments", payload);
                 }
@@ -146,7 +152,10 @@ function Settings() {
                     school_year: form.school_year.trim(),
                 };
                 if (isEditing) {
-                    await axios.put(`/api/admin/academic-years/${selectedItem.academic_year_id}`, payload);
+                    await axios.put(
+                        `/api/admin/academic-years/${selectedItem.academic_year_id}`,
+                        payload
+                    );
                 } else {
                     await axios.post("/api/admin/academic-years", payload);
                 }
@@ -174,12 +183,19 @@ function Settings() {
             await ensureCsrf();
             const url = `/api/admin/${active}/${id}/archive`;
             await axios.post(url);
-            const itemType = active === "courses" ? "Course" : active === "departments" ? "Department" : "Academic Year";
+            const itemType =
+                active === "courses"
+                    ? "Course"
+                    : active === "departments"
+                    ? "Department"
+                    : "Academic Year";
             setModalMessage(`${itemType} has been successfully archived.`);
             setModalState("success");
             setShowModal(true);
         } catch (error) {
-            setModalMessage(error.response?.data?.message || "Failed to archive");
+            setModalMessage(
+                error.response?.data?.message || "Failed to archive"
+            );
             setModalState("error");
             setShowModal(true);
             if (
@@ -196,7 +212,6 @@ function Settings() {
         setModalMessage("");
         await refreshData();
     };
-
 
     const handleEdit = (item) => {
         setIsEditing(true);
@@ -216,13 +231,19 @@ function Settings() {
         try {
             await ensureCsrf();
             const params = new URLSearchParams();
-            if (archiveFilters.search) params.set("search", archiveFilters.search);
-            if (archiveFilters.department_id) params.set("department_id", archiveFilters.department_id);
-            if (archiveFilters.course_id) params.set("course_id", archiveFilters.course_id);
-            if (archiveFilters.academic_year_id) params.set("academic_year_id", archiveFilters.academic_year_id);
+            if (archiveFilters.search)
+                params.set("search", archiveFilters.search);
+            if (archiveFilters.department_id)
+                params.set("department_id", archiveFilters.department_id);
+            if (archiveFilters.course_id)
+                params.set("course_id", archiveFilters.course_id);
+            if (archiveFilters.academic_year_id)
+                params.set("academic_year_id", archiveFilters.academic_year_id);
             params.set("type", archiveType);
 
-            const res = await axios.get("/api/admin/archived?" + params.toString());
+            const res = await axios.get(
+                "/api/admin/archived?" + params.toString()
+            );
             setArchivedItems(res.data.items || []);
         } catch (err) {
             console.error("Load archived error:", err);
@@ -247,14 +268,21 @@ function Settings() {
             setModalState("success");
             setShowModal(true);
         } catch (error) {
-            setModalMessage(error.response?.data?.message || "Failed to restore item");
+            setModalMessage(
+                error.response?.data?.message || "Failed to restore item"
+            );
             setModalState("error");
             setShowModal(true);
         }
     };
 
     const handlePermanentDelete = async (item) => {
-        if (!confirm("Are you sure you want to permanently delete this item? This action cannot be undone!")) return;
+        if (
+            !confirm(
+                "Are you sure you want to permanently delete this item? This action cannot be undone!"
+            )
+        )
+            return;
         try {
             await ensureCsrf();
             const typeMap = {
@@ -270,7 +298,9 @@ function Settings() {
             setModalState("success");
             setShowModal(true);
         } catch (error) {
-            setModalMessage(error.response?.data?.message || "Failed to delete item");
+            setModalMessage(
+                error.response?.data?.message || "Failed to delete item"
+            );
             setModalState("error");
             setShowModal(true);
         }
@@ -408,7 +438,9 @@ function Settings() {
                                             <td>
                                                 <button
                                                     className="btn btn-light"
-                                                    onClick={() => onOpenForm(c)}
+                                                    onClick={() =>
+                                                        onOpenForm(c)
+                                                    }
                                                 >
                                                     ✎ Edit
                                                 </button>
@@ -449,7 +481,9 @@ function Settings() {
                                             <td>
                                                 <button
                                                     className="btn btn-light"
-                                                    onClick={() => onOpenForm(d)}
+                                                    onClick={() =>
+                                                        onOpenForm(d)
+                                                    }
                                                 >
                                                     ✎ Edit
                                                 </button>
@@ -488,7 +522,9 @@ function Settings() {
                                             <td>
                                                 <button
                                                     className="btn btn-light"
-                                                    onClick={() => onOpenForm(a)}
+                                                    onClick={() =>
+                                                        onOpenForm(a)
+                                                    }
                                                 >
                                                     ✎ Edit
                                                 </button>
@@ -513,48 +549,133 @@ function Settings() {
                     {/* === Archive Table === */}
                     {active === "archive" && (
                         <div>
-                            <div className="controls-bar" style={{ display: "flex", gap: "12px", marginBottom: "20px", alignItems: "flex-end", flexWrap: "wrap" }}>
-                                <div className="control-item" style={{ flex: "0 0 auto", minWidth: "150px" }}>
+                            <div
+                                className="controls-bar"
+                                style={{
+                                    display: "flex",
+                                    gap: "12px",
+                                    marginBottom: "20px",
+                                    alignItems: "flex-end",
+                                    flexWrap: "wrap",
+                                }}
+                            >
+                                <div
+                                    className="control-item"
+                                    style={{
+                                        flex: "0 0 auto",
+                                        minWidth: "150px",
+                                    }}
+                                >
                                     <select
                                         value={archiveType}
                                         onChange={(e) => {
                                             setArchiveType(e.target.value);
-                                            setArchiveFilters({ search: "", department_id: "", course_id: "", academic_year_id: "" });
+                                            setArchiveFilters({
+                                                search: "",
+                                                department_id: "",
+                                                course_id: "",
+                                                academic_year_id: "",
+                                            });
                                         }}
-                                        style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "6px", width: "100%", height: "40px" }}
+                                        style={{
+                                            padding: "8px 12px",
+                                            border: "1px solid #ddd",
+                                            borderRadius: "6px",
+                                            width: "100%",
+                                            height: "40px",
+                                        }}
                                     >
                                         <option value="all">All Archive</option>
-                                        <option value="students">Students</option>
+                                        <option value="students">
+                                            Students
+                                        </option>
                                         <option value="faculty">Faculty</option>
                                         <option value="courses">Courses</option>
-                                        <option value="departments">Departments</option>
-                                        <option value="academic_years">Academic Years</option>
+                                        <option value="departments">
+                                            Departments
+                                        </option>
+                                        <option value="academic_years">
+                                            Academic Years
+                                        </option>
                                     </select>
                                 </div>
 
-                                <div className="control-item" style={{ flex: "0 0 auto", width: "320px" }}>
+                                <div
+                                    className="control-item"
+                                    style={{ flex: "0 0 auto", width: "320px" }}
+                                >
                                     <div style={{ position: "relative" }}>
-                                        <BsSearch style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#666", pointerEvents: "none" }} />
+                                        <BsSearch
+                                            style={{
+                                                position: "absolute",
+                                                left: "12px",
+                                                top: "50%",
+                                                transform: "translateY(-50%)",
+                                                color: "#666",
+                                                pointerEvents: "none",
+                                            }}
+                                        />
                                         <input
                                             type="text"
-                                            placeholder={`Search archived ${archiveType === 'all' ? 'items' : archiveType}...`}
+                                            placeholder={`Search archived ${
+                                                archiveType === "all"
+                                                    ? "items"
+                                                    : archiveType
+                                            }...`}
                                             value={archiveFilters.search}
-                                            onChange={(e) => setArchiveFilters({ ...archiveFilters, search: e.target.value })}
-                                            style={{ width: "100%", padding: "8px 12px 8px 38px", border: "1px solid #ddd", borderRadius: "6px", height: "40px" }}
+                                            onChange={(e) =>
+                                                setArchiveFilters({
+                                                    ...archiveFilters,
+                                                    search: e.target.value,
+                                                })
+                                            }
+                                            style={{
+                                                width: "100%",
+                                                padding: "8px 12px 8px 38px",
+                                                border: "1px solid #ddd",
+                                                borderRadius: "6px",
+                                                height: "40px",
+                                            }}
                                         />
                                     </div>
                                 </div>
 
-                                {(archiveType === "students" || archiveType === "faculty" || archiveType === "courses") && (
-                                    <div className="control-item" style={{ flex: "0 0 auto", minWidth: "150px" }}>
+                                {(archiveType === "students" ||
+                                    archiveType === "faculty" ||
+                                    archiveType === "courses") && (
+                                    <div
+                                        className="control-item"
+                                        style={{
+                                            flex: "0 0 auto",
+                                            minWidth: "150px",
+                                        }}
+                                    >
                                         <select
                                             value={archiveFilters.department_id}
-                                            onChange={(e) => setArchiveFilters({ ...archiveFilters, department_id: e.target.value, course_id: "" })}
-                                            style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "6px", width: "100%", height: "40px" }}
+                                            onChange={(e) =>
+                                                setArchiveFilters({
+                                                    ...archiveFilters,
+                                                    department_id:
+                                                        e.target.value,
+                                                    course_id: "",
+                                                })
+                                            }
+                                            style={{
+                                                padding: "8px 12px",
+                                                border: "1px solid #ddd",
+                                                borderRadius: "6px",
+                                                width: "100%",
+                                                height: "40px",
+                                            }}
                                         >
-                                            <option value="">All Departments</option>
+                                            <option value="">
+                                                All Departments
+                                            </option>
                                             {departments.map((d) => (
-                                                <option key={d.department_id} value={d.department_id}>
+                                                <option
+                                                    key={d.department_id}
+                                                    value={d.department_id}
+                                                >
                                                     {d.department_name}
                                                 </option>
                                             ))}
@@ -563,17 +684,46 @@ function Settings() {
                                 )}
 
                                 {archiveType === "students" && (
-                                    <div className="control-item" style={{ flex: "0 0 auto", minWidth: "150px" }}>
+                                    <div
+                                        className="control-item"
+                                        style={{
+                                            flex: "0 0 auto",
+                                            minWidth: "150px",
+                                        }}
+                                    >
                                         <select
                                             value={archiveFilters.course_id}
-                                            onChange={(e) => setArchiveFilters({ ...archiveFilters, course_id: e.target.value })}
-                                            style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "6px", width: "100%", height: "40px" }}
+                                            onChange={(e) =>
+                                                setArchiveFilters({
+                                                    ...archiveFilters,
+                                                    course_id: e.target.value,
+                                                })
+                                            }
+                                            style={{
+                                                padding: "8px 12px",
+                                                border: "1px solid #ddd",
+                                                borderRadius: "6px",
+                                                width: "100%",
+                                                height: "40px",
+                                            }}
                                         >
-                                            <option value="">All Courses</option>
+                                            <option value="">
+                                                All Courses
+                                            </option>
                                             {courses
-                                                .filter((c) => !archiveFilters.department_id || c.department_id === parseInt(archiveFilters.department_id))
+                                                .filter(
+                                                    (c) =>
+                                                        !archiveFilters.department_id ||
+                                                        c.department_id ===
+                                                            parseInt(
+                                                                archiveFilters.department_id
+                                                            )
+                                                )
                                                 .map((c) => (
-                                                    <option key={c.course_id} value={c.course_id}>
+                                                    <option
+                                                        key={c.course_id}
+                                                        value={c.course_id}
+                                                    >
                                                         {c.course_name}
                                                     </option>
                                                 ))}
@@ -582,15 +732,40 @@ function Settings() {
                                 )}
 
                                 {archiveType === "students" && (
-                                    <div className="control-item" style={{ flex: "0 0 auto", minWidth: "150px" }}>
+                                    <div
+                                        className="control-item"
+                                        style={{
+                                            flex: "0 0 auto",
+                                            minWidth: "150px",
+                                        }}
+                                    >
                                         <select
-                                            value={archiveFilters.academic_year_id}
-                                            onChange={(e) => setArchiveFilters({ ...archiveFilters, academic_year_id: e.target.value })}
-                                            style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "6px", width: "100%", height: "40px" }}
+                                            value={
+                                                archiveFilters.academic_year_id
+                                            }
+                                            onChange={(e) =>
+                                                setArchiveFilters({
+                                                    ...archiveFilters,
+                                                    academic_year_id:
+                                                        e.target.value,
+                                                })
+                                            }
+                                            style={{
+                                                padding: "8px 12px",
+                                                border: "1px solid #ddd",
+                                                borderRadius: "6px",
+                                                width: "100%",
+                                                height: "40px",
+                                            }}
                                         >
-                                            <option value="">All Academic Years</option>
+                                            <option value="">
+                                                All Academic Years
+                                            </option>
                                             {academicYears.map((a) => (
-                                                <option key={a.academic_year_id} value={a.academic_year_id}>
+                                                <option
+                                                    key={a.academic_year_id}
+                                                    value={a.academic_year_id}
+                                                >
                                                     {a.school_year}
                                                 </option>
                                             ))}
@@ -601,7 +776,13 @@ function Settings() {
 
                             <div className="table-wrapper">
                                 {archivedItems.length === 0 ? (
-                                    <p style={{ textAlign: "center", padding: "40px", color: "#666" }}>
+                                    <p
+                                        style={{
+                                            textAlign: "center",
+                                            padding: "40px",
+                                            color: "#666",
+                                        }}
+                                    >
                                         No archived items found.
                                     </p>
                                 ) : (
@@ -612,36 +793,107 @@ function Settings() {
                                                 <th>Name</th>
                                                 <th>Details</th>
                                                 <th>Archived At</th>
-                                                <th style={{ textAlign: "center" }}>Actions</th>
+                                                <th
+                                                    style={{
+                                                        textAlign: "center",
+                                                    }}
+                                                >
+                                                    Actions
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {archivedItems.map((item, index) => (
-                                                <tr key={`${item._type}-${item._id || index}`}>
-                                                    <td style={{ textTransform: "capitalize" }}>{item._type?.replace("_", " ")}</td>
-                                                    <td>{item._label}</td>
-                                                    <td>{item._department || item._course || "-"}</td>
-                                                    <td>{item.archived_at ? new Date(item.archived_at).toLocaleDateString() : "-"}</td>
-                                                    <td style={{ textAlign: "center" }}>
-                                                        <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
-                                                            <button
-                                                                className="btn"
-                                                                style={{ backgroundColor: "#fbbf24", color: "#111827", border: "1px solid #fbbf24", padding: "8px 14px", borderRadius: "6px" }}
-                                                                onClick={() => handleRestore(item)}
+                                            {archivedItems.map(
+                                                (item, index) => (
+                                                    <tr
+                                                        key={`${item._type}-${
+                                                            item._id || index
+                                                        }`}
+                                                    >
+                                                        <td
+                                                            style={{
+                                                                textTransform:
+                                                                    "capitalize",
+                                                            }}
+                                                        >
+                                                            {item._type?.replace(
+                                                                "_",
+                                                                " "
+                                                            )}
+                                                        </td>
+                                                        <td>{item._label}</td>
+                                                        <td>
+                                                            {item._department ||
+                                                                item._course ||
+                                                                "-"}
+                                                        </td>
+                                                        <td>
+                                                            {item.archived_at
+                                                                ? new Date(
+                                                                      item.archived_at
+                                                                  ).toLocaleDateString()
+                                                                : "-"}
+                                                        </td>
+                                                        <td
+                                                            style={{
+                                                                textAlign:
+                                                                    "center",
+                                                            }}
+                                                        >
+                                                            <div
+                                                                style={{
+                                                                    display:
+                                                                        "flex",
+                                                                    gap: "8px",
+                                                                    justifyContent:
+                                                                        "center",
+                                                                }}
                                                             >
-                                                                Restore
-                                                            </button>
-                                                            <button
-                                                                className="btn"
-                                                                style={{ backgroundColor: "#dc2626", color: "white", border: "1px solid #dc2626", padding: "8px 14px", borderRadius: "6px" }}
-                                                                onClick={() => handlePermanentDelete(item)}
-                                                            >
-                                                                Delete
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
+                                                                <button
+                                                                    className="btn"
+                                                                    style={{
+                                                                        backgroundColor:
+                                                                            "#fbbf24",
+                                                                        color: "#111827",
+                                                                        border: "1px solid #fbbf24",
+                                                                        padding:
+                                                                            "8px 14px",
+                                                                        borderRadius:
+                                                                            "6px",
+                                                                    }}
+                                                                    onClick={() =>
+                                                                        handleRestore(
+                                                                            item
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Restore
+                                                                </button>
+                                                                <button
+                                                                    className="btn"
+                                                                    style={{
+                                                                        backgroundColor:
+                                                                            "#dc2626",
+                                                                        color: "white",
+                                                                        border: "1px solid #dc2626",
+                                                                        padding:
+                                                                            "8px 14px",
+                                                                        borderRadius:
+                                                                            "6px",
+                                                                    }}
+                                                                    onClick={() =>
+                                                                        handlePermanentDelete(
+                                                                            item
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Delete
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            )}
                                         </tbody>
                                     </table>
                                 )}
@@ -653,7 +905,9 @@ function Settings() {
                     {showForm && active === "courses" && (
                         <div className="modal-overlay">
                             <div className="modal-card">
-                                <h3>{isEditing ? 'Edit Course' : 'Add Course'}</h3>
+                                <h3>
+                                    {isEditing ? "Edit Course" : "Add Course"}
+                                </h3>
                                 <form onSubmit={onSubmit}>
                                     <div style={{ display: "grid", gap: 14 }}>
                                         <div>
@@ -718,7 +972,9 @@ function Settings() {
                                             className="btn btn-primary"
                                             type="submit"
                                         >
-                                            {isEditing ? 'Update Course' : 'Add Course'}
+                                            {isEditing
+                                                ? "Update Course"
+                                                : "Add Course"}
                                         </button>
                                     </div>
                                 </form>
@@ -729,7 +985,11 @@ function Settings() {
                     {showForm && active === "departments" && (
                         <div className="modal-overlay">
                             <div className="modal-card">
-                                <h3>{isEditing ? 'Edit Department' : 'Add Department'}</h3>
+                                <h3>
+                                    {isEditing
+                                        ? "Edit Department"
+                                        : "Add Department"}
+                                </h3>
                                 <form onSubmit={onSubmit}>
                                     <div style={{ display: "grid", gap: 14 }}>
                                         <div>
@@ -769,7 +1029,9 @@ function Settings() {
                                             className="btn btn-primary"
                                             type="submit"
                                         >
-                                            {isEditing ? 'Update Department' : 'Add Department'}
+                                            {isEditing
+                                                ? "Update Department"
+                                                : "Add Department"}
                                         </button>
                                     </div>
                                 </form>
@@ -781,7 +1043,9 @@ function Settings() {
                         <div className="modal-overlay">
                             <div className="modal-card">
                                 <h3>
-                                    {isEditing ? "Edit Academic Year" : "Add Academic Year"}
+                                    {isEditing
+                                        ? "Edit Academic Year"
+                                        : "Add Academic Year"}
                                 </h3>
                                 <form onSubmit={onSubmit}>
                                     <div style={{ display: "grid", gap: 14 }}>
@@ -820,7 +1084,9 @@ function Settings() {
                                             className="btn btn-primary"
                                             type="submit"
                                         >
-                                            {isEditing ? "Save Changes" : "Add Academic Year"}
+                                            {isEditing
+                                                ? "Save Changes"
+                                                : "Add Academic Year"}
                                         </button>
                                     </div>
                                 </form>
@@ -835,19 +1101,28 @@ function Settings() {
                                     <div className="success-content">
                                         <div className="success-icon-wrapper">
                                             <svg
-                                                className="success-icon-svg"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 52 52"
-                                            >
-                                                <path
-                                                    className="success-check-path"
-                                                    fill="none"
-                                                    d="M14.1 27.2l7.1 7.2 16.7-16.8"
-                                                />
-                                            </svg>
+                            className="success-icon-svg"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="52"
+                            height="52"
+                            viewBox="0 0 52 52"
+                        >
+                            <path
+                                fill="none"
+                                stroke="#ffffff"
+                                strokeWidth="8"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M16 28 L24 36 L40 20"
+                            />
+                        </svg>
                                         </div>
-                                        <h4 className="success-title">Success!</h4>
-                                        <p className="success-subtitle">{modalMessage}</p>
+                                        <h4 className="success-title">
+                                            Success!
+                                        </h4>
+                                        <p className="success-subtitle">
+                                            {modalMessage}
+                                        </p>
                                         <button
                                             className="btn btn-primary btn-close-message"
                                             onClick={closeModal}
@@ -871,7 +1146,9 @@ function Settings() {
                                             </svg>
                                         </div>
                                         <h4 className="error-title">Error!</h4>
-                                        <p className="error-subtitle">{modalMessage}</p>
+                                        <p className="error-subtitle">
+                                            {modalMessage}
+                                        </p>
                                         <button
                                             className="btn btn-danger btn-close-message"
                                             onClick={closeModal}

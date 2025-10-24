@@ -598,6 +598,29 @@ class GoogleSheetsExportService
                 }
             }
 
+            // Phone number fix
+            $rawPhone = isset($row[7]) ? trim($row[7]) : '';
+            if (preg_match('/^9\d{9}$/', $rawPhone)) {
+                $phone_number = '0' . $rawPhone;
+            } elseif (preg_match('/^09\d{9}$/', $rawPhone)) {
+                $phone_number = $rawPhone;
+            } else {
+                $phone_number = $rawPhone;
+            }
+
+            $rawYearLevel = isset($row[14]) ? trim($row[14]) : null;
+            $yearLevelMap = [
+                '1' => '1st',
+                '2' => '2nd',
+                '3' => '3rd',
+                '4' => '4th',
+                '1st' => '1st',
+                '2nd' => '2nd',
+                '3rd' => '3rd',
+                '4th' => '4th',
+            ];
+            $year_level = $rawYearLevel && isset($yearLevelMap[$rawYearLevel]) ? $yearLevelMap[$rawYearLevel] : $rawYearLevel;
+
             $studentData = [
                 'student_id' => $row[0] ?? null,
                 'f_name' => $row[1] ?? '',
@@ -606,14 +629,14 @@ class GoogleSheetsExportService
                 'suffix' => $row[4] ?? '',
                 'date_of_birth' => $row[5] ?? null,
                 'sex' => $row[6] ?? '',
-                'phone_number' => $row[7] ?? '',
+                'phone_number' => $phone_number,
                 'email_address' => $row[8] ?? '',
                 'address' => $row[9] ?? '',
                 'status' => $row[10] ?? '',
                 'department_id' => $department ? $department->department_id : null,
                 'course_id' => $course ? $course->course_id : null,
                 'academic_year_id' => $academicYear ? $academicYear->academic_year_id : null,
-                'year_level' => isset($row[14]) ? $row[14] : null,
+                'year_level' => $year_level,
                 'created_at' => isset($row[15]) ? $row[15] : null,
                 'updated_at' => isset($row[16]) ? $row[16] : null,
                 'archived_at' => isset($row[17]) ? $row[17] : null,
@@ -647,6 +670,16 @@ class GoogleSheetsExportService
                 } else {
                     $department = \App\Models\Department::where('department_name', $row[12])->first();
                 }
+            }
+
+            // Phone number fix
+            $rawPhone = isset($row[7]) ? trim($row[7]) : '';
+            if (preg_match('/^9\d{9}$/', $rawPhone)) {
+                $phone_number = '0' . $rawPhone;
+            } elseif (preg_match('/^09\d{9}$/', $rawPhone)) {
+                $phone_number = $rawPhone;
+            } else {
+                $phone_number = $rawPhone;
             }
 
             $facultyData = [

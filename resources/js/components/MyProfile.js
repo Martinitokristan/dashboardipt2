@@ -646,16 +646,21 @@ function MyProfile() {
                         <div className="success-content">
                             <div className="success-icon-wrapper">
                                 <svg
-                                    className="success-icon-svg"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 52 52"
-                                >
-                                    <path
-                                        className="success-check-path"
-                                        fill="none"
-                                        d="M14.1 27.2l7.1 7.2 16.7-16.8"
-                                    />
-                                </svg>
+                            className="success-icon-svg"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="52"
+                            height="52"
+                            viewBox="0 0 52 52"
+                        >
+                            <path
+                                fill="none"
+                                stroke="#ffffff"
+                                strokeWidth="8"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M16 28 L24 36 L40 20"
+                            />
+                        </svg>
                             </div>
                             <h4 className="success-title">Success!</h4>
                             <p className="success-subtitle">{modalMessage}</p>

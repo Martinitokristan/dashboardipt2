@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FiFileText, FiCloud, FiLock } from "react-icons/fi"; // Add FiLock for disabled icon
-import "../../sass/report.scss"; // Reuse students styles for table/buttons
+import "../../sass/report.scss"; 
 
 // Secure helper — ensure Sanctum cookie exists before requests
 const ensureCsrf = async () => {
@@ -41,6 +41,7 @@ function Report() {
     const [selectedDepartment, setSelectedDepartment] = useState("");
     const [tableColumns, setTableColumns] = useState([]);
     const [tableRows, setTableRows] = useState([]);
+    const [initialLoading, setInitialLoading] = useState(true);
     const [loading, setLoading] = useState(false);
     const [exporting, setExporting] = useState(false);
     const [modalState, setModalState] = useState(""); // "", "loading", "success", "error"
@@ -49,6 +50,7 @@ function Report() {
     // Fetch filter options on mount
     useEffect(() => {
         async function fetchFilters() {
+            setInitialLoading(true);
             try {
                 const [coursesRes, departmentsRes] = await Promise.all([
                     axios.get("/api/courses"),
@@ -65,6 +67,8 @@ function Report() {
             } catch {
                 setModalState("error");
                 setModalMessage("Failed to load filter options.");
+            } finally {
+                setInitialLoading(false);
             }
         }
         fetchFilters();
@@ -321,12 +325,17 @@ function Report() {
                         <svg
                             className="success-icon-svg"
                             xmlns="http://www.w3.org/2000/svg"
+                            width="52"
+                            height="52"
                             viewBox="0 0 52 52"
                         >
                             <path
-                                className="success-check-path"
                                 fill="none"
-                                d="M14.1 27.2l7.1 7.2 16.7-16.8"
+                                stroke="#ffffff"
+                                strokeWidth="8"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M16 28 L24 36 L40 20"
                             />
                         </svg>
                     </div>
@@ -348,12 +357,17 @@ function Report() {
                         <svg
                             className="error-icon-svg"
                             xmlns="http://www.w3.org/2000/svg"
+                            width="52"
+                            height="52"
                             viewBox="0 0 52 52"
                         >
                             <path
-                                className="error-x-path"
                                 fill="none"
-                                d="M16 16 36 36 M36 16 16 36"
+                                stroke="#ffffff"
+                                strokeWidth="5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M16 16 L36 36 M36 16 L16 36"
                             />
                         </svg>
                     </div>
@@ -371,6 +385,15 @@ function Report() {
         return null;
     };
 
+    if (initialLoading) {
+        return (
+            <div className="page-loading">
+                <div className="spinner"></div>
+                <p>Loading Reports...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="page">
             <header className="page-header">
@@ -380,128 +403,120 @@ function Report() {
                 </p>
             </header>
 
-            <div
-                className="controls"
-                style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center", // <-- align vertically
-                    marginBottom: 8,
-                }}
-            >
-                {/* Filters and Generate Report */}
-                <div
-                    style={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                    }}
-                >
-                    <select
-                        className="filter"
-                        value={reportType}
-                        onChange={(e) => setReportType(e.target.value)}
-                        style={{ height: 48 }}
-                    >
-                        <option value={REPORT_TYPES.student}>
-                            Student Report
-                        </option>
-                        <option value={REPORT_TYPES.faculty}>
-                            Faculty Report
-                        </option>
-                    </select>
-                    {reportType === REPORT_TYPES.student && (
-                        <select
-                            className="filter"
-                            value={selectedCourse}
-                            onChange={(e) => setSelectedCourse(e.target.value)}
-                            style={{ height: 48 }}
-                        >
-                            <option value="">All Courses</option>
-                            {courses.map((course) => (
-                                <option
-                                    key={course.course_id}
-                                    value={course.course_id}
-                                >
-                                    {course.course_name}
+            <section className="report-config-card">
+                <div className="config-header">
+                    <h2 className="config-title">Report Configuration</h2>
+                </div>
+                <div className="config-body">
+                    <div className="config-grid">
+                        <div className="config-field">
+                            <label>Report Type</label>
+                            <select
+                                className="filter"
+                                value={reportType}
+                                onChange={(e) => setReportType(e.target.value)}
+                            >
+                                <option value={REPORT_TYPES.student}>
+                                    Student Report
                                 </option>
-                            ))}
-                        </select>
-                    )}
-                    {reportType === REPORT_TYPES.faculty && (
-                        <select
-                            className="filter"
-                            value={selectedDepartment}
-                            onChange={(e) =>
-                                setSelectedDepartment(e.target.value)
-                            }
-                            style={{ height: 48 }}
-                        >
-                            <option value="">All Departments</option>
-                            {departments.map((dept) => (
-                                <option
-                                    key={dept.department_id}
-                                    value={dept.department_id}
-                                >
-                                    {dept.department_name}
+                                <option value={REPORT_TYPES.faculty}>
+                                    Faculty Report
                                 </option>
-                            ))}
-                        </select>
-                    )}
-                    <button
-                        className="btn btn-primary uniform-btn"
-                        onClick={handleGenerateReport}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <span>
-                                <span className="spinner"></span> Generating...
-                            </span>
+                            </select>
+                        </div>
+                        <div className="config-field">
+                            <label>
+                                {reportType === REPORT_TYPES.student
+                                    ? "Filter by Course"
+                                    : "Filter by Department"}
+                            </label>
+                            {reportType === REPORT_TYPES.student ? (
+                                <select
+                                    className="filter"
+                                    value={selectedCourse}
+                                    onChange={(e) =>
+                                        setSelectedCourse(e.target.value)
+                                    }
+                                >
+                                    <option value="">All Courses</option>
+                                    {courses.map((course) => (
+                                        <option
+                                            key={course.course_id}
+                                            value={course.course_id}
+                                        >
+                                            {course.course_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <select
+                                    className="filter"
+                                    value={selectedDepartment}
+                                    onChange={(e) =>
+                                        setSelectedDepartment(e.target.value)
+                                    }
+                                >
+                                    <option value="">All Departments</option>
+                                    {departments.map((dept) => (
+                                        <option
+                                            key={dept.department_id}
+                                            value={dept.department_id}
+                                        >
+                                            {dept.department_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                        </div>
+                    </div>
+                    <div className="report-action-row">
+                        <button
+                            className="btn btn-primary uniform-btn"
+                            onClick={handleGenerateReport}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <span>
+                                    <span className="spinner"></span> Generating...
+                                </span>
+                            ) : (
+                                "Generate Report"
+                            )}
+                        </button>
+                        {reportType === REPORT_TYPES.student ? (
+                            <>
+                                <button
+                                    className="btn btn-primary uniform-btn"
+                                    onClick={handleImportStudents}
+                                >
+                                    Import Students
+                                </button>
+                                <button
+                                    className="btn btn-primary uniform-btn"
+                                    onClick={handleExportStudentData}
+                                >
+                                    Export Student Data
+                                </button>
+                            </>
                         ) : (
-                            "Generate Report"
+                            <>
+                                <button
+                                    className="btn btn-primary uniform-btn"
+                                    onClick={handleImportFaculty}
+                                >
+                                    Import Faculty
+                                </button>
+                                <button
+                                    className="btn btn-primary uniform-btn"
+                                    onClick={handleExportFacultyData}
+                                >
+                                    Export Faculty Data
+                                </button>
+                            </>
                         )}
-                    </button>
+                    </div>
                 </div>
-
-                {/* Import/Export buttons */}
-                <div
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(2, 1fr)",
-                        gridTemplateRows: "repeat(2, 1fr)",
-                        gap: "16px",
-                    }}
-                >
-                    <button
-                        className="btn btn-primary uniform-btn"
-                        onClick={handleImportStudents}
-                        disabled={reportType !== "student"}
-                    >
-                        Import Students
-                    </button>
-                    <button
-                        className="btn btn-primary uniform-btn"
-                        onClick={handleExportStudentData}
-                        disabled={reportType !== "student"}
-                    >
-                        Export Student Data
-                    </button>
-                    <button
-                        className="btn btn-primary uniform-btn"
-                        onClick={handleImportFaculty}
-                        disabled={reportType !== "faculty"}
-                    >
-                        Import Faculty
-                    </button>
-                    <button
-                        className="btn btn-primary uniform-btn"
-                        onClick={handleExportFacultyData}
-                        disabled={reportType !== "faculty"}
-                    >
-                        Export Faculty Data
-                    </button>
-                </div>
-            </div>
+            </section>
 
             <div className="table-wrapper">
                 <table className="students-table">
@@ -540,10 +555,7 @@ function Report() {
                 </table>
             </div>
 
-            <div
-                className="export-actions"
-                style={{ marginTop: "16px", display: "flex", gap: "10px" }}
-            >
+            <div className="report-export-row">
                 <button
                     className="btn btn-primary"
                     onClick={handleDownloadPdf}
