@@ -21,12 +21,15 @@
   }
 }
 
+
+
 /* ---------------- STATS CARDS ---------------- */
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 24px;
   margin: 24px 0;
+  
 }
 
 .stat-card {
@@ -38,6 +41,8 @@
   gap: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
+
+
 
 /* Icon Circle */
 .stat-icon {
@@ -57,14 +62,14 @@
   flex-direction: column;
 
   .stat-label {
-    color: #6b7280;
-    font-size: 15px;
-    font-weight: 500;
+    color: #4b5563;
+    font-size: 17px;
+    font-weight: 600;
   }
 
   .stat-value {
-    font-size: 26px;
-    font-weight: 700;
+    font-size: 30px;
+    font-weight: 800;
     color: #1f2937;
   }
 }
