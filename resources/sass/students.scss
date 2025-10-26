@@ -203,7 +203,7 @@
     border: 1px solid transparent;
     border-radius: 45px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px !important;
     font-weight: 500;
     transition: background-color 0.2s, border-color 0.2s, color 0.2s;
 }
@@ -228,7 +228,7 @@
 }
 
 .btn-success {
-    background-color: #10b981;
+    background-color: #83ff83 !important;
     color: white;
 }
 
