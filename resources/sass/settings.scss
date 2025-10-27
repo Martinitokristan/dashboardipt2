@@ -56,19 +56,24 @@
 .tabs {
     display: inline-flex;
     gap: 6px;
+    border: gray solid 1px;
     margin-bottom: 12px;
+    gap: 25px;
+    background-color: white;
+    border-radius: 5px;
 }
 
 .tab {
-    border: 1px solid var(--border);
-    background: #f4f5ff;
-    color: #374151;
+    border: none;
+    background: white;
+    color: #4d44b5;
     padding: 6px 12px;
-    border-radius: 8px;
+    border-radius: 5px;
 }
 
 .tab.active {
-    background: #e7e8ff;
+    background: #ff787856;
+    border-radius: 45px;
 }
 
 .card {
@@ -253,7 +258,7 @@
 .success-icon-svg {
     width: 26px;
     height: 26px;
-    }
+}
 
 .success-check-path {
     stroke: #16a34a;

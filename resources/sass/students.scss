@@ -201,15 +201,15 @@
 .btn {
     padding: 8px 14px;
     border: 1px solid transparent;
-    border-radius: 8px;
+    border-radius: 45px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px !important;
     font-weight: 500;
     transition: background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .btn-primary {
-    background-color: #4f46e5;
+    background-color: #4d44b5 !important;
     color: white;
 }
 
@@ -228,12 +228,16 @@
 }
 
 .btn-success {
-    background-color: #10b981;
+    background-color: #83ff83 !important;
     color: white;
 }
 
 .btn-success:hover {
     background-color: #059669;
+}
+
+.btn-primary.new-btn {
+    border-radius: 45px !important;
 }
 
 /*
