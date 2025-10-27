@@ -7470,3 +7470,11 @@
 [2025-10-26 14:23:31] local.INFO: Faculty loaded successfully:  {"count":5} 
 [2025-10-26 14:27:12] local.INFO: Loading faculty with request:   
 [2025-10-26 14:27:13] local.INFO: Faculty loaded successfully:  {"count":5} 
+[2025-10-27 02:15:42] local.INFO: Loading students with request:   
+[2025-10-27 02:15:42] local.INFO: Students loaded successfully:  {"count":10} 
+[2025-10-27 02:15:45] local.INFO: Loading faculty with request:   
+[2025-10-27 02:15:45] local.INFO: Faculty loaded successfully:  {"count":11} 
+[2025-10-27 02:16:02] local.INFO: Loading students with request:   
+[2025-10-27 02:16:02] local.INFO: Students loaded successfully:  {"count":10} 
+[2025-10-27 02:16:04] local.INFO: Loading students with request:   
+[2025-10-27 02:16:04] local.INFO: Students loaded successfully:  {"count":10} 

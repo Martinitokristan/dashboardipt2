@@ -518,7 +518,7 @@ function MyProfile() {
                         <div className="form-actions">
                             {!isEditing ? (
                                 <button
-                                    className="btn btn-primary"
+                                    className="btn btn-profile"
                                     onClick={() => setIsEditing(true)}
                                 >
                                     Edit Profile
