@@ -7478,3 +7478,5 @@
 [2025-10-27 02:16:02] local.INFO: Students loaded successfully:  {"count":10} 
 [2025-10-27 02:16:04] local.INFO: Loading students with request:   
 [2025-10-27 02:16:04] local.INFO: Students loaded successfully:  {"count":10} 
+[2025-10-27 02:30:14] local.INFO: Loading faculty with request:   
+[2025-10-27 02:30:14] local.INFO: Faculty loaded successfully:  {"count":11} 
