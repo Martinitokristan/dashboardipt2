@@ -179,4 +179,16 @@ class StudentController extends Controller
             return Response::json(['error' => 'Failed to restore student: ' . $e->getMessage()], 500);
         }
     }
+
+    public function destroy($id)
+    {
+        try {
+            $student = StudentProfile::withTrashed()->findOrFail($id);
+            $student->forceDelete();
+            return Response::json(['message' => 'Student permanently deleted'], 200);
+        } catch (\Exception $e) {
+            Log::error('Error deleting student permanently: ', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return Response::json(['error' => 'Failed to delete student permanently: ' . $e->getMessage()], 500);
+        }
+    }
 }

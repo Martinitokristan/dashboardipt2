@@ -233,4 +233,24 @@ class FacultyController extends Controller
             return Response::json(['error' => 'Failed to restore faculty: ' . $e->getMessage()], 500);
         }
     }
+
+    public function destroy($id)
+    {
+        try {
+            $faculty = FacultyProfile::withTrashed()->findOrFail($id);
+
+            if ($faculty->position === 'Department Head' && $faculty->department_id) {
+                \App\Models\Department::where('department_id', $faculty->department_id)
+                    ->where('department_head_id', $faculty->faculty_id)
+                    ->update(['department_head_id' => null]);
+            }
+
+            $faculty->forceDelete();
+
+            return Response::json(['message' => 'Faculty permanently deleted'], 200);
+        } catch (\Exception $e) {
+            Log::error('Error deleting faculty permanently: ', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return Response::json(['error' => 'Failed to delete faculty permanently: ' . $e->getMessage()], 500);
+        }
+    }
 }

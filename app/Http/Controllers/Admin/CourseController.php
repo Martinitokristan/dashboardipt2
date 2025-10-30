@@ -94,4 +94,17 @@ class CourseController extends Controller
         $course->restore();
         return response()->json($course->fresh());
     }
+
+    public function destroy($id)
+    {
+        $course = Course::withTrashed()->findOrFail($id);
+
+        \App\Models\StudentProfile::withTrashed()
+            ->where('course_id', $id)
+            ->forceDelete();
+
+        $course->forceDelete();
+
+        return response()->json(['message' => 'Course permanently deleted'], 200);
+    }
 }

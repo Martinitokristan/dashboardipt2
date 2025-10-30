@@ -578,239 +578,240 @@ function Students() {
 
     return (
         <div className="page">
-            <header className="page-header">
-                <h1 className="page-title">Students</h1>
-                <p className="page-subtitle">Manage student profiles</p>
-                <button
-                    className="btn btn-primary new-btn"
-                    onClick={onOpenForm}
-                >
-                    + New Student
-                </button>
-            </header>
+            <div className="page-card">
+                <header className="page-header">
+                    <div className="page-header-text">
+                        <h1 className="page-title">Students</h1>
+                        <p className="page-subtitle">Manage student profiles</p>
+                    </div>
+                    <button
+                        className="btn btn-primary new-btn"
+                        onClick={onOpenForm}
+                    >
+                        + New Student
+                    </button>
+                </header>
 
-            <div className="controls">
-                <div
-                    className="filters"
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "24px",
-                    }}
-                >
+                <div className="actions-row">
                     <div
-                        className="search"
+                        className="filters"
                         style={{
                             display: "flex",
                             alignItems: "center",
-                            width: "260px", // match input width
-                            background: "#fff",
-                            borderRadius: "10px",
-                            border: "1px solid #e5e7eb",
-                            padding: "0 12px",
+                            gap: "24px",
                         }}
                     >
-                        <BsSearch
-                            className="icon"
-                            style={{ marginRight: 8, fontSize: 18 }}
-                        />
-                        <input
-                            className="search-input"
+                        <div
+                            className="search"
                             style={{
-                                border: "none",
-                                outline: "none",
-                                width: "100%",
-                                fontSize: "1rem",
-                                background: "transparent",
+                                display: "flex",
+                                alignItems: "center",
+                                width: "260px",
+                                background: "#fff",
+                                borderRadius: "10px",
+                                border: "1px solid #e5e7eb",
+                                padding: "0 12px",
                             }}
-                            placeholder="Search here..."
-                            value={filters.search}
+                        >
+                            <BsSearch
+                                className="icon"
+                                style={{ marginRight: 8, fontSize: 18 }}
+                            />
+                            <input
+                                className="search-input"
+                                style={{
+                                    border: "none",
+                                    outline: "none",
+                                    width: "100%",
+                                    fontSize: "1rem",
+                                    background: "transparent",
+                                }}
+                                placeholder="Search here..."
+                                value={filters.search}
+                                onChange={(e) =>
+                                    setFilters({
+                                        ...filters,
+                                        search: e.target.value,
+                                    })
+                                }
+                            />
+                        </div>
+
+                        <select
+                            className="filter"
+                            value={filters.department_id}
+                            onChange={(e) => {
+                                const deptId = e.target.value;
+                                setFilters({
+                                    ...filters,
+                                    department_id: deptId,
+                                    course_id: "",
+                                });
+                            }}
+                            style={{ minWidth: 180 }}
+                        >
+                            <option value="">⚗ All Department</option>
+                            {departments
+                                .filter((d) => {
+                                    if (filters.course_id) {
+                                        const selectedCourse = courses.find(
+                                            (c) => c.course_id == filters.course_id
+                                        );
+                                        return selectedCourse
+                                            ? d.department_id ==
+                                                  selectedCourse.department_id
+                                            : true;
+                                    }
+                                    return true;
+                                })
+                                .map((d) => (
+                                    <option
+                                        key={d.department_id}
+                                        value={d.department_id}
+                                    >
+                                        {d.department_name}
+                                    </option>
+                                ))}
+                        </select>
+
+                        <select
+                            className="filter"
+                            value={filters.course_id}
+                            onChange={(e) => {
+                                const courseId = e.target.value;
+                                const selectedCourse = courses.find(
+                                    (c) => c.course_id == courseId
+                                );
+                                setFilters({
+                                    ...filters,
+                                    course_id: courseId,
+                                    department_id:
+                                        courseId && selectedCourse
+                                            ? selectedCourse.department_id
+                                            : filters.department_id,
+                                });
+                            }}
+                            style={{ minWidth: 180 }}
+                        >
+                            <option value="">⚗ All Course</option>
+                            {courses
+                                .filter((c) => {
+                                    if (filters.department_id) {
+                                        return (
+                                            c.department_id == filters.department_id
+                                        );
+                                    }
+                                    return true;
+                                })
+                                .map((c) => (
+                                    <option key={c.course_id} value={c.course_id}>
+                                        {c.course_name}
+                                    </option>
+                                ))}
+                        </select>
+
+                        <select
+                            className="filter"
+                            value={filters.academic_year_id}
                             onChange={(e) =>
                                 setFilters({
                                     ...filters,
-                                    search: e.target.value,
+                                    academic_year_id: e.target.value,
                                 })
                             }
-                        />
-                    </div>
-
-                    <select
-                        className="filter"
-                        value={filters.department_id}
-                        onChange={(e) => {
-                            const deptId = e.target.value;
-                            setFilters({
-                                ...filters,
-                                department_id: deptId,
-                                course_id: "",
-                            });
-                        }}
-                        style={{ minWidth: 180 }}
-                    >
-                        <option value="">⚗ All Department</option>
-                        {departments
-                            .filter((d) => {
-                                // If a course is selected, only show its department
-                                if (filters.course_id) {
-                                    const selectedCourse = courses.find(
-                                        (c) => c.course_id == filters.course_id
-                                    );
-                                    return selectedCourse
-                                        ? d.department_id ==
-                                              selectedCourse.department_id
-                                        : true;
-                                }
-                                return true;
-                            })
-                            .map((d) => (
+                            style={{ minWidth: 180 }}
+                        >
+                            <option value="">⚗ All Academic Year</option>
+                            {academicYears.map((a) => (
                                 <option
-                                    key={d.department_id}
-                                    value={d.department_id}
+                                    key={a.academic_year_id}
+                                    value={a.academic_year_id}
                                 >
-                                    {d.department_name}
+                                    {a.school_year}
                                 </option>
                             ))}
-                    </select>
-
-                    <select
-                        className="filter"
-                        value={filters.course_id}
-                        onChange={(e) => {
-                            const courseId = e.target.value;
-                            // Find the selected course's department
-                            const selectedCourse = courses.find(
-                                (c) => c.course_id == courseId
-                            );
-                            setFilters({
-                                ...filters,
-                                course_id: courseId,
-                                department_id:
-                                    courseId && selectedCourse
-                                        ? selectedCourse.department_id
-                                        : filters.department_id, // Auto-select department if course is selected
-                            });
-                        }}
-                        style={{ minWidth: 180 }}
-                    >
-                        <option value="">⚗ All Course</option>
-                        {courses
-                            .filter((c) => {
-                                // If a department is selected, only show courses under that department
-                                if (filters.department_id) {
-                                    return (
-                                        c.department_id == filters.department_id
-                                    );
-                                }
-                                return true;
-                            })
-                            .map((c) => (
-                                <option key={c.course_id} value={c.course_id}>
-                                    {c.course_name}
-                                </option>
-                            ))}
-                    </select>
-
-                    <select
-                        className="filter"
-                        value={filters.academic_year_id}
-                        onChange={(e) =>
-                            setFilters({
-                                ...filters,
-                                academic_year_id: e.target.value,
-                            })
-                        }
-                        style={{ minWidth: 180 }}
-                    >
-                        <option value="">⚗ All Academic Year</option>
-                        {academicYears.map((a) => (
-                            <option
-                                key={a.academic_year_id}
-                                value={a.academic_year_id}
-                            >
-                                {a.school_year}
-                            </option>
-                        ))}
-                    </select>
+                        </select>
+                    </div>
                 </div>
-            </div>
 
-            <div className="table-wrapper">
-                <table className="students-table">
-                    <thead>
-                        <tr>
-                            <th>Student Name</th>
-                            <th>Department</th>
-                            <th>Course</th>
-                            <th>Year Level</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {students.map((s) => (
-                            <tr key={s.student_id}>
-                                <td>
-                                    {s.fullName ||
-                                        `${s.f_name} ${
-                                            s.m_name ? s.m_name + " " : ""
-                                        }${s.l_name}${
-                                            s.suffix ? " " + s.suffix : ""
-                                        }`}
-                                </td>
-                                <td>{s.department?.department_name || "-"}</td>
-                                <td>{s.course?.course_name || "-"}</td>
-                                <td>
-                                    {typeof s.year_level === "object" &&
-                                    s.year_level !== null
-                                        ? s.year_level.name ||
-                                          s.year_level.label
-                                        : s.year_level || "-"}
-                                </td>
-                                <td>
-                                    <span
-                                        className={`badge ${
-                                            s.status === "active"
-                                                ? "badge-success"
-                                                : "badge-danger"
-                                        }`}
-                                    >
-                                        {s.status}
-                                    </span>
-                                </td>
-                                <td>
-                                    <button
-                                        className="btn btn-light"
-                                        onClick={() => onOpenEditForm(s)}
-                                    >
-                                        ✎ Edit
-                                    </button>
-                                    {s.archived_at ? (
-                                        <button
-                                            className="btn btn-secondary"
-                                            onClick={() =>
-                                                handleRestore(s.student_id)
-                                            }
-                                        >
-                                            Restore
-                                        </button>
-                                    ) : (
-                                        <button
-                                            className="btn btn-success"
-                                            onClick={() =>
-                                                handleArchive(s.student_id)
-                                            }
-                                        >
-                                            Archive
-                                        </button>
-                                    )}
-                                </td>
+                <div className="table-wrapper">
+                    <table className="students-table">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Department</th>
+                                <th>Course</th>
+                                <th>Year Level</th>
+                                <th>Status</th>
+                                <th>Action</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {students.map((s) => (
+                                <tr key={s.student_id}>
+                                    <td>
+                                        {s.fullName ||
+                                            `${s.f_name} ${
+                                                s.m_name ? s.m_name + " " : ""
+                                            }${s.l_name}${
+                                                s.suffix ? " " + s.suffix : ""
+                                            }`}
+                                    </td>
+                                    <td>{s.department?.department_name || "-"}</td>
+                                    <td>{s.course?.course_name || "-"}</td>
+                                    <td>
+                                        {typeof s.year_level === "object" &&
+                                        s.year_level !== null
+                                            ? s.year_level.name ||
+                                              s.year_level.label
+                                            : s.year_level || "-"}
+                                    </td>
+                                    <td>
+                                        <span
+                                            className={`badge ${
+                                                s.status === "active"
+                                                    ? "badge-success"
+                                                    : "badge-danger"
+                                            }`}
+                                        >
+                                            {s.status}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button
+                                            className="btn btn-light"
+                                            onClick={() => onOpenEditForm(s)}
+                                        >
+                                            ✎ Edit
+                                        </button>
+                                        {s.archived_at ? (
+                                            <button
+                                                className="btn btn-secondary"
+                                                onClick={() =>
+                                                    handleRestore(s.student_id)
+                                                }
+                                            >
+                                                Restore
+                                            </button>
+                                        ) : (
+                                            <button
+                                                className="btn btn-success"
+                                                onClick={() =>
+                                                    handleArchive(s.student_id)
+                                                }
+                                            >
+                                                Archive
+                                            </button>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
 
-            <div className="table-blank" />
+                <div className="table-blank" />
+            </div>
 
             {showForm && (
                 <div className="modal-overlay">
@@ -821,6 +822,6 @@ function Students() {
             {error && <div className="alert-error">{error}</div>}
         </div>
     );
-}
+ }
 
 export default Students;

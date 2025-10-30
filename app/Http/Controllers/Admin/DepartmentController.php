@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class DepartmentController extends Controller
 {
@@ -140,5 +141,36 @@ class DepartmentController extends Controller
         
         $department->restore();
         return response()->json($department->fresh());
+    }
+
+    public function destroy($id)
+    {
+        $department = Department::withTrashed()->findOrFail($id);
+
+        DB::transaction(function () use ($department) {
+            $departmentId = $department->department_id;
+
+            \App\Models\Course::withTrashed()
+                ->where('department_id', $departmentId)
+                ->each(function ($course) {
+                    \App\Models\StudentProfile::withTrashed()
+                        ->where('course_id', $course->course_id)
+                        ->forceDelete();
+
+                    $course->forceDelete();
+                });
+
+            \App\Models\StudentProfile::withTrashed()
+                ->where('department_id', $departmentId)
+                ->forceDelete();
+
+            \App\Models\FacultyProfile::withTrashed()
+                ->where('department_id', $departmentId)
+                ->forceDelete();
+
+            $department->forceDelete();
+        });
+
+        return response()->json(['message' => 'Department permanently deleted'], 200);
     }
 }

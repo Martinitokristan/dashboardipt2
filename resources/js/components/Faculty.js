@@ -475,141 +475,143 @@ function Faculty() {
 
     return (
         <div className="page">
-            <header className="page-header">
-                <div className="page-header-text">
-                    <h1 className="page-title">Faculty</h1>
-                    <p className="page-subtitle">Manage faculty profiles</p>
-                </div>
-                <button
-                    className="btn btn-primary new-btn"
-                    onClick={() => setShowForm(true)}
-                >
-                    + New Faculty
-                </button>
-            </header>
+            <div className="page-card">
+                <header className="page-header">
+                    <div className="page-header-text">
+                        <h1 className="page-title">Faculty</h1>
+                        <p className="page-subtitle">Manage faculty profiles</p>
+                    </div>
+                    <button
+                        className="btn btn-primary new-btn"
+                        onClick={() => setShowForm(true)}
+                    >
+                        + New Faculty
+                    </button>
+                </header>
 
-            <div className="actions-row">
-                <div
-                    className="filters"
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "24px",
-                    }}
-                >
+                <div className="actions-row">
                     <div
-                        className="search"
+                        className="filters"
                         style={{
                             display: "flex",
                             alignItems: "center",
-                            width: "260px",
-                            background: "#fff",
-                            borderRadius: "10px",
-                            border: "1px solid #e5e7eb",
-                            padding: "0 12px",
+                            gap: "24px",
                         }}
                     >
-                        <BsSearch
-                            className="icon"
-                            style={{ marginRight: 8, fontSize: 18 }}
-                        />
-                        <input
-                            className="search-input"
+                        <div
+                            className="search"
                             style={{
-                                border: "none",
-                                outline: "none",
-                                width: "100%",
-                                fontSize: "1rem",
-                                background: "transparent",
+                                display: "flex",
+                                alignItems: "center",
+                                width: "260px",
+                                background: "#fff",
+                                borderRadius: "10px",
+                                border: "1px solid #e5e7eb",
+                                padding: "0 12px",
                             }}
-                            placeholder="Search by name or email..."
-                            value={filters.search}
+                        >
+                            <BsSearch
+                                className="icon"
+                                style={{ marginRight: 8, fontSize: 18 }}
+                            />
+                            <input
+                                className="search-input"
+                                style={{
+                                    border: "none",
+                                    outline: "none",
+                                    width: "100%",
+                                    fontSize: "1rem",
+                                    background: "transparent",
+                                }}
+                                placeholder="Search by name or email..."
+                                value={filters.search}
+                                onChange={(e) =>
+                                    handleFilterChange("search", e.target.value)
+                                }
+                                onBlur={loadFaculty}
+                            />
+                        </div>
+                        <select
+                            className="filter"
+                            value={filters.department_id}
                             onChange={(e) =>
-                                handleFilterChange("search", e.target.value)
+                                handleFilterChange("department_id", e.target.value)
                             }
-                            onBlur={loadFaculty}
-                        />
+                            style={{ minWidth: 180 }}
+                        >
+                            <option value="">All Departments</option>
+                            {departments.map((dept) => (
+                                <option
+                                    key={dept.department_id}
+                                    value={dept.department_id}
+                                >
+                                    {dept.department_name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
-                    <select
-                        className="filter"
-                        value={filters.department_id}
-                        onChange={(e) =>
-                            handleFilterChange("department_id", e.target.value)
-                        }
-                        style={{ minWidth: 180 }}
-                    >
-                        <option value="">All Departments</option>
-                        {departments.map((dept) => (
-                            <option
-                                key={dept.department_id}
-                                value={dept.department_id}
-                            >
-                                {dept.department_name}
-                            </option>
-                        ))}
-                    </select>
                 </div>
-            </div>
 
-            <div className="table-wrapper">
-                <table className="faculty-table">
-                    <thead>
-                        <tr>
-                            <th>Faculty Name</th>
-                            <th>Department</th>
-                            <th>Position</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {faculty.map((f) => (
-                            <tr key={f.faculty_id}>
-                                <td>{`${f.f_name} ${
-                                    f.m_name ? f.m_name + " " : ""
-                                }${f.l_name}${
-                                    f.suffix ? ", " + f.suffix : ""
-                                }`}</td>
-                                <td>{f.department?.department_name || "-"}</td>
-                                <td>{f.position || "-"}</td>
-                                <td>
-                                    <span
-                                        className={`badge ${
-                                            f.status === "active"
-                                                ? "badge-success"
-                                                : "badge-danger"
-                                        }`}
-                                    >
-                                        {f.status || "active"}
-                                    </span>
-                                </td>
-                                <td>
-                                    <button
-                                        className="btn btn-light"
-                                        onClick={() => onOpenEditForm(f)}
-                                    >
-                                        ✎ Edit
-                                    </button>
-                                    <button
-                                        className="btn btn-success"
-                                        onClick={() =>
-                                            handleArchive(f.faculty_id)
-                                        }
-                                    >
-                                        Archive
-                                    </button>
-                                </td>
+                <div className="table-wrapper">
+                    <table className="faculty-table">
+                        <thead>
+                            <tr>
+                                <th>Faculty Name</th>
+                                <th>Department</th>
+                                <th>Position</th>
+                                <th>Status</th>
+                                <th>Action</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            {showForm && (
-                <div className="modal-overlay">
-                    <div className="modal-card">{renderModalContent()}</div>
+                        </thead>
+                        <tbody>
+                            {faculty.map((f) => (
+                                <tr key={f.faculty_id}>
+                                    <td>{`${f.f_name} ${
+                                        f.m_name ? f.m_name + " " : ""
+                                    }${f.l_name}${
+                                        f.suffix ? ", " + f.suffix : ""
+                                    }`}</td>
+                                    <td>{f.department?.department_name || "-"}</td>
+                                    <td>{f.position || "-"}</td>
+                                    <td>
+                                        <span
+                                            className={`badge ${
+                                                f.status === "active"
+                                                    ? "badge-success"
+                                                    : "badge-danger"
+                                            }`}
+                                        >
+                                            {f.status || "active"}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button
+                                            className="btn btn-light"
+                                            onClick={() => onOpenEditForm(f)}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="btn btn-success"
+                                            onClick={() =>
+                                                handleArchive(f.faculty_id)
+                                            }
+                                        >
+                                            Archive
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
-            )}
+
+                {showForm && (
+                    <div className="modal-overlay">
+                        <div className="modal-card">{renderModalContent()}</div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

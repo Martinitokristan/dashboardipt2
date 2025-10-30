@@ -323,845 +323,827 @@ function Settings() {
 
     return (
         <div className="settings-content">
-            <header className="page-header">
-                <h1 className="page-title">Settings</h1>
-                <p className="page-subtitle">
-                    Manage courses, departments, and academic years
-                </p>
-            </header>
-
-            {error && <div className="alert-error">{error}</div>}
-
-            <section className="settings-tabs">
-                <div className="tabs">
-                    <button
-                        className={`tab ${
-                            active === "courses" ? "active" : ""
-                        }`}
-                        onClick={() => {
-                            setActive("courses");
-                            localStorage.setItem(
-                                "settings_active_tab",
-                                "courses"
-                            );
-                        }}
-                    >
-                        Courses
-                    </button>
-                    <button
-                        className={`tab ${
-                            active === "departments" ? "active" : ""
-                        }`}
-                        onClick={() => {
-                            setActive("departments");
-                            localStorage.setItem(
-                                "settings_active_tab",
-                                "departments"
-                            );
-                        }}
-                    >
-                        Departments
-                    </button>
-                    <button
-                        className={`tab ${
-                            active === "academic-years" ? "active" : ""
-                        }`}
-                        onClick={() => {
-                            setActive("academic-years");
-                            localStorage.setItem(
-                                "settings_active_tab",
-                                "academic-years"
-                            );
-                        }}
-                    >
-                        Academic Years
-                    </button>
-                    <button
-                        className={`tab ${
-                            active === "archive" ? "active" : ""
-                        }`}
-                        onClick={() => {
-                            setActive("archive");
-                            localStorage.setItem(
-                                "settings_active_tab",
-                                "archive"
-                            );
-                        }}
-                    >
-                        Archive
-                    </button>
-                </div>
-
-                <div className="tab-content">
-                    {active !== "archive" && (
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "flex-end",
-                                alignItems: "center",
-                                marginBottom: "20px",
-                            }}
-                        >
+            <div className="page">
+                <div className="page-card">
+                    <header className="page-header">
+                        <div className="page-header-text">
+                            <h1 className="page-title">Settings</h1>
+                            <p className="page-subtitle">
+                                Manage courses, departments, and academic years
+                            </p>
+                        </div>
+                        {active !== "archive" && (
                             <button
-                                className="btn btn-primary"
+                                className="btn btn-primary new-btn"
                                 onClick={() => onOpenForm()}
                             >
-                                Add{" "}
-                                {active === "courses"
+                                Add {active === "courses"
                                     ? "Course"
                                     : active === "departments"
                                     ? "Department"
                                     : "Academic Year"}
                             </button>
-                        </div>
-                    )}
+                        )}
+                    </header>
 
-                    {/* === Courses Table === */}
-                    {active === "courses" && (
-                        <div className="table-wrapper">
-                            <table className="settings-table">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Department</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {courses.map((c) => (
-                                        <tr key={c.course_id}>
-                                            <td>{c.course_name}</td>
-                                            <td>
-                                                {c.department
-                                                    ?.department_name || "-"}
-                                            </td>
-                                            <td>
-                                                <button
-                                                    className="btn btn-light"
-                                                    onClick={() =>
-                                                        onOpenForm(c)
-                                                    }
-                                                >
-                                                    ✎ Edit
-                                                </button>
-                                                <button
-                                                    className="btn btn-success btn-sm"
-                                                    onClick={() =>
-                                                        handleDelete(
-                                                            c.course_id
-                                                        )
-                                                    }
-                                                >
-                                                    Archive
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
+                    {error && <div className="alert-error">{error}</div>}
 
-                    {/* === Departments Table === */}
-                    {active === "departments" && (
-                        <div className="table-wrapper">
-                            <table className="settings-table">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Department Head</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {departments.map((d) => (
-                                        <tr key={d.department_id}>
-                                            <td>{d.department_name}</td>
-                                            <td>{d.department_head || "-"}</td>
-                                            <td>
-                                                <button
-                                                    className="btn btn-light"
-                                                    onClick={() =>
-                                                        onOpenForm(d)
-                                                    }
-                                                >
-                                                    ✎ Edit
-                                                </button>
-                                                <button
-                                                    className="btn btn-success btn-sm"
-                                                    onClick={() =>
-                                                        handleDelete(
-                                                            d.department_id
-                                                        )
-                                                    }
-                                                >
-                                                    Archive
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-
-                    {/* === Academic Years Table === */}
-                    {active === "academic-years" && (
-                        <div className="table-wrapper">
-                            <table className="settings-table">
-                                <thead>
-                                    <tr>
-                                        <th>School Year</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {academicYears.map((a) => (
-                                        <tr key={a.academic_year_id}>
-                                            <td>{a.school_year}</td>
-                                            <td>
-                                                <button
-                                                    className="btn btn-light"
-                                                    onClick={() =>
-                                                        onOpenForm(a)
-                                                    }
-                                                >
-                                                    ✎ Edit
-                                                </button>
-                                                <button
-                                                    className="btn btn-success btn-sm"
-                                                    onClick={() =>
-                                                        handleDelete(
-                                                            a.academic_year_id
-                                                        )
-                                                    }
-                                                >
-                                                    Archive
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-
-                    {/* === Archive Table === */}
-                    {active === "archive" && (
-                        <div>
-                            <div
-                                className="controls-bar"
-                                style={{
-                                    display: "flex",
-                                    gap: "12px",
-                                    marginBottom: "20px",
-                                    alignItems: "flex-end",
-                                    flexWrap: "wrap",
+                    <section className="settings-tabs">
+                        <div className="tabs">
+                            <button
+                                className={`tab ${
+                                    active === "courses" ? "active" : ""
+                                }`}
+                                onClick={() => {
+                                    setActive("courses");
+                                    localStorage.setItem(
+                                        "settings_active_tab",
+                                        "courses"
+                                    );
                                 }}
                             >
-                                <div
-                                    className="control-item"
-                                    style={{
-                                        flex: "0 0 auto",
-                                        minWidth: "150px",
-                                    }}
-                                >
-                                    <select
-                                        value={archiveType}
-                                        onChange={(e) => {
-                                            setArchiveType(e.target.value);
-                                            setArchiveFilters({
-                                                search: "",
-                                                department_id: "",
-                                                course_id: "",
-                                                academic_year_id: "",
-                                            });
-                                        }}
-                                        style={{
-                                            padding: "8px 12px",
-                                            border: "1px solid #ddd",
-                                            borderRadius: "6px",
-                                            width: "100%",
-                                            height: "40px",
-                                        }}
-                                    >
-                                        <option value="all">All Archive</option>
-                                        <option value="students">
-                                            Students
-                                        </option>
-                                        <option value="faculty">Faculty</option>
-                                        <option value="courses">Courses</option>
-                                        <option value="departments">
-                                            Departments
-                                        </option>
-                                        <option value="academic_years">
-                                            Academic Years
-                                        </option>
-                                    </select>
-                                </div>
+                                Courses
+                            </button>
+                            <button
+                                className={`tab ${
+                                    active === "departments" ? "active" : ""
+                                }`}
+                                onClick={() => {
+                                    setActive("departments");
+                                    localStorage.setItem(
+                                        "settings_active_tab",
+                                        "departments"
+                                    );
+                                }}
+                            >
+                                Departments
+                            </button>
+                            <button
+                                className={`tab ${
+                                    active === "academic-years" ? "active" : ""
+                                }`}
+                                onClick={() => {
+                                    setActive("academic-years");
+                                    localStorage.setItem(
+                                        "settings_active_tab",
+                                        "academic-years"
+                                    );
+                                }}
+                            >
+                                Academic Years
+                            </button>
+                            <button
+                                className={`tab ${
+                                    active === "archive" ? "active" : ""
+                                }`}
+                                onClick={() => {
+                                    setActive("archive");
+                                    localStorage.setItem(
+                                        "settings_active_tab",
+                                        "archive"
+                                    );
+                                }}
+                            >
+                                Archive
+                            </button>
+                        </div>
 
-                                <div
-                                    className="control-item"
-                                    style={{ flex: "0 0 auto", width: "320px" }}
-                                >
-                                    <div style={{ position: "relative" }}>
-                                        <BsSearch
-                                            style={{
-                                                position: "absolute",
-                                                left: "12px",
-                                                top: "50%",
-                                                transform: "translateY(-50%)",
-                                                color: "#666",
-                                                pointerEvents: "none",
-                                            }}
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder={`Search archived ${
-                                                archiveType === "all"
-                                                    ? "items"
-                                                    : archiveType
-                                            }...`}
-                                            value={archiveFilters.search}
-                                            onChange={(e) =>
-                                                setArchiveFilters({
-                                                    ...archiveFilters,
-                                                    search: e.target.value,
-                                                })
-                                            }
-                                            style={{
-                                                width: "100%",
-                                                padding: "8px 12px 8px 38px",
-                                                border: "1px solid #ddd",
-                                                borderRadius: "6px",
-                                                height: "40px",
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-
-                                {(archiveType === "students" ||
-                                    archiveType === "faculty" ||
-                                    archiveType === "courses") && (
-                                    <div
-                                        className="control-item"
-                                        style={{
-                                            flex: "0 0 auto",
-                                            minWidth: "150px",
-                                        }}
-                                    >
-                                        <select
-                                            value={archiveFilters.department_id}
-                                            onChange={(e) =>
-                                                setArchiveFilters({
-                                                    ...archiveFilters,
-                                                    department_id:
-                                                        e.target.value,
-                                                    course_id: "",
-                                                })
-                                            }
-                                            style={{
-                                                padding: "8px 12px",
-                                                border: "1px solid #ddd",
-                                                borderRadius: "6px",
-                                                width: "100%",
-                                                height: "40px",
-                                            }}
-                                        >
-                                            <option value="">
-                                                All Departments
-                                            </option>
-                                            {departments.map((d) => (
-                                                <option
-                                                    key={d.department_id}
-                                                    value={d.department_id}
-                                                >
-                                                    {d.department_name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
-
-                                {archiveType === "students" && (
-                                    <div
-                                        className="control-item"
-                                        style={{
-                                            flex: "0 0 auto",
-                                            minWidth: "150px",
-                                        }}
-                                    >
-                                        <select
-                                            value={archiveFilters.course_id}
-                                            onChange={(e) =>
-                                                setArchiveFilters({
-                                                    ...archiveFilters,
-                                                    course_id: e.target.value,
-                                                })
-                                            }
-                                            style={{
-                                                padding: "8px 12px",
-                                                border: "1px solid #ddd",
-                                                borderRadius: "6px",
-                                                width: "100%",
-                                                height: "40px",
-                                            }}
-                                        >
-                                            <option value="">
-                                                All Courses
-                                            </option>
-                                            {courses
-                                                .filter(
-                                                    (c) =>
-                                                        !archiveFilters.department_id ||
-                                                        c.department_id ===
-                                                            parseInt(
-                                                                archiveFilters.department_id
-                                                            )
-                                                )
-                                                .map((c) => (
-                                                    <option
-                                                        key={c.course_id}
-                                                        value={c.course_id}
-                                                    >
-                                                        {c.course_name}
-                                                    </option>
-                                                ))}
-                                        </select>
-                                    </div>
-                                )}
-
-                                {archiveType === "students" && (
-                                    <div
-                                        className="control-item"
-                                        style={{
-                                            flex: "0 0 auto",
-                                            minWidth: "150px",
-                                        }}
-                                    >
-                                        <select
-                                            value={
-                                                archiveFilters.academic_year_id
-                                            }
-                                            onChange={(e) =>
-                                                setArchiveFilters({
-                                                    ...archiveFilters,
-                                                    academic_year_id:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            style={{
-                                                padding: "8px 12px",
-                                                border: "1px solid #ddd",
-                                                borderRadius: "6px",
-                                                width: "100%",
-                                                height: "40px",
-                                            }}
-                                        >
-                                            <option value="">
-                                                All Academic Years
-                                            </option>
-                                            {academicYears.map((a) => (
-                                                <option
-                                                    key={a.academic_year_id}
-                                                    value={a.academic_year_id}
-                                                >
-                                                    {a.school_year}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="table-wrapper">
-                                {archivedItems.length === 0 ? (
-                                    <p
-                                        style={{
-                                            textAlign: "center",
-                                            padding: "40px",
-                                            color: "#666",
-                                        }}
-                                    >
-                                        No archived items found.
-                                    </p>
-                                ) : (
+                        <div className="tab-content">
+                            {/* === Courses Table === */}
+                            {active === "courses" && (
+                                <div className="table-wrapper">
                                     <table className="settings-table">
                                         <thead>
                                             <tr>
-                                                <th>Type</th>
                                                 <th>Name</th>
-                                                <th>Details</th>
-                                                <th>Archived At</th>
-                                                <th
-                                                    style={{
-                                                        textAlign: "center",
-                                                    }}
-                                                >
-                                                    Actions
-                                                </th>
+                                                <th>Department</th>
+                                                <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {archivedItems.map(
-                                                (item, index) => (
-                                                    <tr
-                                                        key={`${item._type}-${
-                                                            item._id || index
-                                                        }`}
-                                                    >
-                                                        <td
+                                            {courses.map((c) => (
+                                                <tr key={c.course_id}>
+                                                    <td>{c.course_name}</td>
+                                                    <td>
+                                                        {c.department
+                                                            ?.department_name || "-"}
+                                                    </td>
+                                                    <td>
+                                                        <button
+                                                            className="btn btn-light"
+                                                            onClick={() =>
+                                                                onOpenForm(c)
+                                                            }
+                                                        >
+                                                            ✎ Edit
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-success btn-sm"
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    c.course_id
+                                                                )
+                                                            }
+                                                        >
+                                                            Archive
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+
+                            {/* === Departments Table === */}
+                            {active === "departments" && (
+                                <div className="table-wrapper">
+                                    <table className="settings-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Department Head</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {departments.map((d) => (
+                                                <tr key={d.department_id}>
+                                                    <td>{d.department_name}</td>
+                                                    <td>{d.department_head || "-"}</td>
+                                                    <td>
+                                                        <button
+                                                            className="btn btn-light"
+                                                            onClick={() =>
+                                                                onOpenForm(d)
+                                                            }
+                                                        >
+                                                            ✎ Edit
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-success btn-sm"
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    d.department_id
+                                                                )
+                                                            }
+                                                        >
+                                                            Archive
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+
+                            {/* === Academic Years Table === */}
+                            {active === "academic-years" && (
+                                <div className="table-wrapper">
+                                    <table className="settings-table">
+                                        <thead>
+                                            <tr>
+                                                <th>School Year</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {academicYears.map((a) => (
+                                                <tr key={a.academic_year_id}>
+                                                    <td>{a.school_year}</td>
+                                                    <td>
+                                                        <button
+                                                            className="btn btn-light"
+                                                            onClick={() =>
+                                                                onOpenForm(a)
+                                                            }
+                                                        >
+                                                            ✎ Edit
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-success btn-sm"
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    a.academic_year_id
+                                                                )
+                                                            }
+                                                        >
+                                                            Archive
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+
+                            {/* === Archive Table === */}
+                            {active === "archive" && (
+                                <div>
+                                    <div
+                                        className="controls-bar"
+                                        style={{
+                                            display: "flex",
+                                            gap: "12px",
+                                            marginBottom: "20px",
+                                            alignItems: "flex-end",
+                                            flexWrap: "wrap",
+                                        }}
+                                    >
+                                        <div
+                                            className="control-item"
+                                            style={{
+                                                flex: "0 0 auto",
+                                                minWidth: "150px",
+                                            }}
+                                        >
+                                            <select
+                                                value={archiveType}
+                                                onChange={(e) => {
+                                                    setArchiveType(e.target.value);
+                                                    setArchiveFilters({
+                                                        search: "",
+                                                        department_id: "",
+                                                        course_id: "",
+                                                        academic_year_id: "",
+                                                    });
+                                                }}
+                                                style={{
+                                                    padding: "8px 12px",
+                                                    border: "1px solid #ddd",
+                                                    borderRadius: "6px",
+                                                    width: "100%",
+                                                    height: "40px",
+                                                }}
+                                            >
+                                                <option value="all">All Types</option>
+                                                <option value="students">
+                                                    Students
+                                                </option>
+                                                <option value="faculty">Faculty</option>
+                                                <option value="courses">Courses</option>
+                                                <option value="departments">
+                                                    Departments
+                                                </option>
+                                                <option value="academic_years">
+                                                    Academic Years
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div
+                                            className="control-item"
+                                            style={{ flex: "0 0 auto", width: "320px" }}
+                                        >
+                                            <div style={{ position: "relative" }}>
+                                                <BsSearch
+                                                    style={{
+                                                        position: "absolute",
+                                                        left: "12px",
+                                                        top: "50%",
+                                                        transform: "translateY(-50%)",
+                                                        color: "#666",
+                                                        pointerEvents: "none",
+                                                    }}
+                                                />
+                                                <input
+                                                    type="text"
+                                                    placeholder={`Search archived ${
+                                                        archiveType === "all"
+                                                            ? "items"
+                                                            : archiveType
+                                                    }...`}
+                                                    value={archiveFilters.search}
+                                                    onChange={(e) =>
+                                                        setArchiveFilters({
+                                                            ...archiveFilters,
+                                                            search: e.target.value,
+                                                        })
+                                                    }
+                                                    style={{
+                                                        width: "100%",
+                                                        padding: "8px 12px 8px 38px",
+                                                        border: "1px solid #ddd",
+                                                        borderRadius: "6px",
+                                                        height: "40px",
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {(archiveType === "students" ||
+                                            archiveType === "faculty" ||
+                                            archiveType === "courses") && (
+                                            <div
+                                                className="control-item"
+                                                style={{
+                                                    flex: "0 0 auto",
+                                                    minWidth: "150px",
+                                                }}
+                                            >
+                                                <select
+                                                    value={archiveFilters.department_id}
+                                                    onChange={(e) =>
+                                                        setArchiveFilters({
+                                                            ...archiveFilters,
+                                                            department_id:
+                                                                e.target.value,
+                                                            course_id: "",
+                                                        })
+                                                    }
+                                                    style={{
+                                                        padding: "8px 12px",
+                                                        border: "1px solid #ddd",
+                                                        borderRadius: "6px",
+                                                        width: "100%",
+                                                        height: "40px",
+                                                    }}
+                                                >
+                                                    <option value="">
+                                                        All Departments
+                                                    </option>
+                                                    {departments.map((d) => (
+                                                        <option
+                                                            key={d.department_id}
+                                                            value={d.department_id}
+                                                        >
+                                                            {d.department_name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+
+                                        {archiveType === "students" && (
+                                            <div
+                                                className="control-item"
+                                                style={{
+                                                    flex: "0 0 auto",
+                                                    minWidth: "150px",
+                                                }}
+                                            >
+                                                <select
+                                                    value={archiveFilters.course_id}
+                                                    onChange={(e) =>
+                                                        setArchiveFilters({
+                                                            ...archiveFilters,
+                                                            course_id: e.target.value,
+                                                        })
+                                                    }
+                                                    style={{
+                                                        padding: "8px 12px",
+                                                        border: "1px solid #ddd",
+                                                        borderRadius: "6px",
+                                                        width: "100%",
+                                                        height: "40px",
+                                                    }}
+                                                >
+                                                    <option value="">
+                                                        All Courses
+                                                    </option>
+                                                    {courses
+                                                        .filter(
+                                                            (c) =>
+                                                                !archiveFilters.department_id ||
+                                                                c.department_id ===
+                                                                    parseInt(
+                                                                        archiveFilters.department_id
+                                                                    )
+                                                        )
+                                                        .map((c) => (
+                                                            <option
+                                                                key={c.course_id}
+                                                                value={c.course_id}
+                                                            >
+                                                                {c.course_name}
+                                                            </option>
+                                                        ))}
+                                                </select>
+                                            </div>
+                                        )}
+
+                                        {archiveType === "students" && (
+                                            <div
+                                                className="control-item"
+                                                style={{
+                                                    flex: "0 0 auto",
+                                                    minWidth: "150px",
+                                                }}
+                                            >
+                                                <select
+                                                    value={
+                                                        archiveFilters.academic_year_id
+                                                    }
+                                                    onChange={(e) =>
+                                                        setArchiveFilters({
+                                                            ...archiveFilters,
+                                                            academic_year_id:
+                                                                e.target.value,
+                                                        })
+                                                    }
+                                                    style={{
+                                                        padding: "8px 12px",
+                                                        border: "1px solid #ddd",
+                                                        borderRadius: "6px",
+                                                        width: "100%",
+                                                        height: "40px",
+                                                    }}
+                                                >
+                                                    <option value="">
+                                                        All Academic Years
+                                                    </option>
+                                                    {academicYears.map((a) => (
+                                                        <option
+                                                            key={a.academic_year_id}
+                                                            value={a.academic_year_id}
+                                                        >
+                                                            {a.school_year}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="table-wrapper">
+                                        {archivedItems.length === 0 ? (
+                                            <p
+                                                style={{
+                                                    textAlign: "center",
+                                                    padding: "40px",
+                                                    color: "#666",
+                                                }}
+                                            >
+                                                No archived items found.
+                                            </p>
+                                        ) : (
+                                            <table className="settings-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Type</th>
+                                                        <th>Name</th>
+                                                        <th>Details</th>
+                                                        <th>Archived At</th>
+                                                        <th
                                                             style={{
-                                                                textTransform:
-                                                                    "capitalize",
+                                                                textAlign: "center",
                                                             }}
                                                         >
-                                                            {item._type?.replace(
-                                                                "_",
-                                                                " "
-                                                            )}
-                                                        </td>
-                                                        <td>{item._label}</td>
-                                                        <td>
-                                                            {item._department ||
-                                                                item._course ||
-                                                                "-"}
-                                                        </td>
-                                                        <td>
-                                                            {item.archived_at
-                                                                ? new Date(
-                                                                      item.archived_at
-                                                                  ).toLocaleDateString()
-                                                                : "-"}
-                                                        </td>
-                                                        <td
-                                                            style={{
-                                                                textAlign:
-                                                                    "center",
-                                                            }}
+                                                            Actions
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {archivedItems.map((item, index) => (
+                                                        <tr
+                                                            key={`${item._type}-${
+                                                                item._id || index
+                                                            }`}
                                                         >
-                                                            <div
+                                                            <td
                                                                 style={{
-                                                                    display:
-                                                                        "flex",
-                                                                    gap: "8px",
-                                                                    justifyContent:
+                                                                    textTransform:
+                                                                        "capitalize",
+                                                                }}
+                                                            >
+                                                                {item._type?.replace(
+                                                                    "_",
+                                                                    " "
+                                                                )}
+                                                            </td>
+                                                            <td>{item._label}</td>
+                                                            <td>
+                                                                {item._department ||
+                                                                    item._course ||
+                                                                    "-"}
+                                                            </td>
+                                                            <td>
+                                                                {item.archived_at
+                                                                    ? new Date(
+                                                                          item.archived_at
+                                                                      ).toLocaleDateString()
+                                                                    : "-"}
+                                                            </td>
+                                                            <td
+                                                                style={{
+                                                                    textAlign:
                                                                         "center",
                                                                 }}
                                                             >
-                                                                <button
-                                                                    className="btn"
+                                                                <div
                                                                     style={{
-                                                                        backgroundColor:
-                                                                            "#fbbf24",
-                                                                        color: "#111827",
-                                                                        border: "1px solid #fbbf24",
-                                                                        padding:
-                                                                            "8px 14px",
-                                                                        borderRadius:
-                                                                            "6px",
+                                                                        display: "flex",
+                                                                        gap: "8px",
+                                                                        justifyContent: "center",
                                                                     }}
-                                                                    onClick={() =>
-                                                                        handleRestore(
-                                                                            item
-                                                                        )
-                                                                    }
                                                                 >
-                                                                    Restore
-                                                                </button>
-                                                                <button
-                                                                    className="btn"
-                                                                    style={{
-                                                                        backgroundColor:
-                                                                            "#dc2626",
-                                                                        color: "white",
-                                                                        border: "1px solid #dc2626",
-                                                                        padding:
-                                                                            "8px 14px",
-                                                                        borderRadius:
-                                                                            "6px",
-                                                                    }}
-                                                                    onClick={() =>
-                                                                        handlePermanentDelete(
-                                                                            item
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    Delete
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            )}
-                                        </tbody>
-                                    </table>
-                                )}
-                            </div>
-                        </div>
-                    )}
+                                                                    <button
+                                                                        className="btn"
+                                                                        style={{
+                                                                            backgroundColor: "#fbbf24",
+                                                                            color: "#111827",
+                                                                            border: "1px solid #fbbf24",
+                                                                            padding: "8px 14px",
+                                                                            borderRadius: "6px",
+                                                                        }}
+                                                                        onClick={() =>
+                                                                            handleRestore(
+                                                                                item
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        Restore
+                                                                    </button>
+                                                                    <button
+                                                                        className="btn"
+                                                                        style={{
+                                                                            backgroundColor: "#dc2626",
+                                                                            color: "white",
+                                                                            border: "1px solid #dc2626",
+                                                                            padding: "8px 14px",
+                                                                            borderRadius: "6px",
+                                                                        }}
+                                                                        onClick={() =>
+                                                                            handlePermanentDelete(
+                                                                                item
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
-                    {/* === Modals (Unchanged) === */}
-                    {showForm && active === "courses" && (
-                        <div className="modal-overlay">
-                            <div className="modal-card">
-                                <h3>
-                                    {isEditing ? "Edit Course" : "Add Course"}
-                                </h3>
-                                <form onSubmit={onSubmit}>
-                                    <div style={{ display: "grid", gap: 14 }}>
-                                        <div>
-                                            <label>Course Name</label>
-                                            <input
-                                                className="form-input"
-                                                value={form.course_name}
-                                                onChange={(e) =>
-                                                    setForm({
-                                                        ...form,
-                                                        course_name:
-                                                            e.target.value,
-                                                    })
-                                                }
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label>Department</label>
-                                            <select
-                                                className="form-input"
-                                                value={form.department_id}
-                                                onChange={(e) =>
-                                                    setForm({
-                                                        ...form,
-                                                        department_id:
-                                                            e.target.value,
-                                                    })
-                                                }
-                                                required
-                                            >
-                                                <option value="" disabled>
-                                                    Select department
-                                                </option>
-                                                {departments.map((d) => (
-                                                    <option
-                                                        key={d.department_id}
-                                                        value={d.department_id}
+                            {/* === Modals (Unchanged) === */}
+                            {showForm && active === "courses" && (
+                                <div className="modal-overlay">
+                                    <div className="modal-card">
+                                        <h3>
+                                            {isEditing ? "Edit Course" : "Add Course"}
+                                        </h3>
+                                        <form onSubmit={onSubmit}>
+                                            <div style={{ display: "grid", gap: 14 }}>
+                                                <div>
+                                                    <label>Course Name</label>
+                                                    <input
+                                                        className="form-input"
+                                                        value={form.course_name}
+                                                        onChange={(e) =>
+                                                            setForm({
+                                                                ...form,
+                                                                course_name: e.target.value,
+                                                            })
+                                                        }
+                                                        required
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label>Department</label>
+                                                    <select
+                                                        className="form-input"
+                                                        value={form.department_id}
+                                                        onChange={(e) =>
+                                                            setForm({
+                                                                ...form,
+                                                                department_id:
+                                                                    e.target.value,
+                                                            })
+                                                        }
+                                                        required
                                                     >
-                                                        {d.department_name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div
-                                        style={{
-                                            marginTop: 20,
-                                            display: "flex",
-                                            justifyContent: "flex-end",
-                                            gap: 12,
-                                        }}
-                                    >
-                                        <button
-                                            className="btn"
-                                            type="button"
-                                            onClick={() => setShowForm(false)}
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            className="btn btn-primary"
-                                            type="submit"
-                                        >
-                                            {isEditing
-                                                ? "Update Course"
-                                                : "Add Course"}
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
-                    {showForm && active === "departments" && (
-                        <div className="modal-overlay">
-                            <div className="modal-card">
-                                <h3>
-                                    {isEditing
-                                        ? "Edit Department"
-                                        : "Add Department"}
-                                </h3>
-                                <form onSubmit={onSubmit}>
-                                    <div style={{ display: "grid", gap: 14 }}>
-                                        <div>
-                                            <label>Department Name</label>
-                                            <input
-                                                className="form-input"
-                                                placeholder="Department Name"
-                                                name="department_name"
-                                                value={form.department_name}
-                                                onChange={(e) =>
-                                                    setForm({
-                                                        ...form,
-                                                        department_name:
-                                                            e.target.value,
-                                                    })
-                                                }
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                    <div
-                                        style={{
-                                            marginTop: 20,
-                                            display: "flex",
-                                            justifyContent: "flex-end",
-                                            gap: 12,
-                                        }}
-                                    >
-                                        <button
-                                            className="btn"
-                                            type="button"
-                                            onClick={() => setShowForm(false)}
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            className="btn btn-primary"
-                                            type="submit"
-                                        >
-                                            {isEditing
-                                                ? "Update Department"
-                                                : "Add Department"}
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
-                    {showForm && active === "academic-years" && (
-                        <div className="modal-overlay">
-                            <div className="modal-card">
-                                <h3>
-                                    {isEditing
-                                        ? "Edit Academic Year"
-                                        : "Add Academic Year"}
-                                </h3>
-                                <form onSubmit={onSubmit}>
-                                    <div style={{ display: "grid", gap: 14 }}>
-                                        <div>
-                                            <label>School Year</label>
-                                            <input
-                                                className="form-input"
-                                                value={form.school_year}
-                                                onChange={(e) =>
-                                                    setForm({
-                                                        ...form,
-                                                        school_year:
-                                                            e.target.value,
-                                                    })
-                                                }
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                    <div
-                                        style={{
-                                            marginTop: 20,
-                                            display: "flex",
-                                            justifyContent: "flex-end",
-                                            gap: 12,
-                                        }}
-                                    >
-                                        <button
-                                            className="btn"
-                                            type="button"
-                                            onClick={() => setShowForm(false)}
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            className="btn btn-primary"
-                                            type="submit"
-                                        >
-                                            {isEditing
-                                                ? "Save Changes"
-                                                : "Add Academic Year"}
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
-                    {showModal && (
-                        <div className="modal-overlay">
-                            <div className="modal-card">
-                                {modalState === "success" ? (
-                                    <div className="success-content">
-                                        <div className="success-icon-wrapper">
-                                            <svg
-                            className="success-icon-svg"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="52"
-                            height="52"
-                            viewBox="0 0 52 52"
-                        >
-                            <path
-                                fill="none"
-                                stroke="#ffffff"
-                                strokeWidth="8"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M16 28 L24 36 L40 20"
-                            />
-                        </svg>
-                                        </div>
-                                        <h4 className="success-title">
-                                            Success!
-                                        </h4>
-                                        <p className="success-subtitle">
-                                            {modalMessage}
-                                        </p>
-                                        <button
-                                            className="btn btn-primary btn-close-message"
-                                            onClick={closeModal}
-                                        >
-                                            Done
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="success-content">
-                                        <div className="error-icon-wrapper">
-                                            <svg
-                                                className="error-icon-svg"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 52 52"
+                                                        <option value="" disabled>
+                                                            Select department
+                                                        </option>
+                                                        {departments.map((d) => (
+                                                            <option
+                                                                key={d.department_id}
+                                                                value={d.department_id}
+                                                            >
+                                                                {d.department_name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div
+                                                style={{
+                                                    marginTop: 20,
+                                                    display: "flex",
+                                                    justifyContent: "flex-end",
+                                                    gap: 12,
+                                                }}
                                             >
-                                                <path
-                                                    className="error-x-path"
-                                                    fill="none"
-                                                    d="M16 16 36 36 M36 16 16 36"
-                                                />
-                                            </svg>
-                                        </div>
-                                        <h4 className="error-title">Error!</h4>
-                                        <p className="error-subtitle">
-                                            {modalMessage}
-                                        </p>
-                                        <button
-                                            className="btn btn-danger btn-close-message"
-                                            onClick={closeModal}
-                                        >
-                                            Close
-                                        </button>
+                                                <button
+                                                    className="btn"
+                                                    type="button"
+                                                    onClick={() => setShowForm(false)}
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    className="btn btn-primary"
+                                                    type="submit"
+                                                >
+                                                    {isEditing
+                                                        ? "Update Course"
+                                                        : "Add Course"}
+                                                </button>
+                                            </div>
+                                        </form>
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
+
+                            {showForm && active === "departments" && (
+                                <div className="modal-overlay">
+                                    <div className="modal-card">
+                                        <h3>
+                                            {isEditing ? "Edit Department" : "Add Department"}
+                                        </h3>
+                                        <form onSubmit={onSubmit}>
+                                            <div style={{ display: "grid", gap: 14 }}>
+                                                <div>
+                                                    <label>Department Name</label>
+                                                    <input
+                                                        className="form-input"
+                                                        placeholder="Department Name"
+                                                        name="department_name"
+                                                        value={form.department_name}
+                                                        onChange={(e) =>
+                                                            setForm({
+                                                                ...form,
+                                                                department_name:
+                                                                    e.target.value,
+                                                            })
+                                                        }
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div
+                                                style={{
+                                                    marginTop: 20,
+                                                    display: "flex",
+                                                    justifyContent: "flex-end",
+                                                    gap: 12,
+                                                }}
+                                            >
+                                                <button
+                                                    className="btn"
+                                                    type="button"
+                                                    onClick={() => setShowForm(false)}
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    className="btn btn-primary"
+                                                    type="submit"
+                                                >
+                                                    {isEditing
+                                                        ? "Update Department"
+                                                        : "Add Department"}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            )}
+
+                            {showForm && active === "academic-years" && (
+                                <div className="modal-overlay">
+                                    <div className="modal-card">
+                                        <h3>
+                                            {isEditing
+                                                ? "Edit Academic Year"
+                                                : "Add Academic Year"}
+                                        </h3>
+                                        <form onSubmit={onSubmit}>
+                                            <div style={{ display: "grid", gap: 14 }}>
+                                                <div>
+                                                    <label>School Year</label>
+                                                    <input
+                                                        className="form-input"
+                                                        value={form.school_year}
+                                                        onChange={(e) =>
+                                                            setForm({
+                                                                ...form,
+                                                                school_year:
+                                                                    e.target.value,
+                                                            })
+                                                        }
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div
+                                                style={{
+                                                    marginTop: 20,
+                                                    display: "flex",
+                                                    justifyContent: "flex-end",
+                                                    gap: 12,
+                                                }}
+                                            >
+                                                <button
+                                                    className="btn"
+                                                    type="button"
+                                                    onClick={() => setShowForm(false)}
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    className="btn btn-primary"
+                                                    type="submit"
+                                                >
+                                                    {isEditing
+                                                        ? "Save Changes"
+                                                        : "Add Academic Year"}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            )}
+
+                            {showModal && (
+                                <div className="modal-overlay">
+                                    <div className="modal-card">
+                                        {modalState === "success" ? (
+                                            <div className="success-content">
+                                                <div className="success-icon-wrapper">
+                                                    <svg
+                                                        className="success-icon-svg"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        width="52"
+                                                        height="52"
+                                                        viewBox="0 0 52 52"
+                                                    >
+                                                        <path
+                                                            fill="none"
+                                                            stroke="#ffffff"
+                                                            strokeWidth="8"
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            d="M16 28 L24 36 L40 20"
+                                                        />
+                                                    </svg>
+                                                </div>
+                                                <h4 className="success-title">
+                                                    Success!
+                                                </h4>
+                                                <p className="success-subtitle">
+                                                    {modalMessage}
+                                                </p>
+                                                <button
+                                                    className="btn btn-primary btn-close-message"
+                                                    onClick={closeModal}
+                                                >
+                                                    Done
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="success-content">
+                                                <div className="error-icon-wrapper">
+                                                    <svg
+                                                        className="error-icon-svg"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 52 52"
+                                                    >
+                                                        <path
+                                                            className="error-x-path"
+                                                            fill="none"
+                                                            d="M16 16 36 36 M36 16 16 36"
+                                                        />
+                                                    </svg>
+                                                </div>
+                                                <h4 className="error-title">Error!</h4>
+                                                <p className="error-subtitle">
+                                                    {modalMessage}
+                                                </p>
+                                                <button
+                                                    className="btn btn-danger btn-close-message"
+                                                    onClick={closeModal}
+                                                >
+                                                    Close
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                    )}
+                    </section>
                 </div>
-            </section>
+            </div>
         </div>
     );
 }
