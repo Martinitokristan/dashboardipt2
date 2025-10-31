@@ -603,6 +603,25 @@
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
+.form-input-new.invalid-input,
+.form-input-new.invalid-input:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.input-with-error {
+    display: flex;
+    flex-direction: column;
+}
+
+.inline-error {
+    color: #ef4444;
+    font-size: 0.68rem;
+    margin: 2px 0 4px;
+    display: block;
+    line-height: 1.05;
+}
+
 .full-width-label {
     grid-column: 1 / 2;
 }

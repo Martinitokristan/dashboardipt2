@@ -143,8 +143,22 @@ class ReportController extends Controller
         if (!$spreadsheetId) {
             return response()->json(['error' => 'Spreadsheet ID is required'], 400);
         }
-        $this->sheets->importStudentsFromSheet($spreadsheetId);
-        return response()->json(['success' => true]);
+        $result = $this->sheets->importStudentsFromSheet($spreadsheetId);
+
+        if (!$result['success']) {
+            return response()->json([
+                'success' => false,
+                'errors' => $result['errors'],
+                'duplicates' => $result['duplicates'],
+                'message' => 'Import halted due to duplicate email addresses.',
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'imported' => $result['imported'],
+            'updated' => $result['updated'],
+        ]);
     }
 
     public function generateFacultyReport(Request $request)
@@ -223,16 +237,22 @@ class ReportController extends Controller
     public function importFacultyReport(): \Illuminate\Http\JsonResponse
     {
         try {
-            $summary = $this->sheets->importFacultyFromSheet();
+            $result = $this->sheets->importFacultyFromSheet();
 
-            // If there are errors, include them in the response
+            if (!$result['success']) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $result['errors'],
+                    'duplicates' => $result['duplicates'],
+                    'message' => 'Import halted due to duplicate email addresses.',
+                ], 422);
+            }
+
             return response()->json([
-                'success' => (bool) ($summary['success'] ?? false),
-                'message' => $summary['message'] ?? null,
-                'errors' => $summary['errors'] ?? [],
-                'imported' => $summary['imported'] ?? 0,
-                'updated' => $summary['updated'] ?? 0,
-            ], 200);
+                'success' => true,
+                'imported' => $result['imported'],
+                'updated' => $result['updated'],
+            ]);
         } catch (\Throwable $e) {
             report($e);
 

@@ -47,6 +47,7 @@ function Students() {
         academic_year_id: "",
         year_level: "1st",
     });
+    const [emailWarning, setEmailWarning] = useState("");
 
     const refresh = async () => {
         try {
@@ -125,6 +126,7 @@ function Students() {
             academic_year_id: "",
             year_level: "1st",
         });
+        setEmailWarning("");
         setError("");
     };
 
@@ -151,10 +153,40 @@ function Students() {
             academic_year_id: student.academic_year_id || "",
             year_level: student.year_level || "1st",
         });
+        setEmailWarning("");
+    };
+
+    const normalizeEmail = (email) => email?.trim().toLowerCase() || "";
+
+    const validateDuplicateEmail = (email, currentId = null) => {
+        const normalized = normalizeEmail(email);
+        if (!normalized) {
+            setEmailWarning("");
+            return false;
+        }
+        const duplicate = students.some(
+            (student) =>
+                student.email_address &&
+                normalizeEmail(student.email_address) === normalized &&
+                student.student_id !== currentId
+        );
+        setEmailWarning(duplicate ? "Email already exists." : "");
+        return duplicate;
+    };
+
+    const handleEmailChange = (value) => {
+        setForm((prev) => ({ ...prev, email_address: value }));
+        validateDuplicateEmail(value, editingId);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (validateDuplicateEmail(form.email_address, editingId)) {
+            setModalContentState("form");
+            setError("Email already exists.");
+            return;
+        }
+
         setModalContentState("loading");
         setError("");
 
@@ -181,6 +213,17 @@ function Students() {
             }
         } catch (err) {
             console.error("Save error:", err);
+            const emailErrors =
+                err.response?.status === 422
+                    ? err.response?.data?.errors?.email_address
+                    : null;
+            if (emailErrors?.length) {
+                setModalContentState("form");
+                setError(emailErrors[0]);
+                setEmailWarning(emailErrors[0]);
+                return;
+            }
+
             setModalContentState("error");
             setModalMessage(
                 err.response?.data?.error ||
@@ -345,12 +388,23 @@ function Students() {
                         <select
                             className="form-input-new"
                             value={form.department_id}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    department_id: e.target.value,
-                                })
-                            }
+                            onChange={(e) => {
+                                const deptId = e.target.value;
+                                setForm((prev) => {
+                                    const courseStillValid = courses.some(
+                                        (c) =>
+                                            c.course_id == prev.course_id &&
+                                            c.department_id == deptId
+                                    );
+                                    return {
+                                        ...prev,
+                                        department_id: deptId,
+                                        course_id: courseStillValid
+                                            ? prev.course_id
+                                            : "",
+                                    };
+                                });
+                            }}
                             required
                         >
                             <option value="">Select Department</option>
@@ -374,11 +428,18 @@ function Students() {
                             required
                         >
                             <option value="">Select Course</option>
-                            {courses.map((c) => (
-                                <option key={c.course_id} value={c.course_id}>
-                                    {c.course_name}
-                                </option>
-                            ))}
+                            {courses
+                                .filter((c) => {
+                                    if (!form.department_id) {
+                                        return true;
+                                    }
+                                    return c.department_id == form.department_id;
+                                })
+                                .map((c) => (
+                                    <option key={c.course_id} value={c.course_id}>
+                                        {c.course_name}
+                                    </option>
+                                ))}
                         </select>
 
                         <label className="form-label-new">First Name</label>
@@ -473,19 +534,20 @@ function Students() {
                         />
 
                         <label className="form-label-new">Email</label>
-                        <input
-                            className="form-input-new"
-                            placeholder="Email Address"
-                            value={form.email_address}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    email_address: e.target.value,
-                                })
-                            }
-                            type="email"
-                            required
-                        />
+                        <div className="input-with-error">
+                            {emailWarning && (
+                                <span className="inline-error">{emailWarning}</span>
+                            )}
+                            <input
+                                className={`form-input-new ${
+                                    emailWarning ? "invalid-input" : ""
+                                }`}
+                                placeholder="Email Address"
+                                value={form.email_address}
+                                onChange={(e) => handleEmailChange(e.target.value)}
+                                required
+                            />
+                        </div>
 
                         <label className="form-label-new">Year Level</label>
                         <select

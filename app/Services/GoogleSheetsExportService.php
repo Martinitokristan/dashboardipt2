@@ -559,19 +559,27 @@ class GoogleSheetsExportService
             throw new \Exception("Spreadsheet ID is required");
         }
 
-        $service = $this->service; // Google Sheets API client
-        $range = 'Students!A2:Q'; // Adjust range as needed
+        $service = $this->service;
+        $range = 'Students!A2:Q';
 
         $response = $service->spreadsheets_values->get($spreadsheetId, $range);
         $rows = $response->getValues();
 
-        foreach ($rows as $row) {
-            // Accept either ID or name for department, course, academic year
+        $imported = 0;
+        $updated = 0;
+        $errors = [];
+        $duplicateEmails = [];
+        $seenEmails = [];
+
+        foreach ($rows as $index => $row) {
+            if (empty(array_filter($row, fn ($value) => $value !== null && $value !== ''))) {
+                continue; // skip blank rows
+            }
+
             $department = null;
             $course = null;
             $academicYear = null;
 
-            // Department
             if (!empty($row[11])) {
                 if (is_numeric($row[11])) {
                     $department = \App\Models\Department::find($row[11]);
@@ -580,7 +588,6 @@ class GoogleSheetsExportService
                 }
             }
 
-            // Course
             if (!empty($row[12])) {
                 if (is_numeric($row[12])) {
                     $course = \App\Models\Course::find($row[12]);
@@ -589,7 +596,6 @@ class GoogleSheetsExportService
                 }
             }
 
-            // Academic Year
             if (!empty($row[13])) {
                 if (is_numeric($row[13])) {
                     $academicYear = \App\Models\AcademicYear::find($row[13]);
@@ -598,7 +604,6 @@ class GoogleSheetsExportService
                 }
             }
 
-            // Phone number fix
             $rawPhone = isset($row[7]) ? trim($row[7]) : '';
             if (preg_match('/^9\d{9}$/', $rawPhone)) {
                 $phone_number = '0' . $rawPhone;
@@ -621,8 +626,32 @@ class GoogleSheetsExportService
             ];
             $year_level = $rawYearLevel && isset($yearLevelMap[$rawYearLevel]) ? $yearLevelMap[$rawYearLevel] : $rawYearLevel;
 
+            $studentId = $row[0] ?? null;
+            $email = strtolower(trim($row[8] ?? ''));
+            $sheetRow = $index + 2; // account for header row in sheet
+
+            if ($email !== '') {
+                if (isset($seenEmails[$email])) {
+                    $duplicateEmails[$email] = true;
+                    $errors[] = "Duplicate email '{$email}' found in spreadsheet rows {$seenEmails[$email]} and {$sheetRow}.";
+                    continue;
+                }
+                $seenEmails[$email] = $sheetRow;
+
+                $existsQuery = \App\Models\StudentProfile::where('email_address', $email);
+                if (!empty($studentId)) {
+                    $existsQuery->where('student_id', '!=', $studentId);
+                }
+                $existingEmailOwner = $existsQuery->first();
+                if ($existingEmailOwner) {
+                    $duplicateEmails[$email] = true;
+                    $errors[] = "Email '{$email}' already belongs to student ID {$existingEmailOwner->student_id}.";
+                    continue;
+                }
+            }
+
             $studentData = [
-                'student_id' => $row[0] ?? null,
+                'student_id' => $studentId,
                 'f_name' => $row[1] ?? '',
                 'm_name' => $row[2] ?? '',
                 'l_name' => $row[3] ?? '',
@@ -630,24 +659,43 @@ class GoogleSheetsExportService
                 'date_of_birth' => $row[5] ?? null,
                 'sex' => $row[6] ?? '',
                 'phone_number' => $phone_number,
-                'email_address' => $row[8] ?? '',
+                'email_address' => $email,
                 'address' => $row[9] ?? '',
                 'status' => $row[10] ?? '',
                 'department_id' => $department ? $department->department_id : null,
                 'course_id' => $course ? $course->course_id : null,
                 'academic_year_id' => $academicYear ? $academicYear->academic_year_id : null,
                 'year_level' => $year_level,
-                'created_at' => isset($row[15]) ? $row[15] : null,
-                'updated_at' => isset($row[16]) ? $row[16] : null,
-                'archived_at' => isset($row[17]) ? $row[17] : null,
+                'created_at' => $row[15] ?? null,
+                'updated_at' => $row[16] ?? null,
+                'archived_at' => $row[17] ?? null,
             ];
 
-            \App\Models\StudentProfile::updateOrCreate(
-                ['student_id' => $studentData['student_id']],
-                $studentData
-            );
+            try {
+                $model = \App\Models\StudentProfile::updateOrCreate(
+                    ['student_id' => $studentData['student_id']],
+                    $studentData
+                );
+
+                if ($model->wasRecentlyCreated) {
+                    $imported++;
+                } else {
+                    $updated++;
+                }
+            } catch (\Throwable $e) {
+                $errors[] = "Row {$sheetRow}: " . $e->getMessage();
+            }
         }
+
+        return [
+            'success' => empty($errors) && empty($duplicateEmails),
+            'imported' => $imported,
+            'updated' => $updated,
+            'duplicates' => array_keys($duplicateEmails),
+            'errors' => $errors,
+        ];
     }
+
     public function importFacultyFromSheet()
     {
         $spreadsheetId = $this->spreadsheetId;
@@ -660,8 +708,14 @@ class GoogleSheetsExportService
         $imported = 0;
         $updated = 0;
         $errors = [];
+        $duplicateEmails = [];
+        $seenEmails = [];
 
-        foreach ($rows as $row) {
+        foreach ($rows as $index => $row) {
+            if (empty(array_filter($row, fn ($value) => $value !== null && $value !== ''))) {
+                continue; // skip blank rows
+            }
+
             // Accept either ID or name for department
             $department = null;
             if (!empty($row[12])) {
@@ -682,46 +736,70 @@ class GoogleSheetsExportService
                 $phone_number = $rawPhone;
             }
 
+            $sheetRow = $index + 2;
+            $facultyId = $row[0] ?? null;
+            $email = strtolower(trim($row[8] ?? ''));
+
+            if ($email !== '') {
+                if (isset($seenEmails[$email])) {
+                    $duplicateEmails[$email] = true;
+                    $errors[] = "Duplicate email '{$email}' found in spreadsheet rows {$seenEmails[$email]} and {$sheetRow}.";
+                    continue;
+                }
+                $seenEmails[$email] = $sheetRow;
+
+                $existsQuery = \App\Models\FacultyProfile::where('email_address', $email);
+                if (!empty($facultyId)) {
+                    $existsQuery->where('faculty_id', '!=', $facultyId);
+                }
+                $existingEmailOwner = $existsQuery->first();
+                if ($existingEmailOwner) {
+                    $duplicateEmails[$email] = true;
+                    $errors[] = "Email '{$email}' already belongs to faculty ID {$existingEmailOwner->faculty_id}.";
+                    continue;
+                }
+            }
+
             $facultyData = [
-                'faculty_id'    => isset($row[0])  ? $row[0]  : null,
-                'f_name'        => isset($row[1])  ? $row[1]  : '',
-                'm_name'        => isset($row[2])  ? $row[2]  : '',
-                'l_name'        => isset($row[3])  ? $row[3]  : '',
-                'suffix'        => isset($row[4])  ? $row[4]  : '',
-                'date_of_birth' => isset($row[5])  ? $row[5]  : null,
-                'sex'           => isset($row[6])  ? $row[6]  : '',
-                'phone_number'  => isset($row[7])  ? $row[7]  : '',
-                'email_address' => isset($row[8])  ? $row[8]  : '',
-                'address'       => isset($row[9])  ? $row[9]  : '',
-                'position'      => isset($row[10]) ? $row[10] : '',
-                'status'        => isset($row[11]) ? $row[11] : '',
+                'faculty_id'    => $facultyId,
+                'f_name'        => $row[1] ?? '',
+                'm_name'        => $row[2] ?? '',
+                'l_name'        => $row[3] ?? '',
+                'suffix'        => $row[4] ?? '',
+                'date_of_birth' => $row[5] ?? null,
+                'sex'           => $row[6] ?? '',
+                'phone_number'  => $phone_number,
+                'email_address' => $email,
+                'address'       => $row[9] ?? '',
+                'position'      => $row[10] ?? '',
+                'status'        => $row[11] ?? '',
                 'department_id' => $department ? $department->department_id : null,
-                'created_at'    => isset($row[13]) ? $row[13] : null,
-                'updated_at'    => isset($row[14]) ? $row[14] : null,
-                'archived_at'   => isset($row[15]) ? $row[15] : null,
+                'created_at'    => $row[13] ?? null,
+                'updated_at'    => $row[14] ?? null,
+                'archived_at'   => $row[15] ?? null,
             ];
 
             try {
-                $result = \App\Models\FacultyProfile::updateOrCreate(
+                $model = \App\Models\FacultyProfile::updateOrCreate(
                     ['faculty_id' => $facultyData['faculty_id']],
                     $facultyData
                 );
-                if ($result->wasRecentlyCreated) {
+                if ($model->wasRecentlyCreated) {
                     $imported++;
                 } else {
                     $updated++;
                 }
-            } catch (\Exception $e) {
-                $errors[] = $e->getMessage();
+            } catch (\Throwable $e) {
+                $errors[] = "Row {$sheetRow}: " . $e->getMessage();
             }
         }
 
         return [
-            'success' => empty($errors),
+            'success' => empty($errors) && empty($duplicateEmails),
             'imported' => $imported,
             'updated' => $updated,
+            'duplicates' => array_keys($duplicateEmails),
             'errors' => $errors,
-            'message' => empty($errors) ? 'Faculty import completed.' : 'Some errors occurred.',
         ];
     }
 }

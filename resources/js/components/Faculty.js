@@ -30,6 +30,7 @@ function Faculty() {
         position: "Dean",
         status: "active",
     });
+    const [emailWarning, setEmailWarning] = useState("");
 
     const loadFaculty = async () => {
         try {
@@ -82,6 +83,7 @@ function Faculty() {
             position: "Dean",
             status: "active",
         });
+        setEmailWarning("");
         // Reload table after closing success modal
         await loadFaculty();
     };
@@ -114,13 +116,40 @@ function Faculty() {
         setFilters((prev) => ({ ...prev, [field]: value }));
     };
 
+    const normalizeEmail = (email) => email?.trim().toLowerCase() || "";
+
+    const validateDuplicateEmail = (email, currentId = null) => {
+        const normalized = normalizeEmail(email);
+        if (!normalized) {
+            setEmailWarning("");
+            return false;
+        }
+        const duplicate = faculty.some(
+            (member) =>
+                member.email_address &&
+                normalizeEmail(member.email_address) === normalized &&
+                member.faculty_id !== currentId
+        );
+        setEmailWarning(duplicate ? "Email already exists." : "");
+        return duplicate;
+    };
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+        if (name === "email_address") {
+            validateDuplicateEmail(value, editingId);
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (validateDuplicateEmail(formData.email_address, editingId)) {
+            setModalContentState("form");
+            setError("Email already exists.");
+            return;
+        }
+
         setModalContentState("loading");
         setError("");
         try {
@@ -142,6 +171,21 @@ function Faculty() {
             }
         } catch (error) {
             console.error("Save error:", error);
+            const emailErrors =
+                error.response?.status === 422
+                    ? error.response?.data?.error?.email_address ||
+                      error.response?.data?.errors?.email_address
+                    : null;
+            if (emailErrors?.length) {
+                const message = Array.isArray(emailErrors)
+                    ? emailErrors[0]
+                    : emailErrors;
+                setModalContentState("form");
+                setError(message);
+                setEmailWarning(message);
+                return;
+            }
+
             setModalContentState("error");
             setModalMessage(
                 error.response?.data?.error ||
@@ -190,6 +234,7 @@ function Faculty() {
             position: facultyMember.position || "Dean",
             status: facultyMember.status || "active",
         });
+        setEmailWarning("");
         setShowForm(true);
         setModalContentState("form");
     };
@@ -427,15 +472,22 @@ function Faculty() {
                         </select>
 
                         <label className="form-label-new">Email</label>
-                        <input
-                            className="form-input-new"
-                            placeholder="Email Address"
-                            name="email_address"
-                            value={formData.email_address}
-                            onChange={handleInputChange}
-                            type="email"
-                            required
-                        />
+                        <div className="input-with-error">
+                            {emailWarning && (
+                                <span className="inline-error">{emailWarning}</span>
+                            )}
+                            <input
+                                className={`form-input-new ${
+                                    emailWarning ? "invalid-input" : ""
+                                }`}
+                                placeholder="Email"
+                                name="email_address"
+                                value={formData.email_address}
+                                onChange={handleInputChange}
+                                type="email"
+                                required
+                            />
+                        </div>
 
                         <label className="form-label-new full-width-label">
                             Address
