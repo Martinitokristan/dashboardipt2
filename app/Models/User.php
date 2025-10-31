@@ -18,6 +18,7 @@ class User extends Authenticatable
         'password',
         'role',
         'avatar',
+        'last_login_at',
     ];
 
     protected $hidden = [
@@ -27,6 +28,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime',
     ];
 
     public function isAdmin()

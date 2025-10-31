@@ -6,10 +6,9 @@
 
 .page {
     overflow: initial;
-    min-height: 100vh;
     padding: 0;
     background: #ededed;
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
     gap: 0;
     border-radius: 18px;

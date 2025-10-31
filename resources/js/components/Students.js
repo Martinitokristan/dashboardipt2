@@ -577,7 +577,7 @@ function Students() {
     };
 
     return (
-        <div className="page">
+        <div className="page students-page">
             <div className="page-card">
                 <header className="page-header">
                     <div className="page-header-text">
@@ -810,7 +810,6 @@ function Students() {
                     </table>
                 </div>
 
-                <div className="table-blank" />
             </div>
 
             {showForm && (

@@ -69,8 +69,19 @@ class AdminController extends Controller
     public function getProfile()
     {
         $user = auth()->user();
+
         return response()->json([
-            'user' => $user->only(['id', 'first_name', 'last_name', 'email', 'role', 'avatar']),
+            'user' => [
+                'id' => $user->id,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'avatar' => $user->avatar,
+                'created_at' => optional($user->created_at)->toIso8601String(),
+                'last_login_at' => optional($user->last_login_at)->toIso8601String(),
+                'last_login_agent' => $user->last_login_agent,
+            ],
         ]);
     }
 
@@ -111,7 +122,19 @@ class AdminController extends Controller
 
         return response()->json([
             'message' => 'Profile updated successfully.',
-            'user' => $user->only(['id', 'first_name', 'last_name', 'email', 'role', 'avatar']),
+            'user' => [
+                'id' => $user->id,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'avatar' => $user->avatar,
+                'created_at' => optional($user->created_at)->toIso8601String(),
+                'last_login_at' => optional($user->last_login_at)->toIso8601String(),
+                'last_login_ip' => $user->last_login_ip,
+                'last_login_location' => $user->last_login_location,
+                'last_login_agent' => $user->last_login_agent,
+            ],
         ]);
     }
 

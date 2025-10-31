@@ -3,6 +3,7 @@
     max-width: 1200px; // Increased width for better header/button spacing
     margin: 0 auto;
     padding: 30px; // Increased padding for space from screen edges
+    font-family: 'Segoe UI', 'SegoeUI', 'Helvetica Neue', Arial, sans-serif;
 }
 .profile-header {
     display: flex;
@@ -131,6 +132,80 @@
     font-size: 12px;
     font-weight: 600;
     color: #374151; // Changed to dark gray for ADMIN tag in this design
+}
+
+.profile-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+}
+
+.meta-card {
+    padding: 14px 18px;
+    border-radius: 12px;
+    text-align: left;
+    background: #f5f3ff;
+    border: 1px solid #d9d6fe;
+
+    h4 {
+        margin: 0 0 4px 0;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #4f46e5;
+    }
+
+    .meta-date {
+        font-size: 13px;
+        font-weight: 600;
+        color: #4338ca;
+    }
+
+    .meta-time {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .meta-relative {
+        font-size: 14px;
+        color: #433c76;
+        margin-top: 6px;
+        font-weight: 700;
+    }
+
+    .meta-device {
+        font-size: 13px;
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #6d28d9;
+        font-weight: 600;
+    }
+
+    .meta-empty {
+        font-size: 12px;
+        color: #9ca3af;
+    }
+}
+
+.meta-card.login {
+    background: #f6edff;
+    border-color: #c4b5fd;
+}
+
+.meta-card.created {
+    background: #fff6ed;
+    border-color: #fed7aa;
+}
+
+@media (min-width: 768px) {
+    .profile-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 .card {

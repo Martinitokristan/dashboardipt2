@@ -31,6 +31,11 @@ class LoginController extends Controller
                 ], 403);
             }
 
+            $user->forceFill([
+                'last_login_at' => now(),
+                'last_login_agent' => substr($request->userAgent() ?? '', 0, 255),
+            ])->save();
+
             $token = $user->createToken('auth_token')->plainTextToken;
             return response()->json(['redirect' => '/dashboard', 'token' => $token]);
         }
