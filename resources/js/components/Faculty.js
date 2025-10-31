@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { BsSearch } from "react-icons/bs";
 import "../../sass/faculty.scss";
+import { formatWithAcronym } from "./format";
 
 function Faculty() {
     const [faculty, setFaculty] = useState([]);
@@ -353,7 +354,7 @@ function Faculty() {
                                     key={dept.department_id}
                                     value={dept.department_id}
                                 >
-                                    {dept.department_name}
+                                    {formatWithAcronym(dept.department_name)}
                                 </option>
                             ))}
                         </select>
@@ -623,7 +624,7 @@ function Faculty() {
                                     }${f.l_name}${
                                         f.suffix ? ", " + f.suffix : ""
                                     }`}</td>
-                                    <td>{f.department?.department_name || "-"}</td>
+                                    <td>{formatWithAcronym(f.department?.department_name || "-")}</td>
                                     <td>{f.position || "-"}</td>
                                     <td>
                                         <span

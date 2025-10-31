@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { GraduationCap, Users, Building, BookOpen } from "lucide-react";
 import "../../sass/dashboard.scss";
+import { extractAcronym } from "./format";
 
 // Secure helper — ensure Sanctum cookie exists before requests
 const ensureCsrf = async () => {
@@ -118,7 +119,12 @@ function Dashboard() {
                 <div className="chart-card">
                     <h3>Students per Course</h3>
                     <ResponsiveContainer width="100%" height={350}>
-                        <BarChart data={stats.students_by_course}>
+                        <BarChart
+                            data={stats.students_by_course.map((item) => ({
+                                ...item,
+                                label: extractAcronym(item.label) || item.label,
+                            }))}
+                        >
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="label" />
                             <YAxis allowDecimals={false} />
@@ -137,7 +143,10 @@ function Dashboard() {
                     <ResponsiveContainer width="100%" height={350}>
                         <PieChart>
                             <Pie
-                                data={stats.faculty_by_department}
+                                data={stats.faculty_by_department.map((item) => ({
+                                    ...item,
+                                    label: extractAcronym(item.label) || item.label,
+                                }))}
                                 cx="50%"
                                 cy="50%"
                                 labelLine={false}

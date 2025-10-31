@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { BsSearch } from "react-icons/bs";
 import "../../sass/students.scss";
+import { formatWithAcronym } from "./format";
 
 const getCsrfCookie = async () => {
     try {
@@ -413,7 +414,7 @@ function Students() {
                                     key={d.department_id}
                                     value={d.department_id}
                                 >
-                                    {d.department_name}
+                                    {formatWithAcronym(d.department_name)}
                                 </option>
                             ))}
                         </select>
@@ -437,7 +438,7 @@ function Students() {
                                 })
                                 .map((c) => (
                                     <option key={c.course_id} value={c.course_id}>
-                                        {c.course_name}
+                                        {formatWithAcronym(c.course_name)}
                                     </option>
                                 ))}
                         </select>
@@ -731,7 +732,7 @@ function Students() {
                                         key={d.department_id}
                                         value={d.department_id}
                                     >
-                                        {d.department_name}
+                                        {formatWithAcronym(d.department_name)}
                                     </option>
                                 ))}
                         </select>
@@ -767,7 +768,7 @@ function Students() {
                                 })
                                 .map((c) => (
                                     <option key={c.course_id} value={c.course_id}>
-                                        {c.course_name}
+                                        {formatWithAcronym(c.course_name)}
                                     </option>
                                 ))}
                         </select>
@@ -819,8 +820,14 @@ function Students() {
                                                 s.suffix ? " " + s.suffix : ""
                                             }`}
                                     </td>
-                                    <td>{s.department?.department_name || "-"}</td>
-                                    <td>{s.course?.course_name || "-"}</td>
+                                    <td>
+                                        {formatWithAcronym(
+                                            s.department?.department_name
+                                        )}
+                                    </td>
+                                    <td>
+                                        {formatWithAcronym(s.course?.course_name)}
+                                    </td>
                                     <td>
                                         {typeof s.year_level === "object" &&
                                         s.year_level !== null
